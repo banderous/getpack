@@ -1,0 +1,64 @@
+import groovy.json.JsonBuilder
+
+apply plugin: 'ivy-publish'
+
+apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
+
+dependencies {
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+repositories {
+  mavenCentral()
+}
+
+
+dependencies {
+  compile "org.codehaus.groovy:groovy-all:2.4.7"
+    testCompile gradleTestKit()
+        testCompile 'com.google.guava:guava:20.0'
+}
+
+publishing {
+    publications {
+        ivy(IvyPublication) {
+         //   artifact (exportUnityPackage.output) {
+           //     builtBy exportUnityPackage
+          //  }
+//            artifact (zipManifest) {
+//                builtBy buildManifest
+//                name "manifest"
+//            }
+            descriptor {
+                extraInfo("outline", "unityVersion", "5.0")
+            }
+        }
+    }
+    repositories {
+        ivy {
+            // change to point to your repo, e.g. http://my.org/repo
+            url "$buildDir/repo"
+        }
+    }
+}
+
+task buildManifest {
+    ext.manifest = file("$buildDir/manifest.json")
+    doLast {
+        JsonBuilder json = new JsonBuilder();
+        json files : fileTree('Assets').collect { x-> x.path }
+        manifest.text = json.toString()
+    }
+}
+
+task zipManifest(type: Zip, dependsOn: buildManifest) {
+    from buildManifest.manifest
+}

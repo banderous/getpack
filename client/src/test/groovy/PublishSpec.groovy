@@ -14,18 +14,33 @@ class BuildLogicFunctionalTest extends Specification {
     def "manifest generation"() {
 
         when:
-        def project = dummyProject()
-        def result = "goat"
+        def result = projectWithTask("buildManifest")
 
         then:
-        result == "goat"
+        result.task(":buildManifest").outcome in [SUCCESS, UP_TO_DATE]
     }
 
-    def dummyProject(dummyFilePath) {
+    // Create a dummy project that uses our plugin.
+    def dummyProject() {
         def tempDir = Files.createTempDir()
         def tempFile = new File(tempDir, "Assets/Acme/A.txt")
         tempFile.getParentFile().mkdirs()
         Files.write("Hello", tempFile, StandardCharsets.UTF_8)
 
+        new File(tempDir, "build.gradle") << """
+            plugins {
+                id 'com.nxt.publish'
+            }
+        """
+
+        return tempDir
+    }
+
+    def projectWithTask(task) {
+        GradleRunner.create()
+                .withProjectDir(dummyProject())
+                .withArguments(task)
+                .withPluginClasspath()
+                .build()
     }
 }

@@ -1,17 +1,13 @@
-package com.nxt;
-
-import groovy.json.JsonBuilder;
-import groovy.json.JsonSlurper;
-import org.gradle.api.Project;
+package com.nxt
+import groovy.json.JsonBuilder
 import org.gradle.api.Plugin
-import org.gradle.api.artifacts.Configuration
+import org.gradle.api.Project
 import org.gradle.api.publish.ivy.IvyPublication
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.bundling.Zip
 
-import java.nio.file.Path
 import java.nio.file.Paths
-import java.security.MessageDigest;
+import java.security.MessageDigest
 
 apply plugin: 'groovy'
 apply plugin PublishPlugin

@@ -1,0 +1,11 @@
+
+task build(type: Exec) {
+    inputs.dir 'lib'
+    inputs.dir 'src'
+    inputs.file "${project.name}.csproj"
+    inputs.file "${project.name}.sln"
+    outputs.dir 'bin'
+
+    executable 'xbuild'
+    args "${project.name}.sln"
+}

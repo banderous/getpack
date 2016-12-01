@@ -104,12 +104,6 @@ class PublishPlugin implements Plugin<Project> {
                     }
                 }
             }
-//            dependencies {
-//                def json = new JsonSlurper().parseText(project.file('manifest.json'))
-//                json.packages.each {
-//                    target group: it.group, name: it.name, version: it.version
-//                }
-//            }
         }
     }
 

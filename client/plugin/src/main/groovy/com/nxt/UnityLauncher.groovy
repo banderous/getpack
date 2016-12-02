@@ -46,4 +46,8 @@ class UnityLauncher {
         }
         result
     }
+
+    public static boolean IsUnityRunning(File projectPath) {
+        new File(projectPath, "Temp/UnityLockfile").exists()
+    }
 }

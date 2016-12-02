@@ -50,4 +50,18 @@ class UnityLauncherSpec extends Specification {
         then:
         thrown(IllegalArgumentException)
     }
+
+    def "detects if Unity is running"() {
+        when:
+        def versionPath = "src/test/resources/projects/${version}"
+        def isRunning = UnityLauncher.IsUnityRunning(new File(versionPath))
+
+        then:
+        isRunning == answer
+
+        where:
+        version| answer
+        "5.0.0p3"| true
+        "5.3.5f1"| false
+    }
 }

@@ -24,7 +24,7 @@ dependencies {
     archives project(path: ':client:unityPuppet', configuration: 'archives')
 }
 
-task getPuppet(type: Copy) {
+task getPuppet(type: Copy, dependsOn: ':client:unityPuppet:build') {
     from configurations.archives
     into 'src/main/resources'
 }

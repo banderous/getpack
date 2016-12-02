@@ -11,7 +11,7 @@ class PublishPlugin implements Plugin<Project> {
 
         project.task("installPuppet") {
             doLast {
-                def f = project.file('Assets/Plugins/nxt/unityPuppet.dll')
+                def f = project.file('Assets/Plugins/nxt/Editor/unityPuppet.dll')
                 f.getParentFile().mkdirs()
                 f.withOutputStream { out ->
                     def i = getClass().getResourceAsStream("/unityPuppet.dll")
@@ -34,6 +34,12 @@ class PublishPlugin implements Plugin<Project> {
                     builder.start()
                 }
             }
+        }
+
+        project.task("exportPackage", dependsOn: ['installPuppet', 'launchUnity']) {
+            def exportJob = project.file('nxt/tasks/export.task')
+            exportJob.getParentFile().mkdirs()
+            exportJob.createNewFile()
         }
     }
 }

@@ -17,7 +17,7 @@ class E2ESpec extends Specification {
         projectWithTask("installPuppet")
 
         then:
-        new File(projectFolder, "Assets/Plugins/nxt/unityPuppet.dll").exists()
+        new File(projectFolder, "Assets/Plugins/nxt/Editor/unityPuppet.dll").exists()
     }
 
     def "launching Unity"() {
@@ -25,18 +25,27 @@ class E2ESpec extends Specification {
         projectWithTask("launchUnity")
 
         then:
-        true
         conditions.within(5) {
             assert new File(projectFolder, "Temp/UnityLockfile").exists()
         }
     }
 
+    def "export a package"() {
+        when:
+        projectWithTask("exportPackage")
+
+        then:
+        conditions.within(5) {
+            assert new File(projectFolder, "nxt/package.unitypackage").exists()
+        }
+    }
+
     def projectWithTask(task) {
         projectFolder = SpecHelper.dummyProjectFolder()
-        println projectFolder
+        println "Test for project " + projectFolder
         GradleRunner.create()
                 .withProjectDir(projectFolder)
-                .withArguments('-i', task)
+                .withArguments(task)
                 .withPluginClasspath()
                 .forwardOutput()
                 .build()

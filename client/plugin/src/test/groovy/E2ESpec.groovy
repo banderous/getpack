@@ -35,9 +35,7 @@ class E2ESpec extends Specification {
         projectWithTask("exportPackage")
 
         then:
-        conditions.within(5) {
-            assert new File(projectFolder, "nxt/package.unitypackage").exists()
-        }
+        assert new File(projectFolder, "nxt/package.unitypackage").exists()
     }
 
     def projectWithTask(task) {

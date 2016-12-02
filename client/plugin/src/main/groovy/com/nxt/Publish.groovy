@@ -37,9 +37,19 @@ class PublishPlugin implements Plugin<Project> {
         }
 
         project.task("exportPackage", dependsOn: ['installPuppet', 'launchUnity']) {
-            def exportJob = project.file('nxt/tasks/export.task')
-            exportJob.getParentFile().mkdirs()
-            exportJob.createNewFile()
+            doLast {
+                def expectedFile = project.file('nxt/package.unitypackage')
+                if (expectedFile.exists()) {
+                    expectedFile.delete()
+                }
+
+                def exportJob = project.file('nxt/tasks/export.task')
+                exportJob.getParentFile().mkdirs()
+                exportJob.createNewFile()
+                while (!expectedFile.exists()) {
+                    Thread.sleep(100)
+                }
+            }
         }
     }
 }

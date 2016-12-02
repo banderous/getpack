@@ -43,6 +43,7 @@ class E2ESpec extends Specification {
         println "Test for project " + projectFolder
         GradleRunner.create()
                 .withProjectDir(projectFolder)
+                .withArguments("-i")
                 .withArguments(task)
                 .withPluginClasspath()
                 .forwardOutput()

@@ -2,6 +2,7 @@ package com.nxt
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.internal.impldep.aQute.bnd.build.model.clauses.ExportedPackage
 
 apply plugin: 'groovy'
 apply plugin PublishPlugin
@@ -9,47 +10,9 @@ apply plugin PublishPlugin
 class PublishPlugin implements Plugin<Project> {
     void apply(Project project) {
 
-        project.task("installPuppet") {
-            doLast {
-                def f = project.file('Assets/Plugins/nxt/Editor/unityPuppet.dll')
-                f.getParentFile().mkdirs()
-                f.withOutputStream { out ->
-                    def i = getClass().getResourceAsStream("/unityPuppet.dll")
-                    out << i
-                    i.close()
-                }
-            }
-        }
 
-        project.task("launchUnity") {
-            if (!UnityLauncher.IsUnityRunning(project.file('.'))) {
-                doLast {
-                    def version = UnityLauncher.UnityVersion(project.file('.'))
-                    def exe = UnityLauncher.UnityExeForVersion(new File('/Applications'), version)
-                    ProcessBuilder builder = new ProcessBuilder()
-                    builder.command([
-                            exe.path, '-batchmode',
-                            '-projectPath', project.file('.').path
-                    ])
-                    builder.start()
-                }
-            }
-        }
-
-        project.task("exportPackage", dependsOn: ['installPuppet', 'launchUnity']) {
-            doLast {
-                def expectedFile = project.file('nxt/package.unitypackage')
-                if (expectedFile.exists()) {
-                    expectedFile.delete()
-                }
-
-                def exportJob = project.file('nxt/tasks/export.task')
-                exportJob.getParentFile().mkdirs()
-                exportJob.createNewFile()
-                while (!expectedFile.exists()) {
-                    Thread.sleep(100)
-                }
-            }
-        }
+        project.tasks.create("installPuppet", InstallPuppet.class)
+        project.tasks.create("launchUnity", LaunchUnity.class)
+        project.tasks.create("exportPackage", ExportPackage.class).dependsOn 'installPuppet', 'launchUnity'
     }
 }

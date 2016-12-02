@@ -7,17 +7,19 @@ import org.gradle.api.tasks.TaskAction
  * Created by alex on 02/12/2016.
  */
 class ExportPackage extends  DefaultTask {
+
+    public File unityPackage = project.file('nxt/package.unitypackage')
+
     @TaskAction
     def action() {
-        def expectedFile = project.file('nxt/package.unitypackage')
-        if (expectedFile.exists()) {
-            expectedFile.delete()
+        if (unityPackage.exists()) {
+            unityPackage.delete()
         }
 
         def exportJob = project.file('nxt/tasks/export.task')
         exportJob.getParentFile().mkdirs()
         exportJob.createNewFile()
-        while (!expectedFile.exists()) {
+        while (!unityPackage.exists()) {
             Thread.sleep(100)
         }
     }

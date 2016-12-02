@@ -27,6 +27,8 @@ class SpecHelper {
             plugins {
                 id 'com.nxt.publish'
             }
+            group = "nxt"
+            version = "1.0.0"
         """
 
         return tempDir

@@ -4,7 +4,7 @@ import spock.util.concurrent.PollingConditions
 
 class E2ESpec extends Specification {
 
-    def projectFolder;
+    File projectFolder;
     def conditions = new PollingConditions(timeout: 5)
 
     def cleanupSpec() {
@@ -36,6 +36,17 @@ class E2ESpec extends Specification {
 
         then:
         assert new File(projectFolder, "nxt/package.unitypackage").exists()
+    }
+
+    def "publish a package"() {
+        when:
+        projectWithTask("publishNxtPublicationToIvyRepository")
+
+        then:
+        // Ivy repo is org/name/version.
+        def name = projectFolder.name
+        def expectedPath = "nxt/repo/nxt/${name}/1.0.0/${name}-1.0.0.unitypackage"
+        new File(projectFolder, expectedPath).exists()
     }
 
     def projectWithTask(task) {

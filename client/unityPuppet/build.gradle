@@ -4,8 +4,18 @@ task build(type: Exec) {
     inputs.dir 'src'
     inputs.file "${project.name}.csproj"
     inputs.file "${project.name}.sln"
-    outputs.dir 'bin'
+
+    ext.dll = file('bin/Debug/unityPuppet.dll')
+    outputs.file dll
 
     executable 'xbuild'
     args "${project.name}.sln"
+}
+
+configurations {
+    archives
+}
+
+artifacts {
+    archives build.dll
 }

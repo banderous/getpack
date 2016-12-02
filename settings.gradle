@@ -1,1 +1,1 @@
-include 'client:plugin'
+include 'client:plugin', 'client:unityPuppet', 'client:needy'

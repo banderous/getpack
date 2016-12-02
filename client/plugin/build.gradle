@@ -1,7 +1,5 @@
 import groovy.json.JsonBuilder
 
-apply plugin: 'ivy-publish'
-
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 
@@ -21,44 +19,24 @@ repositories {
 }
 
 
+
 dependencies {
-  compile "org.codehaus.groovy:groovy-all:2.4.7"
+    compile "org.codehaus.groovy:groovy-all:2.4.7"
     testCompile gradleTestKit()
-        testCompile 'com.google.guava:guava:20.0'
+    testCompile 'com.google.guava:guava:20.0'
 }
 
-publishing {
-    publications {
-        ivy(IvyPublication) {
-         //   artifact (exportUnityPackage.output) {
-           //     builtBy exportUnityPackage
-          //  }
-//            artifact (zipManifest) {
-//                builtBy buildManifest
-//                name "manifest"
-//            }
-            descriptor {
-                extraInfo("outline", "unityVersion", "5.0")
-            }
-        }
-    }
-    repositories {
-        ivy {
-            // change to point to your repo, e.g. http://my.org/repo
-            url "$buildDir/repo"
-        }
-    }
+configurations {
+    archives
 }
 
-task buildManifest {
-    ext.manifest = file("$buildDir/manifest.json")
-    doLast {
-        JsonBuilder json = new JsonBuilder();
-        json files : fileTree('Assets').collect { x-> x.path }
-        manifest.text = json.toString()
-    }
+dependencies {
+    archives project(path: ':client:unityPuppet', configuration: 'archives')
 }
 
-task zipManifest(type: Zip, dependsOn: buildManifest) {
-    from buildManifest.manifest
+task getPuppet(type: Copy) {
+    from configurations.archives
+    into 'src/main/resources'
 }
+
+classes.dependsOn getPuppet

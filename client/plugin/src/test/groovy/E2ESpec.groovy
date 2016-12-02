@@ -1,23 +1,23 @@
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 
-import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
-import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
-
 class E2ESpec extends Specification {
 
-    def "manifest generation"() {
+    def projectFolder;
 
+    def "puppet installation"() {
         when:
-        def result = projectWithTask("buildManifest")
+        projectWithTask("installPuppet")
 
         then:
-        result.task(":buildManifest").outcome in [SUCCESS, UP_TO_DATE]
+        new File(projectFolder, "Assets/Plugins/nxt/unityPuppet.dll").exists()
     }
 
     def projectWithTask(task) {
+        projectFolder = SpecHelper.dummyProjectFolder()
+        println projectFolder
         GradleRunner.create()
-                .withProjectDir(SpecHelper.dummyProjectFolder())
+                .withProjectDir(projectFolder)
                 .withArguments(task)
                 .withPluginClasspath()
                 .build()

@@ -19,6 +19,10 @@ class SpecHelper {
         tempFile.getParentFile().mkdirs()
         Files.write("Hello", tempFile, StandardCharsets.UTF_8)
 
+        tempFile = new File(tempDir, "ProjectSettings/ProjectVersion.txt");
+        tempFile.getParentFile().mkdirs()
+        tempFile << "m_EditorVersion: 5.3.4f1"
+
         new File(tempDir, "build.gradle") << """
             plugins {
                 id 'com.nxt.publish'

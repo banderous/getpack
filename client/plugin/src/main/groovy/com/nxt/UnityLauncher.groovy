@@ -6,7 +6,7 @@ package com.nxt
  */
 class UnityLauncher {
 
-    public static String UnityVersion(String projectPath) {
+    public static String UnityVersion(File projectPath) {
         def versionFile = new File(projectPath, "ProjectSettings/ProjectVersion.txt")
 
         if (!versionFile.exists()) {
@@ -22,8 +22,9 @@ class UnityLauncher {
             if (file.isDirectory()) {
                 def pList = new File(file, "Unity.app/Contents/Info.plist")
                 if (pList.exists()) {
-                    def parser = new XmlSlurper()
-                    parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+                    println "reading " + pList.path
+                    def parser = new XmlSlurper(false, false, true)
+                    parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
                     def next = false
                     // Search for bundle version.
                     def node = parser.parse(pList).dict.'*'.find { node ->
@@ -49,5 +50,11 @@ class UnityLauncher {
 
     public static boolean IsUnityRunning(File projectPath) {
         new File(projectPath, "Temp/UnityLockfile").exists()
+    }
+
+    public static File UnityExeForVersion(File searchPath, String version) {
+        // TODO: Windows
+        def unityPath = UnityPathForVersion(searchPath, version)
+        return new File(unityPath, 'Unity.app/Contents/MacOS/Unity')
     }
 }

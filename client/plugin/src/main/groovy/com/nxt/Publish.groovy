@@ -20,5 +20,20 @@ class PublishPlugin implements Plugin<Project> {
                 }
             }
         }
+
+        project.task("launchUnity") {
+            if (!UnityLauncher.IsUnityRunning(project.file('.'))) {
+                doLast {
+                    def version = UnityLauncher.UnityVersion(project.file('.'))
+                    def exe = UnityLauncher.UnityExeForVersion(new File('/Applications'), version)
+                    ProcessBuilder builder = new ProcessBuilder()
+                    builder.command([
+                            exe.path, '-batchmode',
+                            '-projectPath', project.file('.').path
+                    ])
+                    builder.start()
+                }
+            }
+        }
     }
 }

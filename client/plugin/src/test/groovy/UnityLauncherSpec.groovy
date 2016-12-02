@@ -7,7 +7,7 @@ class UnityLauncherSpec extends Specification {
 
         when:
         def versionPath = "src/test/resources/projects/${expectedVersion}"
-        def version = UnityLauncher.UnityVersion(versionPath)
+        def version = UnityLauncher.UnityVersion(new File(versionPath))
 
         then:
         version == expectedVersion
@@ -21,7 +21,7 @@ class UnityLauncherSpec extends Specification {
     def "fails if project not found"() {
 
         when:
-        def version = UnityLauncher.UnityVersion("nonsense")
+        def version = UnityLauncher.UnityVersion(new File("nonsense"))
 
         then:
         thrown(IllegalArgumentException)
@@ -63,5 +63,18 @@ class UnityLauncherSpec extends Specification {
         version| answer
         "5.0.0p3"| true
         "5.3.5f1"| false
+    }
+
+    def "finds Unity executable for version"() {
+        when:
+        def executablePath = UnityLauncher.UnityExeForVersion(new File('src/test/resources/Applications'), version)
+
+        then:
+        executablePath == answer
+
+        where:
+        version| answer
+        "5.0.0p3"| new File('src/test/resources/Applications/Unity 5.0.0p3/Unity.app/Contents/MacOS/Unity')
+        "5.3.5f1"| new File('src/test/resources/Applications/Unity 5.3.5f1/Unity.app/Contents/MacOS/Unity')
     }
 }

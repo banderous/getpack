@@ -7,7 +7,7 @@ class ManifestGenerationSpec extends Specification {
     def "manifest generation"() {
 
         when:
-        def str = ManifestGenerator.GenerateManifest(SpecHelper.dummyProject())
+        def str = ManifestGenerator.GenerateManifest(SpecHelper.dummyProject(ProjectType.DummyFile))
         def manifest = new JsonSlurper().parseText(str)
 
         then:

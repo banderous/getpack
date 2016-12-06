@@ -13,15 +13,12 @@ class PublishModule  {
         project.configurations.create('archives')
         project.pluginManager.apply("ivy-publish")
         project.configure(project) {
+
             publishing {
                 publications {
-                    nxt(IvyPublication) {
+                    nxtPackage(IvyPublication) {
                         artifact (project.tasks.exportPackage.unityPackage) {
                             builtBy project.tasks.exportPackage
-                        }
-
-                        descriptor {
-                            extraInfo("outline", "unityVersion", "5.0")
                         }
                     }
                 }
@@ -32,5 +29,6 @@ class PublishModule  {
                 }
             }
         }
+
     }
 }

@@ -1,6 +1,7 @@
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
+import com.nxt.Trouble
 
 class E2ESpec extends Specification {
 
@@ -14,7 +15,7 @@ class E2ESpec extends Specification {
 
     def "puppet installation"() {
         when:
-        projectWithTask("installPuppet")
+        projectWithTask(ProjectType.Empty, "installPuppet")
 
         then:
         new File(projectFolder, "Assets/Plugins/nxt/Editor/unityPuppet.dll").exists()
@@ -22,7 +23,7 @@ class E2ESpec extends Specification {
 
     def "launching Unity"() {
         when:
-        projectWithTask("launchUnity")
+        projectWithTask(ProjectType.Empty, "launchUnity")
 
         then:
         conditions.within(5) {
@@ -32,7 +33,7 @@ class E2ESpec extends Specification {
 
     def "export a package"() {
         when:
-        projectWithTask("exportPackage")
+        projectWithTask(ProjectType.DummyFile, "exportPackage")
 
         then:
         assert new File(projectFolder, "nxt/package.unitypackage").exists()
@@ -40,7 +41,7 @@ class E2ESpec extends Specification {
 
     def "publish a package"() {
         when:
-        projectWithTask("publishNxtPublicationToIvyRepository")
+        projectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
 
         then:
         // Ivy repo is org/name/version.
@@ -49,15 +50,40 @@ class E2ESpec extends Specification {
         new File(projectFolder, expectedPath).exists()
     }
 
-    def projectWithTask(task) {
-        projectFolder = SpecHelper.dummyProjectFolder()
-        println "Test for project " + projectFolder
-        GradleRunner.create()
+    @Trouble
+    def "install a package"() {
+        when:
+        // Create a dummy repo
+        File repoProject = projectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
+
+        File consumerProject = projectWithTask(ProjectType.Empty, "installPackage",
+                "-PnxtRepo=${repoProject.path}/nxt/repo",
+                "-PnxtGroup=nxt",
+                "-PnxtName=${repoProject.name}",
+                "-PnxtVersion=1.0.0"
+        )
+
+        println "producer " + repoProject
+        println "consumer " + consumerProject
+
+        // Create a project that references it
+        then:
+        conditions.within(5) {
+            assert new File(consumerProject, SpecHelper.DUMMY_FILE).exists()
+        }
+    }
+
+    def projectWithTask(ProjectType projectType, String task, String[] args = []) {
+        projectFolder = SpecHelper.dummyProjectFolder(projectType)
+        println "Test for ${task} args ${args} in ${projectFolder}"
+        def command = [task, "-i"]
+        command.addAll(args)
+        GradleRunner r = GradleRunner.create()
                 .withProjectDir(projectFolder)
-                .withArguments("-i")
-                .withArguments(task)
+                .withArguments(command)
                 .withPluginClasspath()
                 .forwardOutput()
-                .build()
+        r.build()
+        return projectFolder
     }
 }

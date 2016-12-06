@@ -3,25 +3,37 @@ import org.gradle.testfixtures.ProjectBuilder
 
 import java.nio.charset.StandardCharsets
 
+public enum ProjectType {
+    Empty,
+    DummyFile
+}
+
 /**
  * Created by alex on 30/11/2016.
  */
 class SpecHelper {
 
-    static def dummyProject() {
-        ProjectBuilder.builder().withProjectDir(dummyProjectFolder()).build()
+    static def dummyProject(ProjectType t) {
+        ProjectBuilder.builder().withProjectDir(dummyProjectFolder(t)).build()
     }
 
+    public static final String DUMMY_FILE = "Assets/Acme/A.txt";
+
     // Create a dummy project that uses our plugin.
-    static def dummyProjectFolder() {
-        def tempDir = Files.createTempDir()
-        def tempFile = new File(tempDir, "Assets/Acme/A.txt")
-        tempFile.getParentFile().mkdirs()
-        Files.write("Hello", tempFile, StandardCharsets.UTF_8)
+    static def dummyProjectFolder(ProjectType projectType) {
+        File tempDir = Files.createTempDir()
+        File tempFile = new File(tempDir, "Assets")
+        tempFile.mkdir()
 
         tempFile = new File(tempDir, "ProjectSettings/ProjectVersion.txt");
         tempFile.getParentFile().mkdirs()
         tempFile << "m_EditorVersion: 5.3.4f1"
+
+        if (projectType == ProjectType.DummyFile ) {
+            tempFile = new File(tempDir, DUMMY_FILE)
+            tempFile.getParentFile().mkdirs()
+            tempFile << "Hello"
+        }
 
         new File(tempDir, "build.gradle") << """
             plugins {

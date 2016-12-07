@@ -3,6 +3,7 @@ package com.nxt
 import groovy.json.JsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
 
@@ -50,9 +51,16 @@ class ExportPackage extends DefaultTask {
 
     @TaskAction
     def action() {
-        // TODO: timeout.
-        while (!unityPackage.exists()) {
+        long startTime = System.currentTimeMillis();
+        while(!unityPackage.exists())
+        {
             Thread.sleep(100)
+            // TODO - sensible timeout
+            if (System.currentTimeMillis() - startTime > 3000) {
+                println startTime
+                println System.currentTimeMillis()
+                throw new GradleException("Timed out waiting for export of ${unityPackage.path}")
+            }
         }
     }
 }

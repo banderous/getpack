@@ -1,5 +1,6 @@
 import com.google.common.io.Files
 import org.gradle.testfixtures.ProjectBuilder
+import org.gradle.testkit.runner.GradleRunner
 
 import java.nio.charset.StandardCharsets
 
@@ -44,5 +45,19 @@ class SpecHelper {
         """
 
         return tempDir
+    }
+
+    static def projectWithTask(ProjectType projectType, String task, String[] args = []) {
+        def projectFolder = SpecHelper.dummyProjectFolder(projectType)
+        println "Test for ${task} args ${args} in ${projectFolder}"
+        def command = [task, "-i"]
+        command.addAll(args)
+        GradleRunner r = GradleRunner.create()
+                .withProjectDir(projectFolder)
+                .withArguments(command)
+                .withPluginClasspath()
+                .forwardOutput()
+        r.build()
+        return projectFolder
     }
 }

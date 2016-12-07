@@ -19,6 +19,8 @@ class ExportPackage extends  DefaultTask {
         def exportJob = project.file('nxt/tasks/export.task')
         exportJob.getParentFile().mkdirs()
         exportJob.createNewFile()
+
+        // TODO: timeout.
         while (!unityPackage.exists()) {
             Thread.sleep(100)
         }

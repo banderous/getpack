@@ -1,3 +1,5 @@
+package com.nxt;
+
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions

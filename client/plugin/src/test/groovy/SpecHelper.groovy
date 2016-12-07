@@ -1,3 +1,5 @@
+package com.nxt;
+
 import com.google.common.io.Files
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner

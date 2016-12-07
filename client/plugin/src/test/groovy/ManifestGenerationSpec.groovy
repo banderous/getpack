@@ -1,3 +1,4 @@
+package com.nxt;
 import com.nxt.ManifestGenerator
 import groovy.json.JsonSlurper
 import spock.lang.Specification

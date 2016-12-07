@@ -56,7 +56,7 @@ class ExportPackage extends DefaultTask {
         {
             Thread.sleep(100)
             // TODO - sensible timeout
-            if (System.currentTimeMillis() - startTime > 3000) {
+            if (System.currentTimeMillis() - startTime > 5000) {
                 println startTime
                 println System.currentTimeMillis()
                 throw new GradleException("Timed out waiting for export of ${unityPackage.path}")

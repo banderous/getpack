@@ -7,7 +7,7 @@ import spock.util.concurrent.PollingConditions
 import com.nxt.Trouble
 import static SpecHelper.ProjectWithTask;
 
-class ExportPackageSpec extends Specification {
+class ExportPackageSpec extends BaseE2ESpec {
 
     @Trouble
     def "Describes the export job"() {

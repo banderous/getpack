@@ -6,14 +6,9 @@ import spock.util.concurrent.PollingConditions
 import com.nxt.Trouble
 import static SpecHelper.ProjectWithTask
 
-class E2ESpec extends Specification {
+class E2ESpec extends BaseE2ESpec {
 
     def conditions = new PollingConditions(timeout: 5)
-
-    def cleanupSpec() {
-        // Kill all the Unity processes we start.
-        "pkill Unity".execute()
-    }
 
     def "puppet installation"() {
         when:

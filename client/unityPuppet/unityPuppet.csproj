@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>unityPuppet</RootNamespace>
     <AssemblyName>unityPuppet</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="src\Packager.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />
+    <Compile Include="src\MiniJSON.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

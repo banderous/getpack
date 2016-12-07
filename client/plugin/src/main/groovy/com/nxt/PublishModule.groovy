@@ -17,8 +17,8 @@ class PublishModule  {
             publishing {
                 publications {
                     nxtPackage(IvyPublication) {
-                        artifact (project.tasks.exportPackage.unityPackage) {
-                            builtBy project.tasks.exportPackage
+                        artifact (project.tasks.nxtExportPackage.unityPackage) {
+                            builtBy project.tasks.nxtExportPackage
                         }
                     }
                 }

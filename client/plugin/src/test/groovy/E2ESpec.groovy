@@ -4,10 +4,10 @@ import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 import com.nxt.Trouble
+import static SpecHelper.ProjectWithTask
 
 class E2ESpec extends Specification {
 
-    File projectFolder;
     def conditions = new PollingConditions(timeout: 5)
 
     def cleanupSpec() {
@@ -17,7 +17,7 @@ class E2ESpec extends Specification {
 
     def "puppet installation"() {
         when:
-        projectWithTask(ProjectType.Empty, "installPuppet")
+        File projectFolder = ProjectWithTask(ProjectType.Empty, "installPuppet")
 
         then:
         new File(projectFolder, "Assets/Plugins/nxt/Editor/unityPuppet.dll").exists()
@@ -25,7 +25,7 @@ class E2ESpec extends Specification {
 
     def "launching Unity"() {
         when:
-        projectWithTask(ProjectType.Empty, "launchUnity")
+        File projectFolder = ProjectWithTask(ProjectType.Empty, "launchUnity")
 
         then:
         conditions.within(5) {
@@ -35,7 +35,7 @@ class E2ESpec extends Specification {
 
     def "export a package"() {
         when:
-        projectWithTask(ProjectType.DummyFile, "exportPackage")
+        File projectFolder = ProjectWithTask(ProjectType.DummyFile, "nxtExportPackage")
 
         then:
         assert new File(projectFolder, "nxt/package.unitypackage").exists()
@@ -43,7 +43,7 @@ class E2ESpec extends Specification {
 
     def "publish a package"() {
         when:
-        projectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
+        File projectFolder = ProjectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
 
         then:
         // Ivy repo is org/name/version.
@@ -52,13 +52,12 @@ class E2ESpec extends Specification {
         new File(projectFolder, expectedPath).exists()
     }
 
-    @Trouble
     def "install a package"() {
         when:
         // Create a dummy repo
-        File repoProject = projectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
+        File repoProject = ProjectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
 
-        File consumerProject = projectWithTask(ProjectType.Empty, "installPackage",
+        File consumerProject = ProjectWithTask(ProjectType.Empty, "installPackage",
                 "-PnxtRepo=${repoProject.path}/nxt/repo",
                 "-PnxtGroup=nxt",
                 "-PnxtName=${repoProject.name}",
@@ -73,19 +72,5 @@ class E2ESpec extends Specification {
         conditions.within(5) {
             assert new File(consumerProject, SpecHelper.DUMMY_FILE).exists()
         }
-    }
-
-    def projectWithTask(ProjectType projectType, String task, String[] args = []) {
-        projectFolder = SpecHelper.dummyProjectFolder(projectType)
-        println "Test for ${task} args ${args} in ${projectFolder}"
-        def command = [task, "-i"]
-        command.addAll(args)
-        GradleRunner r = GradleRunner.create()
-                .withProjectDir(projectFolder)
-                .withArguments(command)
-                .withPluginClasspath()
-                .forwardOutput()
-        r.build()
-        return projectFolder
     }
 }

@@ -47,7 +47,7 @@ class SpecHelper {
         return tempDir
     }
 
-    static def projectWithTask(ProjectType projectType, String task, String[] args = []) {
+    static def ProjectWithTask(ProjectType projectType, String task, String[] args = []) {
         def projectFolder = SpecHelper.dummyProjectFolder(projectType)
         println "Test for ${task} args ${args} in ${projectFolder}"
         def command = [task, "-i"]

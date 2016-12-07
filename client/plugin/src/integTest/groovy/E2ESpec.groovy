@@ -28,6 +28,18 @@ class E2ESpec extends BaseE2ESpec {
         }
     }
 
+    @Trouble
+    def "create a package"() {
+        when:
+        File projectFolder = ProjectWithTask(ProjectType.DummyFile, "nxtCreatePackage",
+                "-PnxtGroup=Acme",
+                "-PnxtName=Foo"
+        )
+
+        then:
+        new File(projectFolder, "nxt/nxt.json").exists()
+    }
+
     def "export a package"() {
         when:
         File projectFolder = ProjectWithTask(ProjectType.DummyFile, "nxtExportPackage")

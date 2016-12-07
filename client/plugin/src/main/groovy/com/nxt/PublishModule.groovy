@@ -24,6 +24,7 @@ class PublishModule  {
                 }
                 repositories {
                     ivy {
+                        // TODO: make configurable
                         url project.file("nxt/repo")
                     }
                 }

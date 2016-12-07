@@ -51,3 +51,5 @@ task getPuppet(type: Copy, dependsOn: ':client:unityPuppet:build') {
 }
 
 classes.dependsOn getPuppet
+
+compileGroovy.groovyOptions.configurationScript = file('src/groovyCompile/groovycConfig.groovy')

@@ -3,7 +3,7 @@
  */
 package com.nxt
 
-import groovy.json.JsonOutput
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 
@@ -13,23 +13,20 @@ class Config {
     def packages = [:]
 
 
-    public Package findPackage(String group, String name) {
-        packages[key(group, name)]
+    public Package findPackage(String id) {
+        packages[new Package(id).key()]
     }
 
-    public Package addPackage(String group, String name, String version) {
-        if (packages[key(group, name)]) {
-            throw new GradleException("Package ${key(group, name)} already installed!")
+    public Package addPackage(String id) {
+        def pack = new Package(id)
+        if (packages[pack.key()]) {
+            throw new GradleException("Package ${id} already installed!")
         }
-        packages[key(group, name)] = new Package(group: group, name: name, version: version)
+        packages[pack.key()] = pack
     }
 
-    public Package removePackage(String group, String name) {
-        packages.remove(key(group, name))
-    }
-
-    String key(String group, String name) {
-        "${group}:${name}"
+    public Package removePackage(String id) {
+        packages.remove(new Package(id).key())
     }
 
     static Config load(File f) {
@@ -42,6 +39,6 @@ class Config {
     }
 
     static void save(Config config, File f) {
-        f << JsonOutput.prettyPrint(JsonOutput.toJson(config))
+        f << new JsonBuilder(config).toPrettyString()
     }
 }

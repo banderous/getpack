@@ -21,7 +21,7 @@ class Config {
         if (packages[key(group, name)]) {
             throw new GradleException("Package ${key(group, name)} already installed!")
         }
-        packages[key(group, name)] = new Package(version: version)
+        packages[key(group, name)] = new Package(group: group, name: name, version: version)
     }
 
     public Package removePackage(String group, String name) {

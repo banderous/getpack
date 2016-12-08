@@ -15,7 +15,7 @@ class ConfigSpec extends Specification {
         config.addPackage("com.acme", "superjson", "1")
 
         then:
-        config.findPackage("com.acme", "superjson") == "1"
+        config.findPackage("com.acme", "superjson").version == "1"
     }
 
     def "removing a package"() {
@@ -44,6 +44,6 @@ class ConfigSpec extends Specification {
         def loaded = Config.load(f)
 
         then:
-        loaded.findPackage("com.acme", "superjson") == "1"
+        loaded.findPackage("com.acme", "superjson").version == "1"
     }
 }

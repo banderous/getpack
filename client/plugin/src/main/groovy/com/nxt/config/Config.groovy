@@ -13,18 +13,18 @@ class Config {
     def packages = [:]
 
 
-    public String findPackage(String group, String name) {
+    public Package findPackage(String group, String name) {
         packages[key(group, name)]
     }
 
-    public void addPackage(String group, String name, String version) {
+    public Package addPackage(String group, String name, String version) {
         if (packages[key(group, name)]) {
             throw new GradleException("Package ${key(group, name)} already installed!")
         }
-        packages[key(group, name)] = version
+        packages[key(group, name)] = new Package(version: version)
     }
 
-    public void removePackage(String group, String name) {
+    public Package removePackage(String group, String name) {
         packages.remove(key(group, name))
     }
 

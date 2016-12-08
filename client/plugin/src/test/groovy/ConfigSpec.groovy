@@ -1,12 +1,14 @@
-package com.nxt;
+package com.nxt
+
+import com.google.common.io.Files;
 import spock.lang.Specification
 import spock.lang.PendingFeature
 import org.gradle.api.GradleException
 
+
 class ConfigSpec extends Specification {
 
-    def configFile = File.createTempFile("config", "json")
-    def config = new Config(configFile)
+    def config = new Config()
 
     def "adding package"() {
         when:
@@ -34,7 +36,14 @@ class ConfigSpec extends Specification {
         thrown GradleException
     }
 
-    Config loadedConfig() {
-        return new Config(configFile)
+    def "serialising a config"() {
+        when:
+        def f = File.createTempFile("foo", "bar")
+        config.addPackage("com.acme", "superjson", "1")
+        Config.save(config, f)
+        def loaded = Config.load(f)
+
+        then:
+        loaded.findPackage("com.acme", "superjson") == "1"
     }
 }

@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 import com.nxt.Trouble
 import static SpecHelper.ProjectWithTask
+import static SpecHelper.ProjectWithPackage
 
 class E2ESpec extends BaseE2ESpec {
 
@@ -12,72 +13,63 @@ class E2ESpec extends BaseE2ESpec {
 
     def "puppet installation"() {
         when:
-        File projectFolder = ProjectWithTask(ProjectType.Empty, "installPuppet")
+        def project = ProjectWithTask(ProjectType.Empty, "installPuppet")
 
         then:
-        new File(projectFolder, "Assets/Plugins/nxt/Editor/unityPuppet.dll").exists()
+        new File(project.projectDir, "Assets/Plugins/nxt/Editor/unityPuppet.dll").exists()
     }
 
     def "launching Unity"() {
         when:
-        File projectFolder = ProjectWithTask(ProjectType.Empty, "launchUnity")
+        def project = ProjectWithTask(ProjectType.Empty, "launchUnity")
 
         then:
         conditions.within(5) {
-            assert new File(projectFolder, "Temp/UnityLockfile").exists()
+            assert new File(project.projectDir, "Temp/UnityLockfile").exists()
         }
     }
 
-    @Trouble
-    def "create a package"() {
-        when:
-        File projectFolder = ProjectWithTask(ProjectType.DummyFile, "nxtCreatePackage",
-                "-PnxtGroup=Acme",
-                "-PnxtName=Foo"
-        )
-
-        then:
-        new File(projectFolder, "nxt/nxt.json").exists()
-    }
-
+//    @Trouble
     def "export a package"() {
         when:
-        File projectFolder = ProjectWithTask(ProjectType.DummyFile, "nxtExportPackage")
+        def runner = ProjectWithTask(ProjectType.DummyFile, "nxtExportAcmeSuperjson")
 
         then:
-        assert new File(projectFolder, "nxt/package.unitypackage").exists()
+        assert new File(runner.projectDir, "nxt/export/acme.superjson.unitypackage").exists()
     }
 
     def "publish a package"() {
         when:
-        File projectFolder = ProjectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
+        GradleRunner runner = ProjectWithTask(ProjectType.DummyFile, "publishAcmeSuperjsonPublicationToIvyRepository")
 
         then:
         // Ivy repo is org/name/version.
-        def name = projectFolder.name
-        def expectedPath = "nxt/repo/nxt/${name}/1.0.0/${name}-1.0.0.unitypackage"
-        new File(projectFolder, expectedPath).exists()
+        def name = ProjectType.DummyFile.name
+        def group = ProjectType.DummyFile.group
+        def expectedPath = "nxt/repo/${group}/${name}/1.0.0/${name}-1.0.0.unitypackage"
+        new File(runner.projectDir, expectedPath).exists()
     }
 
+    @Trouble
     def "install a package"() {
         when:
         // Create a dummy repo
-        File repoProject = ProjectWithTask(ProjectType.DummyFile, "publishNxtPackagePublicationToIvyRepository")
+        GradleRunner repoProject = ProjectWithTask(ProjectType.DummyFile, "publishAcmeSuperjsonPublicationToIvyRepository")
 
-        File consumerProject = ProjectWithTask(ProjectType.Empty, "installPackage",
-                "-PnxtRepo=${repoProject.path}/nxt/repo",
-                "-PnxtGroup=nxt",
-                "-PnxtName=${repoProject.name}",
+        GradleRunner consumerProject = ProjectWithTask(ProjectType.Empty, "installPackage",
+                "-PnxtRepo=${repoProject.projectDir.path}/nxt/repo",
+                "-PnxtGroup=acme",
+                "-PnxtName=superjson",
                 "-PnxtVersion=1.0.0"
         )
 
-        println "producer " + repoProject
-        println "consumer " + consumerProject
+        println "producer " + repoProject.projectDir
+        println "consumer " + consumerProject.projectDir
 
         // Create a project that references it
         then:
         conditions.within(5) {
-            assert new File(consumerProject, SpecHelper.DUMMY_FILE).exists()
+            assert new File(consumerProject.projectDir, SpecHelper.DUMMY_FILE).exists()
         }
     }
 }

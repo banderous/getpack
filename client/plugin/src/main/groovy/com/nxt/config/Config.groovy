@@ -6,11 +6,17 @@ package com.nxt
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
+import org.gradle.api.Project
+import com.google.gson.Gson
+
+class PackageMap extends HashMap<String, Package> {
+
+}
 
 class Config {
 
-
-    def packages = [:]
+    private final static String CONFIG_PATH = 'nxt/nxt.json'
+    PackageMap packages = new PackageMap()
 
 
     public Package findPackage(String id) {
@@ -33,13 +39,18 @@ class Config {
         packages.remove(new Package(id).key())
     }
 
+    static Config load(Project project) {
+        load(project.file(CONFIG_PATH))
+    }
+
     static Config load(File f) {
         if (!f.exists()) {
             f.getParentFile().mkdirs()
             f.createNewFile()
             f << "{}"
         }
-        return (Config) new JsonSlurper().parse(f)
+
+        new Gson().fromJson(f.text, Config)
     }
 
     static void save(Config config, File f) {

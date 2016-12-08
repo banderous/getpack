@@ -10,9 +10,9 @@ class PublishPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.tasks.create("installPuppet", InstallPuppet.class)
         project.tasks.create("launchUnity", LaunchUnity.class).dependsOn 'installPuppet'
+        def config = Config.load(project)
         CreatePackage.Configure(project)
-        ExportPackage.Configure(project)
-        PublishModule.Configure(project)
+        ExportPackage.Configure(project, config)
         InstallPackage.Configure(project)
     }
 }

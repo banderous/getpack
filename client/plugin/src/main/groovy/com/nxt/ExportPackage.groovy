@@ -4,6 +4,8 @@ import groovy.json.JsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.GradleException
+import org.gradle.api.publish.ivy.IvyPublication
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
 
@@ -14,43 +16,98 @@ import java.nio.file.Paths
  */
 class ExportPackage extends DefaultTask {
 
-    public static String TASK_PATH = 'nxt/tasks/export.task'
+    enum PathType {
+        task("task"),
+        export("unitypackage")
+
+        String extension
+        PathType(String extension) {
+            this.extension = extension
+        }
+    }
+
     @OutputFile
-    public File unityPackage = project.file('nxt/package.unitypackage')
+    File unityPackage
 
-    public static void Configure(Project project) {
-        project.task('nxtCreateExportJob') {
-            doLast() {
-                // TODO: refactor.
-                File unityPackage = project.file('nxt/package.unitypackage')
-                if (unityPackage.exists()) {
-                    unityPackage.delete()
-                }
+    Package pack
 
-                def exportJob = project.file(TASK_PATH)
-                exportJob.getParentFile().mkdirs()
-                exportJob.createNewFile()
+    public static void Configure(Project project, Config config) {
+        project.configurations.create('archives')
+        project.pluginManager.apply("ivy-publish")
 
-                def builder = new JsonBuilder()
-                def baseDir = Paths.get(project.file('.').absolutePath)
-                def export = project.fileTree('Assets').files.collect { f ->
-                    "${baseDir.relativize(f.toPath()).toFile().path}"
+        project.configure(project) {
+            publishing {
+                repositories {
+                    ivy {
+                        // TODO: make configurable
+                        url project.file("nxt/repo")
+                    }
                 }
-                builder.task {
-                    files export
-                }
-                exportJob << builder.toString()
-                println builder.toString()
             }
         }
 
-        project.tasks.create('nxtExportPackage', ExportPackage) {
-            dependsOn 'nxtCreateExportJob', 'launchUnity'
+        config.packages.each { id, pkg ->
+            ConfigurePackage(project, pkg)
         }
+    }
+
+    private static void ConfigurePackage(Project project, Package pkg) {
+        def packageId = "${pkg.group.capitalize()}${pkg.name.capitalize()}"
+        def taskName = "nxtExport${packageId}"
+
+        def task = project.tasks.create(taskName, ExportPackage) {
+            dependsOn 'launchUnity'
+            unityPackage getPath(project, PathType.export, pkg)
+            pack pkg
+        }
+
+        project.configure(project) {
+            publishing {
+                publications {
+                    "${packageId}"(IvyPublication) {
+                        organisation pkg.group
+                        module pkg.name
+                        artifact (task.unityPackage) {
+                            builtBy task
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    def exportPackageJob(Project project, Package pack) {
+        def exportFile = getPath(project, PathType.task, pack)
+        exportFile.getParentFile().mkdirs()
+        exportFile.createNewFile()
+
+
+        def builder = new JsonBuilder()
+        def baseDir = Paths.get(project.file('.').absolutePath)
+        def export = project.fileTree('Assets').files.collect { f ->
+            "${baseDir.relativize(f.toPath()).toFile().path}"
+        }
+        builder.task {
+            files export
+        }
+        exportFile << builder.toString()
+    }
+
+    def cleanExistingPackage() {
+        if (unityPackage.exists()) {
+            unityPackage.delete()
+        }
+    }
+
+    static File getPath(Project project, PathType type, Package pack) {
+        project.file("nxt/${type}/${pack.group}.${pack.name}.${type.extension}")
     }
 
     @TaskAction
     def action() {
+        cleanExistingPackage()
+        exportPackageJob(project, pack)
         long startTime = System.currentTimeMillis();
         while(!unityPackage.exists())
         {

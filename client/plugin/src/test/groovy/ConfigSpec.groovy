@@ -1,5 +1,6 @@
 package com.nxt
 
+import org.apache.tools.ant.taskdefs.Pack
 import spock.lang.Specification
 import org.gradle.api.GradleException
 
@@ -56,6 +57,8 @@ class ConfigSpec extends Specification {
         def loaded = Config.load(f)
 
         then:
-        loaded.findPackage(id)
+        loaded.packages.each { a, b ->
+            assert b instanceof Package
+        }
     }
 }

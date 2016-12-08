@@ -1,14 +1,21 @@
 package com.nxt;
 
 import com.google.common.io.Files
+import org.gradle.api.invocation.Gradle
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
 
 import java.nio.charset.StandardCharsets
 
 public enum ProjectType {
-    Empty,
-    DummyFile
+    Empty("acme", "superjson"),
+    DummyFile("acme", "superjson")
+
+    String group, name
+    public ProjectType(String group, name) {
+        this.group = group
+        this.name = name
+    }
 }
 
 /**
@@ -42,24 +49,37 @@ class SpecHelper {
             plugins {
                 id 'com.nxt.publish'
             }
-            group = "nxt"
+            group = "acme"
             version = "1.0.0"
         """
 
         return tempDir
     }
 
-    static def ProjectWithTask(ProjectType projectType, String task, String[] args = []) {
-        def projectFolder = SpecHelper.dummyProjectFolder(projectType)
+    static GradleRunner ProjectWithTask(ProjectType projectType, String task, String[] args = []) {
+        def runner = PrepareRunner(projectType, task, args)
+        if (projectType == ProjectType.DummyFile) {
+            def config = new Config()
+            config.addPackage("acme:superjson:1.0.0")
+            def f = new File(runner.projectDir, "nxt/nxt.json")
+            f.getParentFile().mkdirs()
+            Config.save(config, f)
+        }
+        runner.build()
+        runner
+    }
+
+    static GradleRunner PrepareRunner(ProjectType type, String task, String[] args) {
+        def projectFolder = SpecHelper.dummyProjectFolder(type)
         println "Test for ${task} args ${args} in ${projectFolder}"
+
         def command = [task, "-i"]
         command.addAll(args)
-        GradleRunner r = GradleRunner.create()
-                .withProjectDir(projectFolder)
-                .withArguments(command)
-                .withPluginClasspath()
-                .forwardOutput()
-        r.build()
-        return projectFolder
+
+        GradleRunner.create()
+            .withProjectDir(projectFolder)
+            .withPluginClasspath()
+            .forwardOutput()
+            .withArguments(command)
     }
 }

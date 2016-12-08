@@ -11,9 +11,9 @@ namespace com.nxt
 	[InitializeOnLoad]
 	public class Watcher
 	{
-		static string ExportTaskPath = Path.Combine (TaskFolder, "export.task");
-		const string TaskFolder = "nxt/tasks";
+		const string TaskFolder = "nxt/task";
 		const string ImportFolder = "nxt/import";
+		const string ExportFolder = "nxt/export";
 		static Watcher ()
 		{
 			if (Application.platform == RuntimePlatform.OSXEditor) {
@@ -83,7 +83,7 @@ namespace com.nxt
 			watcher.Created += new FileSystemEventHandler (OnExportDetected);
 
 			bool doExport = false;
-			if (File.Exists (Path.Combine (TaskFolder, "export.task"))) {
+			if (Directory.GetFiles (TaskFolder, "*.task").Length > 0) {
 				doExport = true;
 			}
 
@@ -102,20 +102,25 @@ namespace com.nxt
 
 		private static void DoExport ()
 		{
-			// Read the list of files to export.
-			var json = System.IO.File.ReadAllText (ExportTaskPath);
-			Dictionary<string, object> dic = (Dictionary<string, object>) MiniJSON.Deserialize (json);
-			var task = (Dictionary<string, object>)dic ["task"];
-			var fileList = (List<object>)task["files"];
-			var files = new string [fileList.Count];
-			var t = 0;
-			foreach (var f in fileList) {
-				files [t++] = f.ToString ();
-			}
+			foreach (var file in Directory.GetFiles (TaskFolder, "*.task")) {
+				
+				// Read the list of files to export.
+				var json = System.IO.File.ReadAllText (file);
+				Dictionary<string, object> dic = (Dictionary<string, object>)MiniJSON.Deserialize (json);
+				var task = (Dictionary<string, object>)dic ["task"];
+				var fileList = (List<object>)task ["files"];
+				var files = new string [fileList.Count];
+				var t = 0;
+				foreach (var f in fileList) {
+					files [t++] = f.ToString ();
+				}
 
-			AssetDatabase.ExportPackage (files, "nxt/package.unitypackage",
-										 ExportPackageOptions.Recurse);
-			Debug.Log ("Published to " + Directory.GetCurrentDirectory ());
+				var destination = Path.Combine (ExportFolder, string.Format ("{0}.unitypackage", Path.GetFileNameWithoutExtension(file)));
+				AssetDatabase.ExportPackage (files, destination,
+											 ExportPackageOptions.Recurse);
+				Debug.Log ("Published to " + destination);
+
+			}
 		}
 
 		private static void log (string s)

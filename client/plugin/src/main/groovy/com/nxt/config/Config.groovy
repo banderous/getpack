@@ -17,6 +17,10 @@ class Config {
         packages[new Package(id).key()]
     }
 
+    public Package addPackage(String group, String name, String version) {
+        addPackage("${group}:${name}:${version}")
+    }
+
     public Package addPackage(String id) {
         def pack = new Package(id)
         if (packages[pack.key()]) {

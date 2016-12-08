@@ -33,6 +33,11 @@ class Config {
     }
 
     static Config load(File f) {
+        if (!f.exists()) {
+            f.getParentFile().mkdirs()
+            f.createNewFile()
+            f << "{}"
+        }
         return (Config) new JsonSlurper().parse(f)
     }
 

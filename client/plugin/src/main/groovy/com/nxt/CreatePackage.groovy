@@ -17,7 +17,7 @@ class CreatePackage extends DefaultTask {
     public static void Configure(Project project) {
         project.task('nxtCreatePackage') {
             doLast() {
-                def c = new Config(project.file('nxt/nxt.json'))
+                def c = Config.load(project.file('nxt/nxt.json'))
                 def p = project.properties
                 c.addPackage p.nxtGroup, p.nxtName, '1.0.0'
             }

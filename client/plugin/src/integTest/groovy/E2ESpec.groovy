@@ -10,12 +10,14 @@ import static SpecHelper.ProjectWithPackage
 class E2ESpec extends BaseE2ESpec {
 
     def conditions = new PollingConditions(timeout: 5)
-    def packageId = "acme:superjson:1.0.1"
+    def group = "acme"
+    def name = "superjson"
+    def version = "1.0.1"
+    def packageId = [group, name, version].join(":")
 
     def "export a package"() {
         when:
         def project = UBuilder.Builder()
-                .withFile(UBuilder.DUMMY_FILE)
                 .withPackage(packageId)
                 .withArg("nxtExportAcmeSuperjson")
                 .build()
@@ -24,19 +26,20 @@ class E2ESpec extends BaseE2ESpec {
         assert new File(project.projectDir, "nxt/export/acme.superjson.unitypackage").exists()
     }
 
+    @Trouble
     def "publish a package"() {
         when:
-        GradleRunner runner = ProjectWithTask(ProjectType.DummyFile, "publishAcmeSuperjsonPublicationToIvyRepository")
+        def project = UBuilder.Builder()
+                .withPackage(packageId)
+                .withArg("publishAcmeSuperjsonPublicationToIvyRepository")
+                .build()
 
         then:
         // Ivy repo is org/name/version.
-        def name = ProjectType.DummyFile.name
-        def group = ProjectType.DummyFile.group
-        def expectedPath = "nxt/repo/${group}/${name}/1.0.0/${name}-1.0.0.unitypackage"
-        new File(runner.projectDir, expectedPath).exists()
+        def expectedPath = "nxt/repo/${group}/${name}/${version}/${name}-${version}.unitypackage"
+        new File(project.projectDir, expectedPath).exists()
     }
 
-    @Trouble
     def "install a package"() {
         when:
         // Create a dummy repo

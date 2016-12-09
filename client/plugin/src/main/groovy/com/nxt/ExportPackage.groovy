@@ -67,6 +67,7 @@ class ExportPackage extends DefaultTask {
                     "${packageId}"(IvyPublication) {
                         organisation pkg.group
                         module pkg.name
+                        revision pkg.version
                         artifact (task.unityPackage) {
                             builtBy task
                         }

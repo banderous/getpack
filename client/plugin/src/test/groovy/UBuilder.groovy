@@ -12,7 +12,6 @@ class UBuilder {
         new UBuilder()
     }
 
-    public static final String DUMMY_FILE = "Assets/Acme/A.txt";
     File projectDir
     Config config = new Config()
     List<String> args = ["-i"]
@@ -29,8 +28,6 @@ class UBuilder {
             plugins {
                 id 'com.nxt.publish'
             }
-            group = "acme"
-            version = "1.0.0"
         """
     }
 
@@ -61,7 +58,14 @@ class UBuilder {
     }
 
     UBuilder withPackage(String id) {
+        String group, name, version
+        (group, name, version) = id.tokenize(':')
+        withFile("Assets/${group.capitalize()}/${name.capitalize()}/A.txt")
         config.addPackage(id)
         this
+    }
+
+    boolean assertFileForPackage(String id) {
+
     }
 }

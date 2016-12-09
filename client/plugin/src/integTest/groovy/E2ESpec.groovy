@@ -1,11 +1,10 @@
 package com.nxt;
 
 import org.gradle.testkit.runner.GradleRunner
+import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 import com.nxt.Trouble
-import static SpecHelper.ProjectWithTask
-import static SpecHelper.ProjectWithPackage
 
 class E2ESpec extends BaseE2ESpec {
 
@@ -26,7 +25,6 @@ class E2ESpec extends BaseE2ESpec {
         assert new File(project.projectDir, "nxt/export/acme.superjson.unitypackage").exists()
     }
 
-    @Trouble
     def "publish a package"() {
         when:
         def project = UBuilder.Builder()
@@ -40,25 +38,27 @@ class E2ESpec extends BaseE2ESpec {
         new File(project.projectDir, expectedPath).exists()
     }
 
+    @PendingFeature
     def "install a package"() {
         when:
-        // Create a dummy repo
-        GradleRunner repoProject = ProjectWithTask(ProjectType.DummyFile, "publishAcmeSuperjsonPublicationToIvyRepository")
+        def repoProject = UBuilder.Builder()
+                .withPackage(packageId)
+                .withArg("publishAcmeSuperjsonPublicationToIvyRepository")
+                .build()
 
-        GradleRunner consumerProject = ProjectWithTask(ProjectType.Empty, "installPackage",
-                "-PnxtRepo=${repoProject.projectDir.path}/nxt/repo",
-                "-PnxtGroup=acme",
-                "-PnxtName=superjson",
-                "-PnxtVersion=1.0.0"
-        )
+        def consumer = UBuilder.Builder()
+                .withRepository("${repoProject.projectDir.path}/nxt/repo")
+                .withDependency(packageId)
+                .withArg("installPackage")
 
         println "producer " + repoProject.projectDir
-        println "consumer " + consumerProject.projectDir
+        println "consumer " + consumer.projectDir
+        consumer.build()
 
         // Create a project that references it
         then:
         conditions.within(5) {
-            assert new File(consumerProject.projectDir, SpecHelper.DUMMY_FILE).exists()
+            assert new File(consumer.projectDir, consumer.filepathForPackage(packageId)).exists()
         }
     }
 }

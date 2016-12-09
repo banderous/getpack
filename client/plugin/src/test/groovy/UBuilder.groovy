@@ -58,14 +58,24 @@ class UBuilder {
     }
 
     UBuilder withPackage(String id) {
-        String group, name, version
-        (group, name, version) = id.tokenize(':')
-        withFile("Assets/${group.capitalize()}/${name.capitalize()}/A.txt")
+        withFile(filepathForPackage(id))
         config.addPackage(id)
         this
     }
 
-    boolean assertFileForPackage(String id) {
+    UBuilder withRepository(String url) {
+        config.addRepository(url)
+        this
+    }
 
+    UBuilder withDependency(String id) {
+        config.addDependency(id)
+        this
+    }
+
+    String filepathForPackage(String id) {
+        String group, name, version
+        (group, name, version) = id.tokenize(':')
+        "Assets/${group.capitalize()}/${name.capitalize()}/A.txt"
     }
 }

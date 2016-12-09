@@ -17,6 +17,8 @@ class Config {
 
     private final static String CONFIG_PATH = 'nxt/nxt.json'
     PackageMap packages = new PackageMap()
+    Set<String> repositories = []
+    Set<String> dependencies = []
 
 
     public Package findPackage(String id) {
@@ -37,6 +39,14 @@ class Config {
 
     public Package removePackage(String id) {
         packages.remove(new Package(id).key())
+    }
+
+    void addRepository(String url) {
+        repositories.add(url)
+    }
+
+    void addDependency(String id) {
+        dependencies.add(id)
     }
 
     static Config load(Project project) {

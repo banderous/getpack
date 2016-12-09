@@ -1,6 +1,7 @@
 package com.nxt
 import com.google.common.io.Files
 import com.nxt.UBuilder
+import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
@@ -23,7 +24,7 @@ class SynchroniserSpec extends Specification {
     def "detects new package"() {
         when:
         projConf.withDependency(superJSON)
-        def deps = Synchroniser.resolveDeps(project, projConf.config, projConf.projectState)
+        def deps = resolve()
 
         then:
         deps.added.containsKey 'acme:superjson'
@@ -32,8 +33,7 @@ class SynchroniserSpec extends Specification {
     def "detects removed package"() {
         when:
         projConf.withInstalledDependency(superJSON)
-
-        def deps = Synchroniser.resolveDeps(project, projConf.config, projConf.projectState)
+        def deps = resolve()
 
         then:
         deps.removed.containsKey 'acme:superjson'
@@ -48,19 +48,23 @@ class SynchroniserSpec extends Specification {
         // Old one still installed.
         projConf.withInstalledDependency(superJSON)
 
-        def deps = Synchroniser.resolveDeps(project, projConf.config, projConf.projectState)
+        def deps = resolve()
 
         then:
         deps.changed.containsKey 'acme:superjson'
     }
 
-    def "first execution"() {
+    def "installs new packages"() {
         when:
-        def builder = IvyBuilder.Create()
-                .withPackage("acme:superjson:1.0.0")
+        projConf.withDependency(superJSON)
+        projConf.create()
+        Synchroniser.Synchronise(project)
 
         then:
-        def file = new File(builder.dir, "acme/superjson/1.0.0/ivy-1.0.0.xml")
-        println file
+        project.fileTree('nxt/import').files.size() == 1
+    }
+
+    Map<String, Map<String, ResolvedDependency>> resolve() {
+        Synchroniser.resolveDeps(project, projConf.config, projConf.projectState)
     }
 }

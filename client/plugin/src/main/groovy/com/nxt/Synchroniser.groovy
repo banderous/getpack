@@ -2,6 +2,7 @@ package com.nxt
 
 import com.google.common.collect.Maps
 import com.google.common.collect.Sets
+import com.google.common.io.Files
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedConfiguration
 import org.gradle.api.artifacts.ResolvedDependency
@@ -15,6 +16,18 @@ class Synchroniser {
 
     public Synchroniser(Project project) {
         this.project = project
+    }
+
+    static void Synchronise(Project project) {
+        def changes = resolveDeps(project, Config.load(project), Config.loadShadow(project))
+        // Copy the new dependencies into place.
+        changes.added.each { id, ResolvedDependency dep ->
+            dep.allModuleArtifacts.each { art ->
+                if (art.file.path.endsWith(".unitypackage")) {
+                    Files.copy(art.file, project.file('nxt/import'))
+                }
+            }
+        }
     }
 
     static Map<String, Map<String, ResolvedDependency>> resolveDeps(Project project,

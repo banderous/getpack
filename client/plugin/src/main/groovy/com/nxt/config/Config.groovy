@@ -16,6 +16,7 @@ class PackageMap extends HashMap<String, Package> {
 class Config {
 
     private final static String CONFIG_PATH = 'nxt/nxt.json'
+    private final static String SHADOW_CONFIG_PATH = 'nxt/nxt.json.state'
     PackageMap packages = new PackageMap()
     Set<String> repositories = []
     Set<String> dependencies = []
@@ -51,6 +52,10 @@ class Config {
 
     static Config load(Project project) {
         load(project.file(CONFIG_PATH))
+    }
+
+    static Config loadShadow(Project project) {
+        load(project.file(SHADOW_CONFIG_PATH))
     }
 
     static Config load(File f) {

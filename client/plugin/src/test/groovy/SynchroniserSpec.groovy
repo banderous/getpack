@@ -68,17 +68,18 @@ class SynchroniserSpec extends Specification {
     def "removes unchanged files on removal of packages"() {
         when:
         def file = builder.withFile(builder.filepathForPackage(superJSON))
-        def manifest = ManifestGenerator.GenerateManifest(project)
+        def manifest = ExportPackage.GenerateManifest(project)
         Synchroniser.RemoveDependency(project, manifest)
 
         then:
         !file.exists()
     }
 
+    @PendingFeature
     def "does not remove changed files on removal of packages"() {
         when:
         def file = builder.withFile(builder.filepathForPackage(superJSON))
-        def manifest = ManifestGenerator.GenerateManifest(project)
+        def manifest = ExportPackage.GenerateManifest(project)
         Synchroniser.RemoveDependency(project, manifest)
 
         then:

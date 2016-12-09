@@ -4,12 +4,14 @@ import groovy.json.JsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.GradleException
+import org.gradle.api.file.FileTree
 import org.gradle.api.publish.ivy.IvyPublication
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
 
 import java.nio.file.Paths
+import java.security.MessageDigest
 
 /**
  * Created by alex on 02/12/2016.
@@ -103,6 +105,20 @@ class ExportPackage extends DefaultTask {
         exportFile << builder.toString()
     }
 
+    static FileTree gatherForExport(Project project, Package pack) {
+        def tree = project.fileTree('Assets') {
+            exclude 'Plugins/nxt'
+            exclude '**/*.meta'
+        }
+        if (pack.roots) {
+            pack.roots.each { r ->
+                println 'adding ' + r
+                tree.include r
+            }
+        }
+        tree
+    }
+
     def cleanExistingPackage() {
         if (unityPackage.exists()) {
             unityPackage.delete()
@@ -113,9 +129,28 @@ class ExportPackage extends DefaultTask {
         project.file("nxt/${type}/${pack.group}.${pack.name}.${type.extension}")
     }
 
+    public static PackageManifest GenerateManifest(Project project, FileTree tree) {
+        // Relativize the paths to the project root,
+        // so they start 'Assets/...".
+        def baseURL = Paths.get(project.projectDir.path)
+        def files = tree.collectEntries {
+            [(baseURL.relativize(it.toPath()).toFile().path): [md5: generateMD5(it)]]
+        }
+        new PackageManifest(files: files)
+    }
+
+    static String generateMD5(File f) {
+        def digest = MessageDigest.getInstance("MD5")
+        f.eachByte(4096) { buffer, length ->
+            digest.update(buffer, 0, length)
+        }
+        return digest.digest().encodeHex() as String
+    }
+
     @TaskAction
     def action() {
-        manifest << ManifestGenerator.GenerateManifest(project)
+        def tree = gatherForExport(project, pack)
+        manifest << GenerateManifest(project, tree)
 
         cleanExistingPackage()
         exportPackageJob(project, pack)

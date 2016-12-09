@@ -1,6 +1,7 @@
 package com.nxt
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -10,6 +11,10 @@ class InstallPuppet extends  DefaultTask {
     public static final String PUPPET_PATH = 'Assets/Plugins/nxt/Editor/unityPuppet.dll'
     @TaskAction
     def install() {
+        Install(project)
+    }
+
+    static void Install(Project project) {
         def f = project.file(PUPPET_PATH)
         f.getParentFile().mkdirs()
         f.withOutputStream { out ->

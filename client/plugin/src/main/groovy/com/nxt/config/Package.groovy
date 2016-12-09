@@ -5,7 +5,7 @@ package com.nxt
  */
 class Package {
     String group, name, version
-    List<String> roots
+    List<String> roots = []
 
     // Required for serialization.
     Package() {

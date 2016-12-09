@@ -2,6 +2,8 @@ package com.nxt
 
 import com.google.common.io.Files
 import com.nxt.ProjectType
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
 
 /**
@@ -47,17 +49,23 @@ class UBuilder {
 
         f = new File(projectDir, "nxt/nxt.json.state")
         Config.save(projectState, f)
+        this
     }
 
-    UBuilder build() {
+    Project asProject() {
         create()
-        GradleRunner.create()
+        ProjectBuilder.builder().withProjectDir(projectDir).build()
+    }
+
+    GradleRunner build() {
+        create()
+        def runner = GradleRunner.create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .forwardOutput()
             .withArguments(args)
-            .build()
-        this
+        runner.build()
+        runner
     }
 
     File withFile(String path) {
@@ -74,7 +82,9 @@ class UBuilder {
 
     UBuilder withPackage(String id) {
         withFile(filepathForPackage(id))
-        config.addPackage(id)
+        // Assume there is a top level root matching the organisation.
+        def group = id.split(":")[0]
+        config.addPackage(id).roots.add("${group.capitalize()}/**")
         this
     }
 

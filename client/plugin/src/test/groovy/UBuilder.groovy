@@ -60,11 +60,11 @@ class UBuilder {
         this
     }
 
-    UBuilder withFile(String path) {
+    File withFile(String path) {
         File tempFile = new File(projectDir, path)
         tempFile.getParentFile().mkdirs()
         tempFile << path
-        this
+        tempFile
     }
 
     UBuilder withArg(String arg) {

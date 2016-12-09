@@ -20,14 +20,28 @@ class Synchroniser {
 
     static void Synchronise(Project project) {
         def changes = resolveDeps(project, Config.load(project), Config.loadShadow(project))
-        // Copy the new dependencies into place.
-        changes.added.each { id, ResolvedDependency dep ->
+
+        CopyNewPackages(project, changes.added)
+        CleanOldFiles(project, changes.removed)
+    }
+
+    static void CopyNewPackages(Project project, Map<String, ResolvedDependency> added) {
+        added.each { id, ResolvedDependency dep ->
             dep.allModuleArtifacts.each { art ->
                 if (art.file.path.endsWith(".unitypackage")) {
                     Files.copy(art.file, project.file('nxt/import'))
                 }
             }
         }
+    }
+
+    static void CleanOldFiles(Project project, Map<String, ResolvedDependency> added) {
+
+    }
+
+    static void RemoveDependency(Project project, PackageManifest manifest) {
+
+
     }
 
     static Map<String, Map<String, ResolvedDependency>> resolveDeps(Project project,

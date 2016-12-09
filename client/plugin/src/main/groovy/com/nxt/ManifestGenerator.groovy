@@ -10,8 +10,7 @@ import java.security.MessageDigest
  * Created by alex on 30/11/2016.
  */
 class ManifestGenerator {
-    public static String GenerateManifest(Project project) {
-        def builder = new JsonBuilder()
+    public static PackageManifest GenerateManifest(Project project) {
         def tree = project.fileTree('Assets') {
             exclude "**/*.meta"
         }
@@ -19,11 +18,10 @@ class ManifestGenerator {
         // Relativize the paths to the project root,
         // so they start 'Assets/...".
         def baseURL = Paths.get(project.file('.').absolutePath)
-        builder files : tree.collectEntries {
-            [("${baseURL.relativize(it.toPath()).toFile().path}"): [md5: generateMD5(it)]]
+        def files = tree.collectEntries {
+            [(baseURL.relativize(it.toPath()).toFile().path): [md5: generateMD5(it)]]
         }
-
-        builder.toString()
+        new PackageManifest(files: files)
     }
 
     static String generateMD5(File f) {

@@ -1,8 +1,8 @@
 package com.nxt
 import com.google.common.io.Files
-import com.nxt.UBuilder
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.PendingFeature
 import spock.lang.Specification
 
 /**
@@ -13,17 +13,17 @@ class SynchroniserSpec extends Specification {
     def superJSON = "acme:superjson:1.0.0"
 
     def project = ProjectBuilder.builder().withProjectDir(Files.createTempDir()).build()
-    def projConf = UBuilder.Builder(project.projectDir)
+    def builder = UBuilder.Builder(project.projectDir)
 
     def ivyRepo = IvyBuilder.Create().withPackage(superJSON)
 
     def setup (){
-        projConf.withRepository(ivyRepo.dir.path)
+        builder.withRepository(ivyRepo.dir.path)
     }
 
     def "detects new package"() {
         when:
-        projConf.withDependency(superJSON)
+        builder.withDependency(superJSON)
         def deps = resolve()
 
         then:
@@ -32,7 +32,7 @@ class SynchroniserSpec extends Specification {
 
     def "detects removed package"() {
         when:
-        projConf.withInstalledDependency(superJSON)
+        builder.withInstalledDependency(superJSON)
         def deps = resolve()
 
         then:
@@ -44,9 +44,9 @@ class SynchroniserSpec extends Specification {
         def newVer = "acme:superjson:1.0.1"
         ivyRepo.withPackage(newVer)
         // A new version is requested.
-        projConf.withDependency(newVer)
+        builder.withDependency(newVer)
         // Old one still installed.
-        projConf.withInstalledDependency(superJSON)
+        builder.withInstalledDependency(superJSON)
 
         def deps = resolve()
 
@@ -56,15 +56,42 @@ class SynchroniserSpec extends Specification {
 
     def "installs new packages"() {
         when:
-        projConf.withDependency(superJSON)
-        projConf.create()
+        builder.withDependency(superJSON)
+        builder.create()
         Synchroniser.Synchronise(project)
 
         then:
         project.fileTree('nxt/import').files.size() == 1
     }
 
+    @PendingFeature
+    def "removes unchanged files on removal of packages"() {
+        when:
+        def file = builder.withFile(builder.filepathForPackage(superJSON))
+        def manifest = ManifestGenerator.GenerateManifest(project)
+        Synchroniser.RemoveDependency(project, manifest)
+
+        then:
+        !file.exists()
+    }
+
+    def "does not remove changed files on removal of packages"() {
+        when:
+        def file = builder.withFile(builder.filepathForPackage(superJSON))
+        def manifest = ManifestGenerator.GenerateManifest(project)
+        Synchroniser.RemoveDependency(project, manifest)
+
+        then:
+        file.exists()
+    }
+
+    def "does not remove files not in the manifest"() {
+    }
+
+    def "does not remove files required by another plugin"() {
+    }
+
     Map<String, Map<String, ResolvedDependency>> resolve() {
-        Synchroniser.resolveDeps(project, projConf.config, projConf.projectState)
+        Synchroniser.resolveDeps(project, builder.config, builder.projectState)
     }
 }

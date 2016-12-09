@@ -12,12 +12,21 @@ class UBuilder {
         new UBuilder()
     }
 
+    public static UBuilder Builder(File f) {
+        new UBuilder(f)
+    }
+
     File projectDir
     Config config = new Config()
+    Config projectState = new Config()
     List<String> args = ["-i"]
 
-    UBuilder() {
-        projectDir = Files.createTempDir()
+    UBuilder(){
+        this(Files.createTempDir())
+    }
+
+    UBuilder(File projectDir) {
+        this.projectDir = projectDir
         File tempFile = new File(projectDir, "Assets")
         tempFile.mkdir()
 
@@ -31,11 +40,17 @@ class UBuilder {
         """
     }
 
-    UBuilder build() {
+    UBuilder create() {
         def f = new File(projectDir, "nxt/nxt.json")
         f.getParentFile().mkdirs()
         Config.save(config, f)
 
+        f = new File(projectDir, "nxt/nxt.json.state")
+        Config.save(projectState, f)
+    }
+
+    UBuilder build() {
+        create()
         GradleRunner.create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
@@ -70,6 +85,11 @@ class UBuilder {
 
     UBuilder withDependency(String id) {
         config.addDependency(id)
+        this
+    }
+
+    UBuilder withInstalledDependency(String id) {
+        projectState.addDependency(id)
         this
     }
 

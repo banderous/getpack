@@ -18,7 +18,8 @@ class ExportPackage extends DefaultTask {
 
     enum PathType {
         task("task"),
-        export("unitypackage")
+        export("unitypackage"),
+        manifest(".manifest")
 
         String extension
         PathType(String extension) {
@@ -28,6 +29,9 @@ class ExportPackage extends DefaultTask {
 
     @OutputFile
     File unityPackage
+
+    @OutputFile
+    File manifest
 
     Package pack
 
@@ -58,6 +62,7 @@ class ExportPackage extends DefaultTask {
         def task = project.tasks.create(taskName, ExportPackage) {
             dependsOn 'launchUnity'
             unityPackage getPath(project, PathType.export, pkg)
+            manifest getPath(project, PathType.manifest, pkg)
             pack pkg
         }
 
@@ -69,6 +74,9 @@ class ExportPackage extends DefaultTask {
                         module pkg.name
                         revision pkg.version
                         artifact (task.unityPackage) {
+                            builtBy task
+                        }
+                        artifact (task.manifest) {
                             builtBy task
                         }
                     }
@@ -107,6 +115,8 @@ class ExportPackage extends DefaultTask {
 
     @TaskAction
     def action() {
+        manifest << ManifestGenerator.GenerateManifest(project)
+
         cleanExistingPackage()
         exportPackageJob(project, pack)
         long startTime = System.currentTimeMillis();

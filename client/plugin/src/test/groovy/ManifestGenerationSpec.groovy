@@ -16,7 +16,7 @@ class ManifestGenerationSpec extends Specification {
 
         then:
         manifest.files instanceof Map
-        // This is a hash of 'the filepath'.
+        // This is a hash of the filepath.
         manifest.files["Assets/Acme/A.txt"].md5 == "a0c832eb7a4d88e91161ea65e2fda78b"
     }
 }

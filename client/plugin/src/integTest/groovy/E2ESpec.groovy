@@ -34,8 +34,10 @@ class E2ESpec extends BaseE2ESpec {
 
         then:
         // Ivy repo is org/name/version.
-        def expectedPath = "nxt/repo/${group}/${name}/${version}/${name}-${version}.unitypackage"
-        new File(project.projectDir, expectedPath).exists()
+        def modulePath = new File(project.projectDir, "nxt/repo/${group}/${name}/${version}")
+
+        new File(modulePath, "${name}-${version}.unitypackage").exists()
+        new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
     @PendingFeature

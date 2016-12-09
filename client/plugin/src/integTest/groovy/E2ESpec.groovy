@@ -10,32 +10,18 @@ import static SpecHelper.ProjectWithPackage
 class E2ESpec extends BaseE2ESpec {
 
     def conditions = new PollingConditions(timeout: 5)
+    def packageId = "acme:superjson:1.0.1"
 
-    def "puppet installation"() {
-        when:
-        def project = ProjectWithTask(ProjectType.Empty, "installPuppet")
-
-        then:
-        new File(project.projectDir, "Assets/Plugins/nxt/Editor/unityPuppet.dll").exists()
-    }
-
-    def "launching Unity"() {
-        when:
-        def project = ProjectWithTask(ProjectType.Empty, "launchUnity")
-
-        then:
-        conditions.within(5) {
-            assert new File(project.projectDir, "Temp/UnityLockfile").exists()
-        }
-    }
-
-//    @Trouble
     def "export a package"() {
         when:
-        def runner = ProjectWithTask(ProjectType.DummyFile, "nxtExportAcmeSuperjson")
+        def project = UBuilder.Builder()
+                .withFile(UBuilder.DUMMY_FILE)
+                .withPackage(packageId)
+                .withArg("nxtExportAcmeSuperjson")
+                .build()
 
         then:
-        assert new File(runner.projectDir, "nxt/export/acme.superjson.unitypackage").exists()
+        assert new File(project.projectDir, "nxt/export/acme.superjson.unitypackage").exists()
     }
 
     def "publish a package"() {

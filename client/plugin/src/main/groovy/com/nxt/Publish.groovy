@@ -1,5 +1,6 @@
 package com.nxt
 
+import com.nxt.config.Config
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

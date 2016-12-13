@@ -1,15 +1,13 @@
 package com.nxt
 
-import org.gradle.api.Project
-import org.gradle.internal.impldep.aQute.bnd.annotation.Export
+import com.nxt.config.Config
 import org.gradle.testfixtures.ProjectBuilder;
 import spock.lang.Specification
-import org.gradle.api.GradleException
 
 class ExportSpec extends Specification {
 
 
-    def id = "acme:superjson:1.0.1"
+    def id = 'acme:superjson:1.0.1'
 
     def "creates export task"() {
         when:

@@ -1,12 +1,13 @@
 package com.nxt
 
+import com.nxt.config.Config
+import com.nxt.config.Package
 import groovy.json.JsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileTree
 import org.gradle.api.publish.ivy.IvyPublication
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
 import org.yaml.snakeyaml.Yaml

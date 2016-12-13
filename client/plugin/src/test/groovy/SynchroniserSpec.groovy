@@ -2,6 +2,7 @@ package com.nxt
 import com.google.common.io.Files
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
+import org.spockframework.compiler.model.Spec
 import spock.lang.PendingFeature
 import spock.lang.Specification
 
@@ -21,6 +22,7 @@ class SynchroniserSpec extends Specification {
         builder.withRepository(ivyRepo.dir.path)
     }
 
+    @Trouble
     def "detects new package"() {
         when:
         builder.withDependency(superJSON)
@@ -54,6 +56,7 @@ class SynchroniserSpec extends Specification {
         deps.changed.containsKey 'acme:superjson'
     }
 
+    @PendingFeature
     def "installs new packages"() {
         when:
         builder.withDependency(superJSON)
@@ -64,35 +67,104 @@ class SynchroniserSpec extends Specification {
         project.fileTree('nxt/import').files.size() == 1
     }
 
-    @PendingFeature
-    def "removes unchanged files on removal of packages"() {
-        when:
-        def file = builder.withFile(builder.filepathForPackage(superJSON))
-        def manifest = ExportPackage.GenerateManifest(project)
-        Synchroniser.RemoveDependency(project, manifest)
+    class Person {
+        String name
 
-        then:
-        !file.exists()
     }
 
-    @PendingFeature
-    def "does not remove changed files on removal of packages"() {
-        when:
-        def file = builder.withFile(builder.filepathForPackage(superJSON))
-        def manifest = ExportPackage.GenerateManifest(project)
-        Synchroniser.RemoveDependency(project, manifest)
+    def "installs a new package"() {
+        def v1 = [
+                (Assets/A.txt): "A"
+        ]
 
-        then:
-        file.exists()
+        builder.addSync(v1)
+        project.file(v1.files.first()).exists()
     }
 
-    def "does not remove files not in the manifest"() {
+    static class RemovePackageSpec extends SynchroniserSpec {
+        def "removes unchanged files"() {
+            def v1 = [
+                    (Assets/A.txt): "A"
+            ]
+
+            builder.addSync(v1)
+            builder.removeSync(v1)
+            !project.file(v1.files.first()).exists()
+        }
+
+        def "does not remove changed files"() {
+            def v1 = [
+                    (Assets/A.txt): "A"
+            ]
+
+            builder.addSync(v1)
+            v1.files.first() << "nonsense"
+            builder.removeSync(v1)
+            project.file(v1.files.first()).exists()
+        }
+
+        def "does not remove files not in the manifest"() {
+            def projectA = {
+                file('')
+            }
+        }
+
+        def "does not remove files required by another plugin"() {
+        }
     }
 
-    def "does not remove files required by another plugin"() {
+    static class UpdatePackageSpec extends SynchroniserSpec {
+        def "incoming file removed"() {
+
+        }
+
+        def "incoming file moved"() {
+            // Delete file.
+        }
+
+        def "incoming file modified"() {
+            // Do nothing.
+        }
+
+        def "incoming file moved & modified"() {
+            // Delete file.
+        }
     }
 
-    Map<String, Map<String, ResolvedDependency>> resolve() {
+
+    // Set of possible actions:
+
+    // Drop it from the unitypackage.
+    // Issue warning
+    // Replace incoming with local in unitypackage.
+    // Do nothing
+    // Delete local file.
+
+    // Simple case - local file is not changed,
+    // no need to worry about losing changes.
+
+    // The local file has been modified from its original;
+    // specify behaviour for all possible incoming file
+    // scenarios when the local file is modified.
+    static class UpdatePackageWithLocalModificationsSpec extends SynchroniserSpec {
+        def "incoming file removed"() {
+            // Issue warning
+        }
+
+        def "incoming file moved"() {
+            // Replace incoming with local.
+        }
+
+        def "incoming file modified"() {
+            // Issue warning.
+        }
+
+        def "incoming file moved & modified"() {
+            // Replace incoming with local, issue warning.
+        }
+    }
+
+    ResolveResult resolve() {
         Synchroniser.resolveDeps(project, builder.config, builder.projectState)
     }
 }

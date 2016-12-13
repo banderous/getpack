@@ -1,6 +1,7 @@
 package com.nxt
 
-import org.apache.tools.ant.taskdefs.Pack
+import com.nxt.config.Config
+import com.nxt.config.Package
 import spock.lang.Specification
 import org.gradle.api.GradleException
 

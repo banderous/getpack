@@ -1,13 +1,9 @@
 package com.nxt
 
-import groovy.json.JsonBuilder
+import com.nxt.config.Config
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.OutputFile
-
-import java.nio.file.Paths
 
 /**
  * Created by alex on 02/12/2016.

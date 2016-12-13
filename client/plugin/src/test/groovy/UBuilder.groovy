@@ -4,7 +4,8 @@ import com.google.common.base.Charsets
 import com.google.common.collect.Lists
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
-import com.nxt.ProjectType
+import com.nxt.config.Config
+import com.nxt.config.Package
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
@@ -99,10 +100,10 @@ class UBuilder {
     UBuilder withPackage(String id) {
         withFile(filepathForPackage(id))
         // Assume there is a top level root matching the organisation.
-        def group = id.split(":")[0]
+        String group = id.split(":")[0]
         def pack = config.addPackage(id)
         packages.add(pack)
-        pack.roots.add("${group.capitalize()}/**")
+        pack.roots.add("${group.capitalize()}/**".toString())
         this
     }
 

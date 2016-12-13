@@ -9,6 +9,7 @@ import org.gradle.api.publish.ivy.IvyPublication
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
+import org.yaml.snakeyaml.Yaml
 
 import java.nio.file.Paths
 import java.security.MessageDigest
@@ -129,17 +130,35 @@ class ExportPackage extends DefaultTask {
         project.file("nxt/${type}/${pack.group}.${pack.name}.${type.extension}")
     }
 
+    public static PackageManifest GenerateManifest(Project project, Package pack) {
+        def tree = gatherForExport(project, pack)
+        GenerateManifest(project, tree)
+    }
+
     public static PackageManifest GenerateManifest(Project project, FileTree tree) {
         // Relativize the paths to the project root,
         // so they start 'Assets/...".
         def baseURL = Paths.get(project.projectDir.path)
         def files = tree.collectEntries {
-            [(baseURL.relativize(it.toPath()).toFile().path): [md5: generateMD5(it)]]
+            def guid = GetGUIDForAsset(it)
+            [(guid): [
+                    md5: generateMD5(it),
+                    path: (baseURL.relativize(it.toPath()).toFile().path)
+            ]]
         }
         new PackageManifest(files: files)
     }
 
-    static String generateMD5(File f) {
+    public static String GetGUIDForAsset(File asset) {
+        GetGUID(new File(asset.path + ".meta"))
+    }
+
+    public static String GetGUID(File meta) {
+        def yaml = new Yaml()
+        yaml.load(meta.text).guid
+    }
+
+    public static String generateMD5(File f) {
         def digest = MessageDigest.getInstance("MD5")
         f.eachByte(4096) { buffer, length ->
             digest.update(buffer, 0, length)
@@ -149,8 +168,7 @@ class ExportPackage extends DefaultTask {
 
     @TaskAction
     def action() {
-        def tree = gatherForExport(project, pack)
-        manifest << GenerateManifest(project, tree)
+        manifest << GenerateManifest(project, pack)
 
         cleanExistingPackage()
         exportPackageJob(project, pack)

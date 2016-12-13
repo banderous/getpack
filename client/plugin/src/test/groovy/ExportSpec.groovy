@@ -1,6 +1,7 @@
 package com.nxt
 
 import org.gradle.api.Project
+import org.gradle.internal.impldep.aQute.bnd.annotation.Export
 import org.gradle.testfixtures.ProjectBuilder;
 import spock.lang.Specification
 import org.gradle.api.GradleException
@@ -23,7 +24,10 @@ class ExportSpec extends Specification {
 
     def "gathers files in package roots"() {
         when:
-        def builder = UBuilder.Builder().withPackage(id).create()
+        def builder = UBuilder.Builder()
+        builder.withPackage(id)
+        builder.create()
+
 
         def proj = builder.asProject()
         InstallPuppet.Install(proj)
@@ -48,14 +52,24 @@ class ExportSpec extends Specification {
 
         when:
         def builder = UBuilder.Builder()
-        builder.withFile("Assets/Acme/A.txt")
-        def project = builder.asProject()
-        def tree = project.fileTree("Assets")
-        def manifest = ExportPackage.GenerateManifest(project, tree)
+        def project = builder
+                      .withPackage(id)
+                      .asProject()
+
+        def manifest = ExportPackage.GenerateManifest(project, builder.packages.first())
 
         then:
         manifest.files instanceof Map
-        // This is a hash of the filepath.
-        manifest.files['Assets/Acme/A.txt'].md5 == "a0c832eb7a4d88e91161ea65e2fda78b"
+        assert manifest.files.any { guid, info -> (info.path == 'Assets/Acme/Superjson/A.txt'
+            && info.md5 == "944a6d991b9079caee0446d21a2e4770")}
+    }
+
+    def "meta parsing"() {
+        when:
+        def path = new File('src/test/resources/meta/prefab.meta')
+        def meta = ExportPackage.GetGUID(path)
+
+        then:
+        meta == "4f04e8e06b86e4610af0205cbb62425c"
     }
 }

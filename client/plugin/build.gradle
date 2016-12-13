@@ -30,6 +30,8 @@ dependencies {
     compile "org.codehaus.groovy:groovy-all:2.4.7"
     compile "com.google.code.gson:gson:2.8.0"
     compile 'com.google.guava:guava:20.0'
+    compile 'org.yaml:snakeyaml:1.17'
+
     testCompile gradleTestKit()
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {
         exclude module: 'groovy-all'

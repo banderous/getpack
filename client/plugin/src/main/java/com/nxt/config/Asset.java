@@ -4,13 +4,20 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class Asset {
-    String md5, path;
+    private String md5, path;
     private Asset() {}
     Asset(Path path, String md5) {
         this.path = path.toString();
         this.md5 = md5;
     }
 
+    public String getMd5() {
+        return md5;
+    }
+
+    public String getPath() {
+        return path;
+    }
 
     @Override
     public boolean equals(Object obj) {

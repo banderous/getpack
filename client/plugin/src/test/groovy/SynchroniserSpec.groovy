@@ -1,10 +1,12 @@
 package com.nxt
 
 import com.google.common.base.CharMatcher
+import com.google.common.base.Predicates
 import com.google.common.base.Splitter
 import com.google.common.collect.Sets
 import com.google.common.io.Files
 import com.nxt.config.Asset
+import com.nxt.config.AssetDifference
 import com.nxt.config.AssetMap
 import com.nxt.config.PackageManifest
 import org.gradle.api.artifacts.ResolvedDependency
@@ -79,11 +81,12 @@ class SynchroniserSpec extends Specification {
         }
     }
 
-    def assetMap(assets) {
+    AssetMap assetMap(assets) {
         def result = new PackageManifest()
         assets.each { a ->
             def path = a.size > 1 ? a[1] : a[0] + '.txt'
             def hash = a.size > 2 ? a[2] : a[0]
+
             result.Add(a[0], Paths.get(path), hash)
         }
         result.files
@@ -103,8 +106,13 @@ class SynchroniserSpec extends Specification {
                 ["newHash", 'newHash.txt', 'differentHash'],
                 ["unchanged"]])
 
-        def diff = Synchroniser.difference(old, latest)
-
+        def filter = new IChangedFileFilter() {
+            @Override
+            boolean isUnchanged(String path, String expectedHash) {
+                return true
+            }
+        }
+        def diff = Synchroniser.difference(old, latest, filter)
 
         then:
         with (diff) {
@@ -114,6 +122,22 @@ class SynchroniserSpec extends Specification {
             changed.containsKey 'newHash'
             !(changed.containsKey("unchanged"))
         }
+    }
+
+    def "excludes for removal files with local changes"() {
+        when:
+        def map = assetMap([
+                ["1", "Assets/file.txt" ]])
+
+        IChangedFileFilter filter = new IChangedFileFilter() {
+            @Override
+            boolean isUnchanged(String path, String expectedHash) {
+                return false;
+            }
+        }
+        def diff = Synchroniser.difference(map, new AssetMap(), filter)
+        then:
+        !diff.remove.containsKey('1')
     }
 
 //    def "installs new packages"() {

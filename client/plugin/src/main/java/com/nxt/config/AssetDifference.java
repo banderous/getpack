@@ -13,7 +13,6 @@ public class AssetDifference {
     private Map<String, Asset> add;
     private Map<String, MapDifference.ValueDifference<Asset>> changed;
 
-
     public AssetDifference(Map<String, Asset> remove, Map<String, Asset> add, Map<String, MapDifference.ValueDifference<Asset>> changed) {
         this.remove = remove;
         this.add = add;

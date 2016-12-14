@@ -6,10 +6,16 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 class Asset {
-    String md5;
+    String md5, path;
+    private Asset() {}
+    Asset(Path path, String md5) {
+        this.path = path.toString();
+        this.md5 = md5;
+    }
 }
 
 class AssetMap extends HashMap<String, Asset> {}
@@ -20,7 +26,11 @@ class AssetMap extends HashMap<String, Asset> {}
 public class PackageManifest {
 
     // Pathname
-    AssetMap files = new AssetMap();
+    private AssetMap files = new AssetMap();
+
+    public void Add(String guid, Path path, String md5) {
+        files.put(guid, new Asset(path, md5));
+    }
 
     public static PackageManifest load(File from) {
         try {

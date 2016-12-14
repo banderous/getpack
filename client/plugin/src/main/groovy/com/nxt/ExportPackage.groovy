@@ -141,14 +141,14 @@ class ExportPackage extends DefaultTask {
         // Relativize the paths to the project root,
         // so they start 'Assets/...".
         def baseURL = Paths.get(project.projectDir.path)
-        def files = tree.collectEntries {
-            def guid = GetGUIDForAsset(it)
-            [(guid): [
-                    md5: generateMD5(it),
-                    path: (baseURL.relativize(it.toPath()).toFile().path)
-            ]]
+        def manifest = new PackageManifest()
+        tree.each { file ->
+            def guid = GetGUIDForAsset(file)
+            def md5 = generateMD5(file)
+            def path = baseURL.relativize(file.toPath())
+            manifest.Add(guid, path, md5);
         }
-        new PackageManifest(files: files)
+        manifest
     }
 
     public static String GetGUIDForAsset(File asset) {
@@ -170,7 +170,7 @@ class ExportPackage extends DefaultTask {
 
     @TaskAction
     def action() {
-        manifest << GenerateManifest(project, pack)
+        PackageManifest.save(GenerateManifest(project, pack), manifest)
 
         cleanExistingPackage()
         exportPackageJob(project, pack)

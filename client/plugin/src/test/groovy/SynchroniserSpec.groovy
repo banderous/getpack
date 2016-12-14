@@ -1,12 +1,19 @@
 package com.nxt
 
+import com.google.common.base.CharMatcher
+import com.google.common.base.Splitter
 import com.google.common.collect.Sets
 import com.google.common.io.Files
+import com.nxt.config.Asset
+import com.nxt.config.AssetMap
+import com.nxt.config.PackageManifest
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
 import org.spockframework.compiler.model.Spec
 import spock.lang.PendingFeature
 import spock.lang.Specification
+
+import java.nio.file.Paths
 
 /**
  * Created by alex on 09/12/2016.
@@ -71,6 +78,44 @@ class SynchroniserSpec extends Specification {
             files.size() == 0
         }
     }
+
+    def assetMap(assets) {
+        def result = new PackageManifest()
+        assets.each { a ->
+            def path = a.size > 1 ? a[1] : a[0] + '.txt'
+            def hash = a.size > 2 ? a[2] : a[0]
+            result.Add(a[0], Paths.get(path), hash)
+        }
+        result.files
+    }
+
+    def "diffs asset maps"() {
+        when:
+        def old = assetMap([
+                ["disappears"],
+                ["newPath", 'old.txt'],
+                ["newHash", 'newHash.txt'],
+                ["unchanged"]])
+
+        def latest = assetMap([
+                ['added'],
+                ["newPath", 'new.txt'],
+                ["newHash", 'newHash.txt', 'differentHash'],
+                ["unchanged"]])
+
+        def diff = Synchroniser.difference(old, latest)
+
+
+        then:
+        with (diff) {
+            remove.containsKey 'disappears'
+            add.containsKey 'added'
+            changed.containsKey 'newPath'
+            changed.containsKey 'newHash'
+            !(changed.containsKey("unchanged"))
+        }
+    }
+
 //    def "installs new packages"() {
 //        when:
 //        builder.withDependency(superJSON)

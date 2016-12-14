@@ -1,6 +1,11 @@
 package com.nxt;
 
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.nxt.config.Asset;
+import com.nxt.config.AssetDifference;
+import com.nxt.config.AssetMap;
 import com.nxt.config.PackageManifest;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -16,6 +21,14 @@ import java.util.Set;
  * Created by alex on 09/12/2016.
  */
 class Synchroniser {
+
+    static AssetDifference difference(AssetMap old, AssetMap latest) {
+        MapDifference<String, Asset> diff =  Maps.difference(old, latest);
+
+        return new AssetDifference(diff.entriesOnlyOnLeft(),
+                diff.entriesOnlyOnRight(),
+                diff.entriesDiffering());
+    }
 
     static Set<PackageManifest> gatherManifests(Set<ResolvedDependency> deps) {
         Set<PackageManifest> manifests = Sets.newHashSet();

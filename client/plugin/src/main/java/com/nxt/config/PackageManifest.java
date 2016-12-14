@@ -9,17 +9,6 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-class Asset {
-    String md5, path;
-    private Asset() {}
-    Asset(Path path, String md5) {
-        this.path = path.toString();
-        this.md5 = md5;
-    }
-}
-
-class AssetMap extends HashMap<String, Asset> {}
-
 /**
  * Created by alex on 09/12/2016.
  */

@@ -1,6 +1,7 @@
 package com.nxt
 
 import com.google.common.io.Files
+import com.nxt.config.PackageManifest
 import groovy.xml.MarkupBuilder
 
 /**
@@ -25,11 +26,13 @@ class IvyBuilder {
         ivyFolder.mkdirs()
         def ivy = new File(ivyFolder, "ivy-${parsed.version}.xml")
         def xml = new MarkupBuilder(new FileWriter(ivy))
+        def manifestName = [parsed.group, parsed.name].join(".")
         xml.('ivy-module')(version: "2.0") {
             info(organisation: parsed.group, module: parsed.name, revision: parsed.version, status: 'integration', publication:"20161209071257")
             configurations()
             publications() {
                 artifact(name: parsed.name, type: 'unitypackage', ext: 'unitypackage')
+                artifact(name: manifestName, type: 'manifest', ext: 'manifest')
             }
             dependencies() {
                 deps.each { d ->
@@ -39,6 +42,12 @@ class IvyBuilder {
             }
         }
 
+
+        // Write the manifest.
+        File manifest = new File(ivyFolder, manifestName + "-${parsed.version}.manifest")
+        PackageManifest.save(new PackageManifest(), manifest)
+
+        // Write the unitypackage.
         File dummyPackage = new File("src/test/resources/unitypackage/dummy.unitypackage")
         File unityPackage = new File(ivyFolder, "${parsed.name}-${parsed.version}.unitypackage")
         Files.copy(dummyPackage, unityPackage)

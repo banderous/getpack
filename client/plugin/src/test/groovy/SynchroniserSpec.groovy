@@ -58,6 +58,19 @@ class SynchroniserSpec extends Specification {
         deps.any { it.moduleName == "usesfoo" }
     }
 
+    def "resolves package manifests"() {
+        when:
+        def manifests = Synchroniser.gatherManifests(Synchroniser.gatherDependencies(
+                project,
+                repositories,
+                Sets.newHashSet(superJSON)))
+
+        then:
+        manifests.size() == 1
+        with (manifests.first()) {
+            files.size() == 0
+        }
+    }
 //    def "installs new packages"() {
 //        when:
 //        builder.withDependency(superJSON)

@@ -2,6 +2,7 @@ package com.nxt
 
 import com.nxt.config.Config
 import com.nxt.config.Package
+import com.nxt.config.PackageManifest
 import groovy.json.JsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project

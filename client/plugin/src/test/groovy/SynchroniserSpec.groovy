@@ -1,5 +1,7 @@
 package com.nxt
 
+import com.google.common.collect.ImmutableMap
+import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
 import com.google.common.io.Files
 import com.nxt.config.Asset
@@ -130,38 +132,20 @@ class SynchroniserSpec extends Specification {
         when:
         def diff = Synchroniser.difference(old, latest, noChangesFilter)
         then:
-        with (diff.remove) {
 
-            // Old file scheduled for removal.
-            containsKey 'disappears'
-            // A file whose path has changed should be removed.
-            with(get('newPath')) {
-                path == "old.txt"
-            }
-
-            with(get('allChange')) {
-                path == "allChange.txt"
-            }
-
-            // We don't need to remove old version of new hashed file.
-            !(containsKey('newHash'))
-            !(containsKey("unchanged"))
-        }
+        diff.remove == ImmutableSet.of(
+            'disappears.txt',
+            'allChange.txt'
+        )
+        diff.moved == ImmutableMap.of("old.txt", "new.txt")
 
         with (diff.add) {
             // New file should be added.
             containsKey 'added'
 
-            // The new pathed file should be added.
-            with (get('newPath')) {
-                path == "new.txt"
-                preferLocal == false
-            }
-
             // The file with different contents should be added.
             with (get('newHash')) {
                 md5 == "differentHash"
-                preferLocal == false
             }
 
             with(get('allChange')) {
@@ -178,34 +162,16 @@ class SynchroniserSpec extends Specification {
         when:
         def diff = Synchroniser.difference(old, latest, allChangedFilter)
         then:
-        old.keySet().each { k ->
-            assert !diff.remove.containsKey(k)
+        old.values().each { v ->
+            assert !diff.remove.contains(v.getPath())
         }
 
-        with (diff.add) {
-            // New file should be added.
-            containsKey 'added'
-
-            // The new pathed file should be added.
-            with (get('newPath')) {
-                path == "new.txt"
-                preferLocal == true
-            }
-
-            // The file with different contents should be added.
-            with (get('newHash')) {
-                md5 == "differentHash"
-                preferLocal == true
-            }
-
-            with(get('allChange')) {
-                path == "changedPath.txt"
-                preferLocal == true
-            }
-
-            // Do nothing to unchanged file.
-            !(containsKey("unchanged"))
+        with (diff.moved) {
+            get('old.txt') == 'new.txt'
+            get('allChange.txt') == 'changedPath.txt'
         }
+
+        diff.add.keySet() == ImmutableSet.of('added')
     }
 
 //    def "difference with local changes"() {

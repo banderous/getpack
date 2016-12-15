@@ -57,7 +57,6 @@ class IvyBuilder {
         // Write the unitypackage.
         File unityPackage = new File(ivyFolder, "${man.pack.name}-${man.pack.version}.unitypackage")
         CreateTarGZ.Create(tarDir, unityPackage);
-        println "WROTE TO " + unityPackage.path
     }
 
     def writeManifest(File ivyFolder, String group, String name, String version) {

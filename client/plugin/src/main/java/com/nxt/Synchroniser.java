@@ -1,7 +1,5 @@
 package com.nxt;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -58,17 +56,19 @@ class Synchroniser {
 
     static AssetDifference difference(AssetMap old, AssetMap latest, IChangedFileFilter filter) {
         MapDifference<String, Asset> diff =  Maps.difference(old, latest);
-        AssetMap remove = new AssetMap();
+        Set<String> remove = Sets.newHashSet();
 
+        Map<String, String> moved = Maps.newHashMap();
+
+        // Don't remove any files with local changes.
         for (Map.Entry<String, Asset> entry : diff.entriesOnlyOnLeft().entrySet()) {
             if (!filter.hasLocalModifications(entry.getValue())) {
-                remove.put(entry.getKey(), entry.getValue());
+                remove.add(entry.getValue().getPath());
             }
         }
 
         AssetMap add = new AssetMap();
         for (Map.Entry<String, Asset> entry : diff.entriesOnlyOnRight().entrySet()) {
-            entry.getValue().preferLocal = filter.hasLocalModifications(entry.getValue());
             add.put(entry.getKey(), entry.getValue());
         }
 
@@ -76,23 +76,27 @@ class Synchroniser {
             Asset original = entry.getValue().leftValue();
             Asset updated = entry.getValue().rightValue();
             boolean pathChanged = !original.getPath().equals(updated.getPath());
-            boolean hashChanged = !original.getMd5().equals(updated.getMd5());
-            boolean localChanges = filter.hasLocalModifications(original);
-            updated.preferLocal = localChanges;
+            boolean pkgModified = !original.getMd5().equals(updated.getMd5());
 
-            if (pathChanged) {
-                if (!localChanges) {
-                    remove.put(entry.getKey(), original);
+            // TODO - make this modal theirs/ours.
+            if (pathChanged && pkgModified) {
+                // Out with old in with new.
+                if (!filter.hasLocalModifications(original)) {
+                    remove.add(original.getPath());
+                    add.put(entry.getKey(), updated);
+                } else {
+                    moved.put(original.getPath(), updated.getPath());
                 }
-                add.put(entry.getKey(), updated);
-            }
-
-            if (hashChanged) {
-                add.put(entry.getKey(), updated);
+            } else if (pathChanged && !pkgModified) {
+                moved.put(original.getPath(), updated.getPath());
+            } else if (!pathChanged && pkgModified) {
+                if (!filter.hasLocalModifications(original)) {
+                    add.put(entry.getKey(), updated);
+                }
             }
         }
 
-        return new AssetDifference(remove, add);
+        return new AssetDifference(remove, add, moved);
     }
 
     static AssetMap buildAssetMap(Set<PackageManifest> manifests) {

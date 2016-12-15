@@ -62,7 +62,9 @@ class UBuilder {
 
     Project asProject() {
         create()
-        ProjectBuilder.builder().withProjectDir(projectDir).build()
+        Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+        project.pluginManager.apply PublishPlugin.class
+        project
     }
 
     GradleRunner build() {

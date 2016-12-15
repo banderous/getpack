@@ -96,50 +96,112 @@ class SynchroniserSpec extends Specification {
         result.files
     }
 
-    def "diffs asset maps"() {
-        when:
-        def old = assetMap([
-                ["disappears"],
-                ["newPath", 'old.txt'],
-                ["newHash", 'newHash.txt'],
-                ["unchanged"]])
-
-        def latest = assetMap([
-                ['added'],
-                ["newPath", 'new.txt'],
-                ["newHash", 'newHash.txt', 'differentHash'],
-                ["unchanged"]])
-
-        def filter = new IChangedFileFilter() {
-            @Override
-            boolean hasLocalModifications(String path, String expectedHash) {
-                return false
-            }
-        }
-        def diff = Synchroniser.difference(old, latest, filter)
-
-        then:
-        with (diff) {
-            remove.containsKey 'disappears'
-            add.containsKey 'added'
-            changed.containsKey 'newPath'
-            changed.containsKey 'newHash'
-            !(changed.containsKey("unchanged"))
+    def noChangesFilter = new IChangedFileFilter() {
+        @Override
+        boolean hasLocalModifications(String path, String expectedHash) {
+            return false
         }
     }
+
+    def allChangedFilter = new IChangedFileFilter() {
+        @Override
+        boolean hasLocalModifications(String path, String expectedHash) {
+            return true;
+        }
+    }
+
+    def old = assetMap([
+            ['disappears'],
+            ['newPath', 'old.txt'],
+            ['newHash', 'newHash.txt'],
+            ['allChange'],
+            ['unchanged']])
+
+    def latest = assetMap([
+            ['added'],
+            ['newPath', 'new.txt'],
+            ['newHash', 'newHash.txt', 'differentHash'],
+            ['allChange', 'changedPath.txt', 'changedHash'],
+            ['unchanged']])
+
+    @Trouble
+    def "difference with no local changes"() {
+        when:
+        def diff = Synchroniser.difference(old, latest, noChangesFilter)
+        then:
+        with (diff.remove) {
+
+            // Old file scheduled for removal.
+            containsKey 'disappears'
+            // A file whose path has changed should be removed.
+            with(get('newPath')) {
+                path == "old.txt"
+            }
+
+            with(get('allChange')) {
+                path == "allChange.txt"
+            }
+
+            // We don't need to remove old version of new hashed file.
+            !(containsKey('newHash'))
+            !(containsKey("unchanged"))
+        }
+
+        with (diff.add) {
+            // New file should be added.
+            containsKey 'added'
+
+            // The new pathed file should be added.
+            with (get('newPath')) {
+                path == "new.txt"
+                preferLocal == false
+            }
+
+            // The file with different contents should be added.
+            with (get('newHash')) {
+                md5 == "differentHash"
+                preferLocal == false
+            }
+
+            with(get('allChange')) {
+                path == "changedPath.txt"
+            }
+
+            // Do nothing to unchanged file.
+            !(containsKey("unchanged"))
+        }
+    }
+
+//    def "difference with local changes"() {
+//        when:
+//        def diff = Synchroniser.difference(old, latest, allChangedFilter)
+//
+//        then:
+//        with (diff) {
+//            // Old file must not be removed.
+//            !(remove.containsKey('disappears'))
+//            // New file should be added.
+//            add.containsKey 'added'
+//            // A file whose path has changed should be removed.
+//            remove.containsKey 'newPath'
+//            // The new pathed file should be added.
+//            add.containsKey 'newPath'
+//            // The file with different contents should be added.
+//            add.containsKey 'newHash'
+//            // We don't need to remove old version of new hashed file.
+//            !(remove.containsKey('newHash'))
+//            // Do nothing to unchanged file.
+//            !(add.containsKey("unchanged"))
+//            !(remove.containsKey("unchanged"))
+//        }
+//    }
 
 //    def "excludes for removal files with local changes"() {
 //        when:
 //        def map = assetMap([
 //                ["1", "Assets/file.txt" ]])
 //
-//        IChangedFileFilter filter = new IChangedFileFilter() {
-//            @Override
-//            boolean hasLocalModifications(String path, String expectedHash) {
-//                return true;
-//            }
-//        }
-//        def diff = Synchroniser.difference(map, new AssetMap(), filter)
+//        def diff = Synchroniser.difference(map, new AssetMap(), allChangedFilter)
 //        then:
 //        !diff.remove.containsKey('1')
 //    }

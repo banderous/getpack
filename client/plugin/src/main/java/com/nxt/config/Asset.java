@@ -6,6 +6,7 @@ import java.util.Objects;
 public class Asset {
     private String md5, path;
     private Asset() {}
+    public transient boolean preferLocal;
     Asset(Path path, String md5) {
         this.path = path.toString();
         this.md5 = md5;

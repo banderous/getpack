@@ -53,15 +53,36 @@ class Synchroniser {
         };
     }
 
-//    static ChangeSet gatherChangeset() {
-//
-//    }
-
     static AssetDifference difference(AssetMap old, AssetMap latest, IChangedFileFilter filter) {
         MapDifference<String, Asset> diff =  Maps.difference(old, latest);
-        return new AssetDifference(diff.entriesOnlyOnLeft(),
-                diff.entriesOnlyOnRight(),
-                diff.entriesDiffering());
+        AssetMap remove = new AssetMap();
+        for (Map.Entry<String, Asset> entry : diff.entriesOnlyOnLeft().entrySet()) {
+            remove.put(entry.getKey(), entry.getValue());
+        }
+
+        AssetMap add = new AssetMap();
+        for (Map.Entry<String, Asset> entry : diff.entriesOnlyOnRight().entrySet()) {
+            add.put(entry.getKey(), entry.getValue());
+        }
+
+        for (Map.Entry<String, MapDifference.ValueDifference<Asset>> entry : diff.entriesDiffering().entrySet()) {
+            Asset original = entry.getValue().leftValue();
+            Asset updated = entry.getValue().rightValue();
+            boolean pathChanged = !original.getPath().equals(updated.getPath());
+            boolean hashChanged = !original.getMd5().equals(updated.getMd5());
+
+            if (pathChanged) {
+                remove.put(entry.getKey(), original);
+                // TODO - what if hash changes?
+                add.put(entry.getKey(), updated);
+            }
+
+            if (hashChanged) {
+                add.put(entry.getKey(), updated);
+            }
+        }
+
+        return new AssetDifference(remove, add);
     }
 
     static Map<String, Asset> filterOutChangedAssets(IChangedFileFilter filter, Map<String, Asset> assets) {

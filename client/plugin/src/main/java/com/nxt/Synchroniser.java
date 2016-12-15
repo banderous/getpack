@@ -1,6 +1,7 @@
 package com.nxt;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 interface IChangedFileFilter {
-    boolean isUnchanged(String path, String expectedHash);
+    boolean hasLocalModifications(String path, String expectedHash);
 }
 
 /**
@@ -34,11 +35,16 @@ class Synchroniser {
     static IChangedFileFilter Filter(Project project) {
         return new IChangedFileFilter() {
             @Override
-            public boolean isUnchanged(String path, String expectedHash) {
+            public boolean hasLocalModifications(String path, String expectedHash) {
                 File f = project.file(path);
+                if (!f.exists()) {
+                    // If the file is missing we don't count it as modified,
+                    // since we won't be overwriting work.
+                    return false;
+                }
                 try {
                     String currentHash = Files.hash(f, Hashing.md5()).toString();
-                    return expectedHash.equals(currentHash);
+                    return !expectedHash.equals(currentHash);
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -47,13 +53,13 @@ class Synchroniser {
         };
     }
 
+//    static ChangeSet gatherChangeset() {
+//
+//    }
+
     static AssetDifference difference(AssetMap old, AssetMap latest, IChangedFileFilter filter) {
         MapDifference<String, Asset> diff =  Maps.difference(old, latest);
-
-        Map<String, Asset> removed = filterOutChangedAssets(filter, diff.entriesOnlyOnLeft());
-
-
-        return new AssetDifference(removed,
+        return new AssetDifference(diff.entriesOnlyOnLeft(),
                 diff.entriesOnlyOnRight(),
                 diff.entriesDiffering());
     }
@@ -62,15 +68,23 @@ class Synchroniser {
         return Maps.filterValues(assets, new Predicate<Asset>() {
             @Override
             public boolean apply(Asset input) {
-                return filter.isUnchanged(input.getPath(), input.getMd5());
+                return !filter.hasLocalModifications(input.getPath(), input.getMd5());
             }
         });
+    }
+
+    static AssetMap buildAssetMap(Set<PackageManifest> manifests) {
+        AssetMap result = new AssetMap();
+        for (PackageManifest p : manifests) {
+            result.putAll(p.getFiles());
+        }
+        return result;
     }
 
     static Set<PackageManifest> gatherManifests(Set<ResolvedDependency> deps) {
         Set<PackageManifest> manifests = Sets.newHashSet();
         for (ResolvedDependency dep : deps) {
-            for (ResolvedArtifact art : dep.getAllModuleArtifacts()) {
+            for (ResolvedArtifact art : dep.getModuleArtifacts()) {
                 if (art.getExtension().equals("manifest")) {
                     manifests.add(PackageManifest.load(art.getFile()));
                 }

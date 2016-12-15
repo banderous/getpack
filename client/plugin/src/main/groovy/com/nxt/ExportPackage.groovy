@@ -134,14 +134,15 @@ class ExportPackage extends DefaultTask {
 
     public static PackageManifest GenerateManifest(Project project, Package pack) {
         def tree = gatherForExport(project, pack)
-        GenerateManifest(project, tree)
+        GenerateManifest(project, tree, pack)
     }
 
-    public static PackageManifest GenerateManifest(Project project, FileTree tree) {
+    public static PackageManifest GenerateManifest(Project project, FileTree tree, Package pack) {
         // Relativize the paths to the project root,
         // so they start 'Assets/...".
         def baseURL = Paths.get(project.projectDir.path)
-        def manifest = new PackageManifest()
+
+        def manifest = new PackageManifest(pack)
         tree.each { file ->
             def guid = GetGUIDForAsset(file)
             def md5 = generateMD5(file)

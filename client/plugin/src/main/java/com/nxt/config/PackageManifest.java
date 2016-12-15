@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created by alex on 09/12/2016.
@@ -16,9 +17,31 @@ public class PackageManifest {
 
     // Pathname
     private AssetMap files = new AssetMap();
+    private Package pack;
+
+    private PackageManifest() {
+
+    }
+
+    public PackageManifest(Package pack) {
+        this.pack = pack;
+    }
 
     public void Add(String guid, Path path, String md5) {
         files.put(guid, new Asset(path, md5));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        final PackageManifest other = (PackageManifest) obj;
+        if (null == other) return false;
+
+        return Objects.equals(pack.key(), other.pack.key());
+    }
+
+    @Override
+    public int hashCode() {
+        return pack.key().hashCode();
     }
 
     public static PackageManifest load(File from) {
@@ -35,5 +58,9 @@ public class PackageManifest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public AssetMap getFiles() {
+        return files;
     }
 }

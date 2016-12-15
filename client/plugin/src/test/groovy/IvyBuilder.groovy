@@ -1,8 +1,11 @@
 package com.nxt
 
 import com.google.common.io.Files
+import com.nxt.config.Package
 import com.nxt.config.PackageManifest
 import groovy.xml.MarkupBuilder
+
+import java.nio.file.Paths
 
 /**
  * Created by alex on 09/12/2016.
@@ -45,7 +48,9 @@ class IvyBuilder {
 
         // Write the manifest.
         File manifest = new File(ivyFolder, manifestName + "-${parsed.version}.manifest")
-        PackageManifest.save(new PackageManifest(), manifest)
+        def m = new PackageManifest(new Package(id));
+        m.Add(parsed.name, Paths.get(parsed.name + ".txt"), parsed.name)
+        PackageManifest.save(m, manifest)
 
         // Write the unitypackage.
         File dummyPackage = new File("src/test/resources/unitypackage/dummy.unitypackage")

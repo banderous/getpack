@@ -1,18 +1,12 @@
 package com.nxt
 
-import com.google.common.base.CharMatcher
-import com.google.common.base.Predicates
-import com.google.common.base.Splitter
 import com.google.common.collect.Sets
 import com.google.common.io.Files
-import com.nxt.config.Asset
-import com.nxt.config.AssetDifference
 import com.nxt.config.AssetMap
+import com.nxt.config.Package
 import com.nxt.config.PackageManifest
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
-import org.spockframework.compiler.model.Spec
-import spock.lang.PendingFeature
 import spock.lang.Specification
 
 import java.nio.file.Paths
@@ -34,13 +28,19 @@ class SynchroniserSpec extends Specification {
         builder.withRepository(ivyRepo.dir.path)
     }
 
+    def "manifests settable"() {
+        when:
+        def manifest = new PackageManifest(new Package(superJSON))
+        def same = new PackageManifest(new Package(superJSON))
+        def set = Sets.newHashSet(manifest, same)
+
+        then:
+        set.size() == 1
+    }
 
     def "resolves a dependency"() {
         when:
-        def deps = Synchroniser.gatherDependencies(
-                project,
-                repositories,
-                Sets.newHashSet(superJSON))
+        def deps = resolve(superJSON)
         then:
         deps.size() == 1
         with (deps.first()) {
@@ -52,33 +52,37 @@ class SynchroniserSpec extends Specification {
 
     def "resolves transitive dependencies"() {
         when:
-        def firstLevel = "com.foo:usesjson:1.0.0"
-        ivyRepo.withPackage(firstLevel, superJSON)
-        def secondLevel = "com.foo:usesfoo:1.0.0"
-        ivyRepo.withPackage(secondLevel, firstLevel)
-        def deps = Synchroniser.gatherDependencies(
-                project,
-                repositories,
-                Sets.newHashSet(secondLevel))
+        def child = buildTransitivePackage(2)
+        def deps = resolve(child)
         then:
         deps.size() == 3
-        deps.any { it.moduleName == "superjson" }
-        deps.any { it.moduleName == "usesjson" }
-        deps.any { it.moduleName == "usesfoo" }
+        deps.any { it.moduleName == "level0" }
+        deps.any { it.moduleName == "level1" }
+        deps.any { it.moduleName == "level2" }
     }
 
+    @Trouble
     def "resolves package manifests"() {
         when:
-        def manifests = Synchroniser.gatherManifests(Synchroniser.gatherDependencies(
-                project,
-                repositories,
-                Sets.newHashSet(superJSON)))
+        def child = buildTransitivePackage(4)
+        def deps = resolve(child)
+        def manifests = Synchroniser.gatherManifests(deps)
+        then:
+        manifests.size() == 5
+        with (manifests.first()) {
+            files.size() == 1
+        }
+    }
+
+
+    def "builds asset map from all manifests"() {
+        when:
+        def child = buildTransitivePackage(3)
+        def manifests = Synchroniser.gatherManifests(resolve(child))
+        def assetMap = Synchroniser.buildAssetMap(manifests)
 
         then:
-        manifests.size() == 1
-        with (manifests.first()) {
-            files.size() == 0
-        }
+        assetMap.size() == 4
     }
 
     AssetMap assetMap(assets) {
@@ -108,8 +112,8 @@ class SynchroniserSpec extends Specification {
 
         def filter = new IChangedFileFilter() {
             @Override
-            boolean isUnchanged(String path, String expectedHash) {
-                return true
+            boolean hasLocalModifications(String path, String expectedHash) {
+                return false
             }
         }
         def diff = Synchroniser.difference(old, latest, filter)
@@ -124,21 +128,21 @@ class SynchroniserSpec extends Specification {
         }
     }
 
-    def "excludes for removal files with local changes"() {
-        when:
-        def map = assetMap([
-                ["1", "Assets/file.txt" ]])
-
-        IChangedFileFilter filter = new IChangedFileFilter() {
-            @Override
-            boolean isUnchanged(String path, String expectedHash) {
-                return false;
-            }
-        }
-        def diff = Synchroniser.difference(map, new AssetMap(), filter)
-        then:
-        !diff.remove.containsKey('1')
-    }
+//    def "excludes for removal files with local changes"() {
+//        when:
+//        def map = assetMap([
+//                ["1", "Assets/file.txt" ]])
+//
+//        IChangedFileFilter filter = new IChangedFileFilter() {
+//            @Override
+//            boolean hasLocalModifications(String path, String expectedHash) {
+//                return true;
+//            }
+//        }
+//        def diff = Synchroniser.difference(map, new AssetMap(), filter)
+//        then:
+//        !diff.remove.containsKey('1')
+//    }
 
 //    def "installs new packages"() {
 //        when:
@@ -242,4 +246,20 @@ class SynchroniserSpec extends Specification {
 //        }
 //    }
 
+    Set<ResolvedDependency> resolve(String forPackage) {
+        Synchroniser.gatherDependencies(project, repositories, Sets.newHashSet(forPackage))
+    }
+
+    def buildTransitivePackage(int depth) {
+
+        String parent = "com.foo:level0:1.0.0"
+        ivyRepo.withPackage(parent)
+
+        (1..depth).each { level ->
+            def child = "com.foo:level${level}:1.0.0"
+            ivyRepo.withPackage(child, parent)
+            parent = child
+        }
+        parent
+    }
 }

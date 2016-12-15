@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 interface IChangedFileFilter {
-    boolean hasLocalModifications(String path, String expectedHash);
+    boolean hasLocalModifications(Asset asset);
 }
 
 /**
@@ -35,8 +35,8 @@ class Synchroniser {
     static IChangedFileFilter Filter(Project project) {
         return new IChangedFileFilter() {
             @Override
-            public boolean hasLocalModifications(String path, String expectedHash) {
-                File f = project.file(path);
+            public boolean hasLocalModifications(Asset asset) {
+                File f = project.file(asset.getPath());
                 if (!f.exists()) {
                     // If the file is missing we don't count it as modified,
                     // since we won't be overwriting work.
@@ -44,7 +44,7 @@ class Synchroniser {
                 }
                 try {
                     String currentHash = Files.hash(f, Hashing.md5()).toString();
-                    return !expectedHash.equals(currentHash);
+                    return !asset.getMd5().equals(currentHash);
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -56,12 +56,16 @@ class Synchroniser {
     static AssetDifference difference(AssetMap old, AssetMap latest, IChangedFileFilter filter) {
         MapDifference<String, Asset> diff =  Maps.difference(old, latest);
         AssetMap remove = new AssetMap();
+
         for (Map.Entry<String, Asset> entry : diff.entriesOnlyOnLeft().entrySet()) {
-            remove.put(entry.getKey(), entry.getValue());
+            if (!filter.hasLocalModifications(entry.getValue())) {
+                remove.put(entry.getKey(), entry.getValue());
+            }
         }
 
         AssetMap add = new AssetMap();
         for (Map.Entry<String, Asset> entry : diff.entriesOnlyOnRight().entrySet()) {
+            entry.getValue().preferLocal = filter.hasLocalModifications(entry.getValue());
             add.put(entry.getKey(), entry.getValue());
         }
 
@@ -70,10 +74,13 @@ class Synchroniser {
             Asset updated = entry.getValue().rightValue();
             boolean pathChanged = !original.getPath().equals(updated.getPath());
             boolean hashChanged = !original.getMd5().equals(updated.getMd5());
+            boolean localChanges = filter.hasLocalModifications(original);
+            updated.preferLocal = localChanges;
 
             if (pathChanged) {
-                remove.put(entry.getKey(), original);
-                // TODO - what if hash changes?
+                if (!localChanges) {
+                    remove.put(entry.getKey(), original);
+                }
                 add.put(entry.getKey(), updated);
             }
 
@@ -83,15 +90,6 @@ class Synchroniser {
         }
 
         return new AssetDifference(remove, add);
-    }
-
-    static Map<String, Asset> filterOutChangedAssets(IChangedFileFilter filter, Map<String, Asset> assets) {
-        return Maps.filterValues(assets, new Predicate<Asset>() {
-            @Override
-            public boolean apply(Asset input) {
-                return !filter.hasLocalModifications(input.getPath(), input.getMd5());
-            }
-        });
     }
 
     static AssetMap buildAssetMap(Set<PackageManifest> manifests) {

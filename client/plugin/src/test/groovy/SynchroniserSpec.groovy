@@ -2,6 +2,7 @@ package com.nxt
 
 import com.google.common.collect.Sets
 import com.google.common.io.Files
+import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
@@ -98,14 +99,14 @@ class SynchroniserSpec extends Specification {
 
     def noChangesFilter = new IChangedFileFilter() {
         @Override
-        boolean hasLocalModifications(String path, String expectedHash) {
+        boolean hasLocalModifications(Asset a) {
             return false
         }
     }
 
     def allChangedFilter = new IChangedFileFilter() {
         @Override
-        boolean hasLocalModifications(String path, String expectedHash) {
+        boolean hasLocalModifications(Asset a) {
             return true;
         }
     }
@@ -165,6 +166,41 @@ class SynchroniserSpec extends Specification {
 
             with(get('allChange')) {
                 path == "changedPath.txt"
+            }
+
+            // Do nothing to unchanged file.
+            !(containsKey("unchanged"))
+        }
+    }
+
+    @Trouble
+    def "difference with local changes"() {
+        when:
+        def diff = Synchroniser.difference(old, latest, allChangedFilter)
+        then:
+        old.keySet().each { k ->
+            assert !diff.remove.containsKey(k)
+        }
+
+        with (diff.add) {
+            // New file should be added.
+            containsKey 'added'
+
+            // The new pathed file should be added.
+            with (get('newPath')) {
+                path == "new.txt"
+                preferLocal == true
+            }
+
+            // The file with different contents should be added.
+            with (get('newHash')) {
+                md5 == "differentHash"
+                preferLocal == true
+            }
+
+            with(get('allChange')) {
+                path == "changedPath.txt"
+                preferLocal == true
             }
 
             // Do nothing to unchanged file.

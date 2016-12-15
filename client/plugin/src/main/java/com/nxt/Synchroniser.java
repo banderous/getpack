@@ -17,6 +17,8 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,7 @@ interface IChangedFileFilter {
  */
 class Synchroniser {
 
+    static Logger logger = LoggerFactory.getLogger("nxt");
     static IChangedFileFilter Filter(Project project) {
         return new IChangedFileFilter() {
             @Override
@@ -102,12 +105,25 @@ class Synchroniser {
 
     static Set<PackageManifest> gatherManifests(Set<ResolvedDependency> deps) {
         Set<PackageManifest> manifests = Sets.newHashSet();
+
         for (ResolvedDependency dep : deps) {
+            File manifest = null, unitypackage = null;
             for (ResolvedArtifact art : dep.getModuleArtifacts()) {
                 if (art.getExtension().equals("manifest")) {
-                    manifests.add(PackageManifest.load(art.getFile()));
+                    manifest = art.getFile();
+                } else if (art.getExtension().equals("unitypackage")) {
+                    unitypackage = art.getFile();
                 }
             }
+
+            if (null != manifest && null != unitypackage) {
+                PackageManifest p = PackageManifest.load(manifest);
+                p.unityPackage = unitypackage;
+                manifests.add(p);
+            } else {
+                logger.error("Malformed package", manifest, unitypackage);
+            }
+
         }
 
         return manifests;

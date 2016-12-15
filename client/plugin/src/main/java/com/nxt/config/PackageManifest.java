@@ -18,6 +18,7 @@ public class PackageManifest {
     // Pathname
     private AssetMap files = new AssetMap();
     private Package pack;
+    public transient File unityPackage;
 
     private PackageManifest() {
 
@@ -62,5 +63,9 @@ public class PackageManifest {
 
     public AssetMap getFiles() {
         return files;
+    }
+
+    public File getUnityPackage() {
+        return unityPackage;
     }
 }

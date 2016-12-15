@@ -1,4 +1,8 @@
+import com.nxt.IvyBuilder
+import com.nxt.Trouble
 import com.nxt.config.Asset
+import com.nxt.config.AssetMap
+import com.nxt.config.PackageManifest
 import spock.lang.Specification
 
 import java.nio.file.Paths
@@ -8,12 +12,21 @@ import java.nio.file.Paths
  */
 class UnityPackageCreatorSpec extends Specification {
 
-    def "sources files from the project"() {
-//        when:
-//        def asset = createAsset("Foo.txt")
-    }
+    def superJSON = "acme:superjson:1.0.0";
+    @Trouble
+    def "create ivy"() {
+        when:
+        def repo = IvyBuilder.Create().withPackage(superJSON)
 
-    def createAsset(String path) {
-        return new Asset(Paths.get(path), path)
+        then:
+        true
     }
+//   def "sources files from the project"() {
+//        Asset asset = new Asset('A.txt', 'md5')
+//        asset.pack = manifest;
+//
+////        when:
+////        def asset = createAsset("Foo.txt")
+//    }
+
 }

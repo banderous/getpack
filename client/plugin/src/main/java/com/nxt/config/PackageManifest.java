@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -18,7 +19,6 @@ public class PackageManifest {
     // Pathname
     private AssetMap files = new AssetMap();
     private Package pack;
-    public transient File unityPackage;
 
     private PackageManifest() {
 
@@ -26,6 +26,12 @@ public class PackageManifest {
 
     public PackageManifest(Package pack) {
         this.pack = pack;
+    }
+
+    public void setUnityPackage(File pack) {
+        for (Map.Entry<String, Asset> entry : files.entrySet()) {
+            entry.getValue().unitypackage = pack;
+        }
     }
 
     public void Add(String guid, Path path, String md5) {
@@ -65,7 +71,4 @@ public class PackageManifest {
         return files;
     }
 
-    public File getUnityPackage() {
-        return unityPackage;
-    }
 }

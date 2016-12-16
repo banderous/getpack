@@ -3,6 +3,7 @@ package com.nxt.config;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -10,6 +11,7 @@ public class Asset {
     private String md5, path;
     private Asset() {}
     public transient PackageManifest pack;
+    public transient File unitypackage;
 
     Asset(Path path, String md5) {
         this.path = path.toString();

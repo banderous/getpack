@@ -1,7 +1,9 @@
 package com.nxt;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -23,14 +25,14 @@ import java.util.Set;
 public class UnityPackageCreator extends Copy {
 
 
-    public static FileTree MergeArchives(Project project, Map<File, Set<String>> filesAndPaths) {
+    public static FileTree MergeArchives(Project project, HashMultimap<File, String> filesAndPaths) {
         FileTree result = null;
-        for (Map.Entry<File, Set<String>> entry : filesAndPaths.entrySet()) {
-            ReadableResource resource = project.getResources().gzip(entry.getKey());
+        for (File file : filesAndPaths.keys()) {
+            ReadableResource resource = project.getResources().gzip(file);
 
             PatternSet pattern = new PatternSet();
 
-            for (String s : entry.getValue()) {
+            for (String s : filesAndPaths.get(file)) {
                 pattern.include(String.format("./%s/**", s));
             }
             FileTree tree = project.tarTree(resource).matching(pattern);

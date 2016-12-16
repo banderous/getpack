@@ -1,15 +1,21 @@
 package com.nxt;
 
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.nxt.config.*;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
+import org.gradle.api.file.FileTree;
+import org.gradle.api.tasks.bundling.Compression;
+import org.gradle.api.tasks.bundling.Tar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +33,7 @@ interface IChangedFileFilter {
  */
 class Synchroniser {
 
+    public static final String IMPORT_PACKAGE_PATH = "nxt/import/package.unitypackage";
     static Logger logger = LoggerFactory.getLogger("nxt");
 
 
@@ -38,9 +45,28 @@ class Synchroniser {
         Remove(project, difference.getRemove());
         Move(difference.getMoved());
         Install(difference.getAdd());
+
+        if (!difference.getAdd().isEmpty()) {
+            HashMultimap<File, String> guidsByFile = HashMultimap.create();
+            for (Map.Entry<String, Asset> entry : difference.getAdd().entrySet()) {
+                guidsByFile.put(entry.getValue().unitypackage, entry.getKey());
+            }
+
+            // TODO - task this stuff!
+            FileTree tree = UnityPackageCreator.MergeArchives(project, guidsByFile);
+            Tar tar = project.getTasks().create("nxtBalls", Tar.class);
+            tar.setCompression(Compression.GZIP);
+            tar.from(tree);
+
+            tar.setDestinationDir(project.file("nxt/import"));
+            tar.setArchiveName("package.unitypackage");
+            System.out.println("WRITING TO " + project.getPath());
+            tar.execute();
+        }
     }
 
     private static void Install(ImmutableMap<String, Asset> add) {
+
     }
 
     private static void Move(ImmutableMap<String, String> moved) {
@@ -143,7 +169,7 @@ class Synchroniser {
 
             if (null != manifest && null != unitypackage) {
                 PackageManifest p = PackageManifest.load(manifest);
-                p.unityPackage = unitypackage;
+                p.setUnityPackage(unitypackage);
                 manifests.add(p);
             } else {
                 logger.error("Malformed package", manifest, unitypackage);

@@ -64,7 +64,7 @@ class IvyBuilder {
             asset << "Fake asset"
 
             File path = new File(assetFolder, "pathname")
-            path << "Assets/${man.pack.name}.txt"
+            path <<  assetPathForPackage(man.pack.key())
         }
 
 

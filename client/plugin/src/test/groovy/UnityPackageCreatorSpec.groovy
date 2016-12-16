@@ -1,3 +1,4 @@
+import com.google.common.collect.HashMultimap
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
@@ -15,12 +16,13 @@ class UnityPackageCreatorSpec extends Specification {
 
     def project = UBuilder.Builder().asProject()
 
-    @Trouble
     def "extracts assets from unitypackages"() {
         when:
         def a = createTarGz("Include/Me.txt", "exclude/notme.txt")
         def b = createTarGz("And/MeToo.txt", "not/meeither.txt")
-        def input = ImmutableMap.of(a, Sets.newHashSet("Include"), b, Sets.newHashSet("And"))
+        HashMultimap<File, String> input = HashMultimap.create()
+        input.put(a, "Include")
+        input.put(b, "And")
         def tree = UnityPackageCreator.MergeArchives(project, input);
         def names = ImmutableSet.copyOf(tree.files.collect { it.getName() })
 

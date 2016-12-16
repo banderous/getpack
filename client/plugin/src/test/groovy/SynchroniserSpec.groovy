@@ -174,7 +174,7 @@ class SynchroniserSpec extends Specification {
         diff.add.keySet() == ImmutableSet.of('added')
     }
 
-    @Trouble
+
     def "removing old package"() {
         when:
         builder.withInstalledDependency(superJSON)
@@ -188,6 +188,18 @@ class SynchroniserSpec extends Specification {
         then:
         !expectedFile.exists()
         !meta.exists()
+    }
+
+    @Trouble
+    def "installing new package"() {
+        when:
+        builder.withDependency(superJSON)
+        Synchroniser.Sync(project)
+        def tree = project.tarTree(project.resources.gzip(Synchroniser.IMPORT_PACKAGE_PATH))
+        def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
+        def filenames = ImmutableSet.copyOf(paths)
+        then:
+        filenames == ImmutableSet.of('Assets/Acme/Superjson.txt')
     }
 
 //    def "difference with local changes"() {

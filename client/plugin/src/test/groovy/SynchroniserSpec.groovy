@@ -8,6 +8,7 @@ import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
+import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
@@ -21,14 +22,15 @@ class SynchroniserSpec extends Specification {
     def deps = []
     def superJSON = "acme:superjson:1.0.0"
 
-    def project = ProjectBuilder.builder().withProjectDir(Files.createTempDir()).build()
-    def builder = UBuilder.Builder(project.projectDir)
+    def builder = UBuilder.Builder()
+    Project project = null;
 
     def ivyRepo = IvyBuilder.Create().withPackage(superJSON)
     def repositories = Sets.newHashSet(ivyRepo.dir.path)
 
     def setup (){
         builder.withRepository(ivyRepo.dir.path)
+        project = builder.asProject()
     }
 
     def "manifests settable"() {
@@ -64,7 +66,6 @@ class SynchroniserSpec extends Specification {
         deps.any { it.moduleName == "level2" }
     }
 
-    @Trouble
     def "resolves package manifests"() {
         when:
         def child = buildTransitivePackage(4)
@@ -127,7 +128,6 @@ class SynchroniserSpec extends Specification {
             ['allChange', 'changedPath.txt', 'changedHash'],
             ['unchanged']])
 
-    @Trouble
     def "difference with no local changes"() {
         when:
         def diff = Synchroniser.difference(old, latest, noChangesFilter)
@@ -157,7 +157,7 @@ class SynchroniserSpec extends Specification {
         }
     }
 
-    @Trouble
+
     def "difference with local changes"() {
         when:
         def diff = Synchroniser.difference(old, latest, allChangedFilter)
@@ -172,6 +172,22 @@ class SynchroniserSpec extends Specification {
         }
 
         diff.add.keySet() == ImmutableSet.of('added')
+    }
+
+    @Trouble
+    def "removing old package"() {
+        when:
+        builder.withInstalledDependency(superJSON)
+        def filePath = IvyBuilder.assetPathForPackage(superJSON)
+        def expectedFile = project.file(filePath)
+        def meta = project.file(filePath + ".meta")
+        assert expectedFile.exists()
+        assert meta.exists()
+        Synchroniser.Sync(project)
+
+        then:
+        !expectedFile.exists()
+        !meta.exists()
     }
 
 //    def "difference with local changes"() {
@@ -211,11 +227,11 @@ class SynchroniserSpec extends Specification {
 //    def "installs new packages"() {
 //        when:
 //        builder.withDependency(superJSON)
-//        builder.create()
-//        Synchroniser.Synchronise(project)
+//        builder.saveConfig()
+//        Synchroniser.Synchronise(runner)
 //
 //        then:
-//        project.fileTree('nxt/import').files.size() == 1
+//        runner.fileTree('nxt/import').files.size() == 1
 //    }
 //
 //    def "installs a new package"() {
@@ -224,7 +240,7 @@ class SynchroniserSpec extends Specification {
 //        ]
 //
 //        builder.addSync(v1)
-//        project.file(v1.files.first()).exists()
+//        runner.file(v1.files.first()).exists()
 //    }
 
 //    static class RemovePackageSpec extends SynchroniserSpec {
@@ -235,7 +251,7 @@ class SynchroniserSpec extends Specification {
 //
 //            builder.addSync(v1)
 //            builder.removeSync(v1)
-//            !project.file(v1.files.first()).exists()
+//            !runner.file(v1.files.first()).exists()
 //        }
 //
 //        def "does not remove changed files"() {
@@ -246,7 +262,7 @@ class SynchroniserSpec extends Specification {
 //            builder.addSync(v1)
 //            v1.files.first() << "nonsense"
 //            builder.removeSync(v1)
-//            project.file(v1.files.first()).exists()
+//            runner.file(v1.files.first()).exists()
 //        }
 //
 //        def "does not remove files not in the manifest"() {

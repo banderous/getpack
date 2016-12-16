@@ -14,6 +14,6 @@ class PublishPlugin implements Plugin<Project> {
         def config = Config.load(project)
         CreatePackage.Configure(project)
         ExportPackage.Configure(project, config)
-        InstallPackage.Configure(project)
+        SyncDeps.Configure(project)
     }
 }

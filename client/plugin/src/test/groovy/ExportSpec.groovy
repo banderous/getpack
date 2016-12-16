@@ -24,7 +24,7 @@ class ExportSpec extends Specification {
         when:
         def builder = UBuilder.Builder()
         builder.withPackage(id)
-        builder.create()
+        builder.saveConfig()
 
 
         def proj = builder.asProject()
@@ -39,7 +39,7 @@ class ExportSpec extends Specification {
         // Ignores puppet dll.
         !tree.files.any { it.path.endsWith(".dll") }
         // Includes our text file
-        tree.files.any { it.path.endsWith("A.txt")}
+        tree.files.any { it.path.endsWith("Superjson.txt")}
         // Ignores irrelevant file.
         !tree.files.any { it.path.endsWith("Irrelevant.txt") }
         // Ignores any meta files.
@@ -58,8 +58,8 @@ class ExportSpec extends Specification {
 
         then:
         manifest.files instanceof Map
-        assert manifest.files.any { guid, info -> (info.path == 'Assets/Acme/Superjson/A.txt'
-            && info.md5 == "944a6d991b9079caee0446d21a2e4770")}
+        assert manifest.files.any { guid, info -> (info.path == 'Assets/Acme/Superjson.txt'
+            && info.md5 == "5eb28086954dfc9e3313c848d928ca4e")}
     }
 
     def "meta parsing"() {

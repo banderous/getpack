@@ -1,14 +1,9 @@
 package com.nxt;
 
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
-import com.nxt.config.Asset;
-import com.nxt.config.AssetDifference;
-import com.nxt.config.AssetMap;
-import com.nxt.config.PackageManifest;
+import com.nxt.config.*;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -33,7 +28,33 @@ interface IChangedFileFilter {
 class Synchroniser {
 
     static Logger logger = LoggerFactory.getLogger("nxt");
-    static IChangedFileFilter Filter(Project project) {
+
+
+    public static void Sync(Project project) {
+        AssetMap target = Synchroniser.loadAssetMap(project, Config.load(project));
+        AssetMap current = Synchroniser.loadAssetMap(project, Config.loadShadow(project));
+        AssetDifference difference = Synchroniser.difference(current, target, Synchroniser.Filter(project));
+
+        Remove(project, difference.getRemove());
+        Move(difference.getMoved());
+        Install(difference.getAdd());
+    }
+
+    private static void Install(ImmutableMap<String, Asset> add) {
+    }
+
+    private static void Move(ImmutableMap<String, String> moved) {
+
+    }
+
+    private static void Remove(Project project, ImmutableSet<String> remove) {
+        for (String s : remove) {
+            project.file(s).delete();
+            project.file(s + ".meta").delete();
+        }
+    }
+
+    public static IChangedFileFilter Filter(final Project project) {
         return new IChangedFileFilter() {
             @Override
             public boolean hasLocalModifications(Asset asset) {
@@ -133,8 +154,14 @@ class Synchroniser {
         return manifests;
     }
 
+    public static AssetMap loadAssetMap(Project project, Config config) {
+        Set<ResolvedDependency> deps = Synchroniser.gatherDependencies(project, config.getRepositories(), config.getDependencies());
+        Set<PackageManifest> manifests = Synchroniser.gatherManifests(deps);
+        return Synchroniser.buildAssetMap(manifests);
+    }
+
     static Set<ResolvedDependency> gatherDependencies(Project project, Set<String> repositories, Set<String> dependencies) {
-        for (String r : repositories) {
+        for (final String r : repositories) {
             project.getRepositories().ivy(new Action<IvyArtifactRepository>() {
                 @Override
                 public void execute(IvyArtifactRepository ivyArtifactRepository) {
@@ -161,8 +188,4 @@ class Synchroniser {
 
 
     static int count = 1;
-
-    public static File stateFile(Project project) {
-        return project.file("nxt/nxt.json.state");
-    }
 }

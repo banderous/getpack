@@ -50,7 +50,7 @@ class UBuilder {
         """
     }
 
-    UBuilder create() {
+    UBuilder saveConfig() {
         def f = new File(projectDir, "nxt/nxt.json")
         f.getParentFile().mkdirs()
         Config.save(config, f)
@@ -61,14 +61,14 @@ class UBuilder {
     }
 
     Project asProject() {
-        create()
+        saveConfig()
         Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
         project.pluginManager.apply PublishPlugin.class
         project
     }
 
     GradleRunner build() {
-        create()
+        saveConfig()
         def runner = GradleRunner.create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
@@ -81,7 +81,7 @@ class UBuilder {
     File withFile(String path) {
         File tempFile = new File(projectDir, path)
         tempFile.getParentFile().mkdirs()
-        tempFile << "File: path"
+        tempFile << tempFile.name
 
         // Create an accompanying meta file.
         File meta = new File(tempFile.path + ".meta")
@@ -100,33 +100,32 @@ class UBuilder {
     }
 
     UBuilder withPackage(String id) {
-        withFile(filepathForPackage(id))
+        withFile(IvyBuilder.assetPathForPackage(id))
         // Assume there is a top level root matching the organisation.
         String group = id.split(":")[0]
         def pack = config.addPackage(id)
         packages.add(pack)
         pack.roots.add("${group.capitalize()}/**".toString())
+        saveConfig()
         this
     }
 
     UBuilder withRepository(String url) {
         config.addRepository(url)
+        saveConfig()
         this
     }
 
     UBuilder withDependency(String id) {
         config.addDependency(id)
+        saveConfig()
         this
     }
 
     UBuilder withInstalledDependency(String id) {
+        withFile(IvyBuilder.assetPathForPackage(id))
         projectState.addDependency(id)
+        saveConfig()
         this
-    }
-
-    String filepathForPackage(String id) {
-        String group, name, version
-        (group, name, version) = id.tokenize(':')
-        "Assets/${group.capitalize()}/${name.capitalize()}/A.txt"
     }
 }

@@ -73,11 +73,11 @@ public class Config {
         return ImmutableSet.copyOf(dependencies);
     }
 
-    static Config load(Project project) {
+    public static Config load(Project project) {
         return load(project.file(CONFIG_PATH));
     }
 
-    static Config loadShadow(Project project) {
+    public static Config loadShadow(Project project) {
         return load(project.file(SHADOW_CONFIG_PATH));
     }
 

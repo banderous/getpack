@@ -1,5 +1,8 @@
 package com.nxt.config;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
+
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -33,5 +36,10 @@ public class Asset {
     @Override
     public int hashCode() {
         return Objects.hash(path, md5);
+    }
+
+    @Override
+    public String toString() {
+        return Joiner.on(":").join(path, md5);
     }
 }

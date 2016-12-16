@@ -25,6 +25,20 @@ class IvyBuilder {
         [group: group, name: name, version: version]
     }
 
+    public static String assetContentsForPackage(String id) {
+        def vals = parseId(id)
+        return vals.name
+    }
+
+    public static String assetPathForPackage(String id) {
+        def vals = parseId(id)
+        return assetPathForPackage(vals.group, vals.name, vals.version)
+    }
+
+    public static String assetPathForPackage(String group, String name, String version) {
+        return ['Assets', group.capitalize(), name.capitalize() + ".txt"].join("/")
+    }
+
     File dir = Files.createTempDir()
 
     IvyBuilder withPackage(String id, String[] deps) {
@@ -65,8 +79,12 @@ class IvyBuilder {
         File manifest = new File(ivyFolder, manifestName + "-${version}.manifest")
         def m = new PackageManifest(new Package([group, name, version].join(':')));
         def guid = Hashing.md5().hashString(name, Charsets.UTF_8).toString()
-        m.Add(guid, Paths.get(name + ".txt"), name)
+        def path = assetPathForPackage(group, name, version)
+        def contents = new File(path).name
+        def hash = Hashing.md5().hashString(contents, Charsets.UTF_8).toString();
+        m.Add(guid, Paths.get(path), hash)
         PackageManifest.save(m, manifest)
+
         return m
     }
 

@@ -51,13 +51,13 @@ class E2ESpec extends BaseE2ESpec {
         def consumer = UBuilder.Builder()
                 .withRepository("${repoProject.projectDir.path}/nxt/repo")
                 .withDependency(packageId)
-                .withArg("installPackage")
+                .withArg("nxtSync")
 
         println "producer " + repoProject.projectDir
         println "consumer " + consumer.projectDir
         consumer.build()
 
-        // Create a project that references it
+        // Create a runner that references it
         then:
         conditions.within(5) {
             assert new File(consumer.projectDir, consumer.filepathForPackage(packageId)).exists()

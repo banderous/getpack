@@ -23,7 +23,7 @@ import java.util.Set;
 public class UnityPackageCreator extends Copy {
 
 
-    public static FileTree DoIt(Project project, Map<File, Set<String>> filesAndPaths) {
+    public static FileTree MergeArchives(Project project, Map<File, Set<String>> filesAndPaths) {
         FileTree result = null;
         for (Map.Entry<File, Set<String>> entry : filesAndPaths.entrySet()) {
             ReadableResource resource = project.getResources().gzip(entry.getKey());

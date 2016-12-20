@@ -68,7 +68,7 @@ class IvyBuilder {
                 file("pathname", path)
             }
         }
-        
+
         // Write the unitypackage.
         File unityPackage = File.createTempFile("fake", "fake")
         CreateTarGZ.Create(tarDir, unityPackage);

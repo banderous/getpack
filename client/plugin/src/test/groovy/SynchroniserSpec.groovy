@@ -175,19 +175,30 @@ class SynchroniserSpec extends Specification {
     }
 
 
-    def "removing old package"() {
+    def "removing old files"() {
         when:
-        builder.withInstalledDependency(superJSON)
-        def filePath = IvyBuilder.assetPathForPackage(superJSON)
-        def expectedFile = project.file(filePath)
-        def meta = project.file(filePath + ".meta")
-        assert expectedFile.exists()
-        assert meta.exists()
-        Synchroniser.Sync(project)
+        def files = ImmutableSet.of('Assets/A.txt', 'Assets/A.txt.meta')
+        def b = new FileTreeBuilder(project.projectDir)
+        files.each { f ->
+            b.file(f, 'Contents')
+        }
+
+        Synchroniser.Remove(project, files)
 
         then:
-        !expectedFile.exists()
-        !meta.exists()
+        files.every { !project.file(it).exists() }
+    }
+
+    def "moving files"() {
+        when:
+        new FileTreeBuilder(project.projectDir).Assets {
+            file('A.txt', "A");
+        }
+
+        Synchroniser.Move(project, ImmutableMap.of('Assets/A.txt', 'Assets/B.txt'))
+        then:
+        !project.file('Assets/A.txt').exists()
+        project.file('Assets/B.txt').exists()
     }
 
     @Trouble

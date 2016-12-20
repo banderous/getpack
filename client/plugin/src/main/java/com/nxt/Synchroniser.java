@@ -43,7 +43,7 @@ class Synchroniser {
         AssetDifference difference = Synchroniser.difference(current, target, Synchroniser.Filter(project));
 
         Remove(project, difference.getRemove());
-        Move(difference.getMoved());
+        Move(project, difference.getMoved());
         Install(difference.getAdd());
 
         if (!difference.getAdd().isEmpty()) {
@@ -65,12 +65,16 @@ class Synchroniser {
         }
     }
 
-    private static void Install(ImmutableMap<String, Asset> add) {
+    public static void Install(ImmutableMap<String, Asset> add) {
 
     }
 
-    private static void Move(ImmutableMap<String, String> moved) {
-
+    public static void Move(Project project, ImmutableMap<String, String> moved) {
+        for (Map.Entry<String, String> entry : moved.entrySet()) {
+            File from = project.file(entry.getKey());
+            File to = project.file(entry.getValue());
+            from.renameTo(to);
+        }
     }
 
     private static void Remove(Project project, ImmutableSet<String> remove) {

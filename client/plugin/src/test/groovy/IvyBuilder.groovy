@@ -60,18 +60,15 @@ class IvyBuilder {
 
     def writeUnityPackage(PackageManifest man) {
         File tarDir = Files.createTempDir()
-
-        for (Map.Entry<String, Asset> a : man.files.entrySet()) {
-            File assetFolder = new File(tarDir, a.key)
-            assetFolder.mkdir()
-            File asset = new File(assetFolder, "asset")
-            asset << "Fake asset"
-
-            File path = new File(assetFolder, "pathname")
-            path <<  assetPathForPackage(man.pack.key())
+        def path = assetPathForPackage(man.pack)
+        def builder = new FileTreeBuilder(tarDir)
+        man.files.each { a ->
+            builder.dir(a.key) {
+                file("asset", "Fake asset")
+                file("pathname", path)
+            }
         }
-
-
+        
         // Write the unitypackage.
         File unityPackage = File.createTempFile("fake", "fake")
         CreateTarGZ.Create(tarDir, unityPackage);

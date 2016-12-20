@@ -7,7 +7,6 @@ import com.nxt.config.Asset
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
 import groovy.xml.MarkupBuilder
-import org.gradle.api.Project
 
 import java.nio.file.Paths
 
@@ -30,6 +29,10 @@ class IvyBuilder {
         return vals.name
     }
 
+    public static String assetPathForPackage(vals) {
+        return assetPathForPackage(vals.group, vals.name, vals.version)
+    }
+
     public static String assetPathForPackage(String id) {
         def vals = parseId(id)
         return assetPathForPackage(vals.group, vals.name, vals.version)
@@ -43,18 +46,19 @@ class IvyBuilder {
 
     IvyBuilder withPackage(String id, String[] deps) {
         def parsed = parseId(id)
-        def ivyFolder = new File(dir, "${parsed.group}/${parsed.name}/${parsed.version}")
-        ivyFolder.mkdirs()
+        def builder = new FileTreeBuilder(dir)
+        def manifest = createManifest(parsed)
+        builder.dir("${parsed.group}/${parsed.name}/${parsed.version}") {
+            file("ivy-${parsed.version}.xml", writeIvyModule(deps, parsed))
+            file("${parsed.group}.${parsed.name}-${parsed.version}.manifest", manifest.toString())
+            file("${parsed.name}-${parsed.version}.unitypackage", writeUnityPackage(manifest))
+        }
 
-
-        writeIvyModule(ivyFolder, deps, parsed.group, parsed.name, parsed.version)
-        def manifest = writeManifest(ivyFolder, parsed.group, parsed.name, parsed.version)
-        writeUnityPackage(ivyFolder, manifest)
 
         this
     }
 
-    def writeUnityPackage(File ivyFolder, PackageManifest man) {
+    def writeUnityPackage(PackageManifest man) {
         File tarDir = Files.createTempDir()
 
         for (Map.Entry<String, Asset> a : man.files.entrySet()) {
@@ -69,34 +73,31 @@ class IvyBuilder {
 
 
         // Write the unitypackage.
-        File unityPackage = new File(ivyFolder, "${man.pack.name}-${man.pack.version}.unitypackage")
+        File unityPackage = File.createTempFile("fake", "fake")
         CreateTarGZ.Create(tarDir, unityPackage);
+        return unityPackage
     }
 
-    def writeManifest(File ivyFolder, String group, String name, String version) {
-        def manifestName = [group, name].join(".")
-        // Write the manifest.
-        File manifest = new File(ivyFolder, manifestName + "-${version}.manifest")
-        def m = new PackageManifest(new Package([group, name, version].join(':')));
-        def guid = Hashing.md5().hashString(name, Charsets.UTF_8).toString()
-        def path = assetPathForPackage(group, name, version)
+    def createManifest(id) {
+        def m = new PackageManifest(new Package(id));
+        def guid = Hashing.md5().hashString(id.name, Charsets.UTF_8).toString()
+        def path = assetPathForPackage(id)
         def contents = new File(path).name
         def hash = Hashing.md5().hashString(contents, Charsets.UTF_8).toString();
         m.Add(guid, Paths.get(path), hash)
-        PackageManifest.save(m, manifest)
 
         return m
     }
 
-    def writeIvyModule(File ivyFolder, String[] deps, String group, String name, String version) {
-        def ivy = new File(ivyFolder, "ivy-${version}.xml")
-        def xml = new MarkupBuilder(new FileWriter(ivy))
-        def manifestName = [group, name].join(".")
+    def writeIvyModule(String[] deps, id) {
+        def writer = new StringWriter()
+        def xml = new MarkupBuilder(writer)
+        def manifestName = [id.group, id.name].join(".")
         xml.('ivy-module')(version: "2.0") {
-            info(organisation: group, module: name, revision: version, status: 'integration', publication:"20161209071257")
+            info(organisation: id.group, module: id.name, revision: id.version, status: 'integration', publication:"20161209071257")
             configurations()
             publications() {
-                artifact(name: name, type: 'unitypackage', ext: 'unitypackage')
+                artifact(name: id.name, type: 'unitypackage', ext: 'unitypackage')
                 artifact(name: manifestName, type: 'manifest', ext: 'manifest')
             }
             dependencies() {
@@ -106,5 +107,6 @@ class IvyBuilder {
                 }
             }
         }
+        writer.toString()
     }
 }

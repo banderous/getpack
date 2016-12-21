@@ -221,6 +221,22 @@ class SynchroniserSpec extends Specification {
         filenames == ImmutableSet.of('Assets/Acme/Superjson.txt')
     }
 
+    def "new package with transitive dependencies"() {
+        when:
+        def withTransitive = buildTransitivePackage(3)
+        builder.withDependency(withTransitive)
+        project.tasks.nxtDo.execute()
+        project.tasks.nxtSync.execute()
+        def tree = project.tarTree(project.resources.gzip(Synchroniser.IMPORT_PACKAGE_PATH))
+        def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
+        def filenames = ImmutableSet.copyOf(paths)
+        def expectedNames = (0..3).collect { "Assets/Com.foo/Level${it}.txt".toString() }
+        then:
+
+        filenames == ImmutableSet.copyOf(expectedNames)
+    }
+
+
     def "no changes does not create import package"() {
         when:
         project.tasks.nxtDo.execute()
@@ -228,142 +244,6 @@ class SynchroniserSpec extends Specification {
         then:
         !project.file(Synchroniser.IMPORT_PACKAGE_PATH).exists()
     }
-
-//    def "difference with local changes"() {
-//        when:
-//        def diff = Synchroniser.difference(old, latest, allChangedFilter)
-//
-//        then:
-//        with (diff) {
-//            // Old file must not be removed.
-//            !(remove.containsKey('disappears'))
-//            // New file should be added.
-//            add.containsKey 'added'
-//            // A file whose path has changed should be removed.
-//            remove.containsKey 'newPath'
-//            // The new pathed file should be added.
-//            add.containsKey 'newPath'
-//            // The file with different contents should be added.
-//            add.containsKey 'newHash'
-//            // We don't need to remove old version of new hashed file.
-//            !(remove.containsKey('newHash'))
-//            // Do nothing to unchanged file.
-//            !(add.containsKey("unchanged"))
-//            !(remove.containsKey("unchanged"))
-//        }
-//    }
-
-//    def "excludes for removal files with local changes"() {
-//        when:
-//        def map = assetMap([
-//                ["1", "Assets/file.txt" ]])
-//
-//        def diff = Synchroniser.difference(map, new AssetMap(), allChangedFilter)
-//        then:
-//        !diff.remove.containsKey('1')
-//    }
-
-//    def "installs new packages"() {
-//        when:
-//        builder.withDependency(superJSON)
-//        builder.saveConfig()
-//        Synchroniser.Synchronise(runner)
-//
-//        then:
-//        runner.fileTree('nxt/import').files.size() == 1
-//    }
-//
-//    def "installs a new package"() {
-//        def v1 = [
-//                (Assets/A.txt): "A"
-//        ]
-//
-//        builder.addSync(v1)
-//        runner.file(v1.files.first()).exists()
-//    }
-
-//    static class RemovePackageSpec extends SynchroniserSpec {
-//        def "removes unchanged files"() {
-//            def v1 = [
-//                    (Assets/A.txt): "A"
-//            ]
-//
-//            builder.addSync(v1)
-//            builder.removeSync(v1)
-//            !runner.file(v1.files.first()).exists()
-//        }
-//
-//        def "does not remove changed files"() {
-//            def v1 = [
-//                    (Assets/A.txt): "A"
-//            ]
-//
-//            builder.addSync(v1)
-//            v1.files.first() << "nonsense"
-//            builder.removeSync(v1)
-//            runner.file(v1.files.first()).exists()
-//        }
-//
-//        def "does not remove files not in the manifest"() {
-//            def projectA = {
-//                file('')
-//            }
-//        }
-//
-//        def "does not remove files required by another plugin"() {
-//        }
-//    }
-//
-//    static class UpdatePackageSpec extends SynchroniserSpec {
-//        def "incoming file removed"() {
-//
-//        }
-//
-//        def "incoming file moved"() {
-//            // Delete file.
-//        }
-//
-//        def "incoming file modified"() {
-//            // Do nothing.
-//        }
-//
-//        def "incoming file moved & modified"() {
-//            // Delete file.
-//        }
-//    }
-//
-//
-//    // Set of possible actions:
-//
-//    // Drop it from the unitypackage.
-//    // Issue warning
-//    // Replace incoming with local in unitypackage.
-//    // Do nothing
-//    // Delete local file.
-//
-//    // Simple case - local file is not changed,
-//    // no need to worry about losing changes.
-//
-//    // The local file has been modified from its original;
-//    // specify behaviour for all possible incoming file
-//    // scenarios when the local file is modified.
-//    static class UpdatePackageWithLocalModificationsSpec extends SynchroniserSpec {
-//        def "incoming file removed"() {
-//            // Issue warning
-//        }
-//
-//        def "incoming file moved"() {
-//            // Replace incoming with local.
-//        }
-//
-//        def "incoming file modified"() {
-//            // Issue warning.
-//        }
-//
-//        def "incoming file moved & modified"() {
-//            // Replace incoming with local, issue warning.
-//        }
-//    }
 
     Set<ResolvedDependency> resolve(String forPackage) {
         Synchroniser.gatherDependencies(project, repositories, Sets.newHashSet(forPackage))

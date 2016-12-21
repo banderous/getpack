@@ -1,14 +1,11 @@
 package com.nxt;
 
-import com.google.common.base.Function;
-import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.nxt.config.*;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
@@ -38,18 +35,23 @@ class Synchroniser {
 
 
     public static void Sync(Project project) {
-        AssetMap target = Synchroniser.loadAssetMap(project, Config.load(project));
-        AssetMap current = Synchroniser.loadAssetMap(project, Config.loadShadow(project));
+        AssetMap current = buildAssetMap(gatherManifests(gatherDependencies(project, Config.loadShadow(project))));
+        Set<PackageManifest> targetManifests = gatherManifests(gatherDependencies(project, Config.load(project)));
+        AssetMap target = buildAssetMap(targetManifests);
         AssetDifference difference = Synchroniser.difference(current, target, Synchroniser.Filter(project));
 
         Remove(project, difference.getRemove());
         Move(project, difference.getMoved());
-        Install(difference.getAdd());
+        Install(project, difference.getAdd(), targetManifests);
+    }
 
-        if (!difference.getAdd().isEmpty()) {
+    public static void Install(Project project, ImmutableMap<String, Asset> add, Set<PackageManifest> targetManifests) {
+        if (!add.isEmpty()) {
+            Map<String, File> filesByGUID = buildGUIDToUnitypackageMap(targetManifests);
             HashMultimap<File, String> guidsByFile = HashMultimap.create();
-            for (Map.Entry<String, Asset> entry : difference.getAdd().entrySet()) {
-                guidsByFile.put(entry.getValue().unitypackage, entry.getKey());
+            for (Map.Entry<String, Asset> entry : add.entrySet()) {
+                File f = filesByGUID.get(entry.getKey());
+                guidsByFile.put(f, entry.getKey());
             }
 
             // TODO - task this stuff!
@@ -63,10 +65,6 @@ class Synchroniser {
             System.out.println("WRITING TO " + project.getPath());
             tar.execute();
         }
-    }
-
-    public static void Install(ImmutableMap<String, Asset> add) {
-
     }
 
     public static void Move(Project project, ImmutableMap<String, String> moved) {
@@ -184,10 +182,21 @@ class Synchroniser {
         return manifests;
     }
 
-    public static AssetMap loadAssetMap(Project project, Config config) {
-        Set<ResolvedDependency> deps = Synchroniser.gatherDependencies(project, config.getRepositories(), config.getDependencies());
-        Set<PackageManifest> manifests = Synchroniser.gatherManifests(deps);
-        return Synchroniser.buildAssetMap(manifests);
+    public static Map<String, File> buildGUIDToUnitypackageMap(Set<PackageManifest> manifests) {
+        Map<String, File> result = Maps.newHashMap();
+        for (PackageManifest manifest : manifests) {
+            for (Map.Entry<String, Asset> entry : manifest.getFiles().entrySet()) {
+                if (!result.containsKey(entry.getKey())) {
+                    result.put(entry.getKey(), manifest.getUnitypackage());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    static Set<ResolvedDependency> gatherDependencies(Project project, Config config) {
+        return gatherDependencies(project, config.getRepositories(), config.getDependencies());
     }
 
     static Set<ResolvedDependency> gatherDependencies(Project project, Set<String> repositories, Set<String> dependencies) {

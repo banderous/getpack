@@ -11,7 +11,6 @@ public class Asset {
     private String md5, path;
     private Asset() {}
     public transient PackageManifest pack;
-    public transient File unitypackage;
 
     Asset(Path path, String md5) {
         this.path = path.toString();

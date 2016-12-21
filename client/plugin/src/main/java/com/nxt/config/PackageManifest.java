@@ -19,6 +19,7 @@ public class PackageManifest {
     // Pathname
     private AssetMap files = new AssetMap();
     private Package pack;
+    private File unitypackage;
 
     private PackageManifest() {
 
@@ -29,9 +30,7 @@ public class PackageManifest {
     }
 
     public void setUnityPackage(File pack) {
-        for (Map.Entry<String, Asset> entry : files.entrySet()) {
-            entry.getValue().unitypackage = pack;
-        }
+        this.unitypackage = pack;
     }
 
     public void Add(String guid, Path path, String md5) {
@@ -75,4 +74,7 @@ public class PackageManifest {
         return files;
     }
 
+    public File getUnitypackage() {
+        return unitypackage;
+    }
 }

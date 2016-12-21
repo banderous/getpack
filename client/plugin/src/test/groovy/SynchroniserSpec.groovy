@@ -78,6 +78,14 @@ class SynchroniserSpec extends Specification {
         }
     }
 
+    def "builds guid to unitypackage map"() {
+        when:
+        def manifests = Synchroniser.gatherManifests(resolve(superJSON))
+        def guidFileMap = Synchroniser.buildGUIDToUnitypackageMap(manifests)
+
+        then:
+        guidFileMap.size() == 1
+    }
 
     def "builds asset map from all manifests"() {
         when:
@@ -353,7 +361,7 @@ class SynchroniserSpec extends Specification {
         Synchroniser.gatherDependencies(project, repositories, Sets.newHashSet(forPackage))
     }
 
-    def buildTransitivePackage(int depth) {
+    String buildTransitivePackage(int depth) {
 
         String parent = "com.foo:level0:1.0.0"
         ivyRepo.withPackage(parent)

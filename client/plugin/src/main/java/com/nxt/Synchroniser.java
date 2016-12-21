@@ -34,7 +34,7 @@ class Synchroniser {
     static Logger logger = LoggerFactory.getLogger("nxt");
 
 
-    public static void Sync(Project project) {
+    public static FileTree Sync(Project project) {
         AssetMap current = buildAssetMap(gatherManifests(gatherDependencies(project, Config.loadShadow(project))));
         Set<PackageManifest> targetManifests = gatherManifests(gatherDependencies(project, Config.load(project)));
         AssetMap target = buildAssetMap(targetManifests);
@@ -42,10 +42,10 @@ class Synchroniser {
 
         Remove(project, difference.getRemove());
         Move(project, difference.getMoved());
-        Install(project, difference.getAdd(), targetManifests);
+        return Install(project, difference.getAdd(), targetManifests);
     }
 
-    public static void Install(Project project, ImmutableMap<String, Asset> add, Set<PackageManifest> targetManifests) {
+    public static FileTree Install(Project project, ImmutableMap<String, Asset> add, Set<PackageManifest> targetManifests) {
         if (!add.isEmpty()) {
             Map<String, File> filesByGUID = buildGUIDToUnitypackageMap(targetManifests);
             HashMultimap<File, String> guidsByFile = HashMultimap.create();
@@ -55,16 +55,10 @@ class Synchroniser {
             }
 
             // TODO - task this stuff!
-            FileTree tree = UnityPackageCreator.MergeArchives(project, guidsByFile);
-            Tar tar = project.getTasks().create("nxtBalls", Tar.class);
-            tar.setCompression(Compression.GZIP);
-            tar.from(tree);
-
-            tar.setDestinationDir(project.file("nxt/import"));
-            tar.setArchiveName("package.unitypackage");
-            System.out.println("WRITING TO " + project.getPath());
-            tar.execute();
+            return UnityPackageCreator.MergeArchives(project, guidsByFile);
         }
+
+        return null;
     }
 
     public static void Move(Project project, ImmutableMap<String, String> moved) {

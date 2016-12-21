@@ -40,7 +40,7 @@ class E2ESpec extends BaseE2ESpec {
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
-    @PendingFeature
+    @Trouble
     def "install a package"() {
         when:
         def repoProject = UBuilder.Builder()
@@ -60,7 +60,7 @@ class E2ESpec extends BaseE2ESpec {
         // Create a runner that references it
         then:
         conditions.within(5) {
-            assert new File(consumer.projectDir, consumer.filepathForPackage(packageId)).exists()
+            assert new File(consumer.projectDir, IvyBuilder.assetPathForPackage(packageId)).exists()
         }
     }
 }

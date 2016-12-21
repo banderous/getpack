@@ -209,16 +209,24 @@ class SynchroniserSpec extends Specification {
         project.file('Assets/B.txt').exists()
     }
 
-    @Trouble
     def "installing new package"() {
         when:
         builder.withDependency(superJSON)
-        Synchroniser.Sync(project)
+        project.tasks.nxtDo.execute()
+        project.tasks.nxtSync.execute()
         def tree = project.tarTree(project.resources.gzip(Synchroniser.IMPORT_PACKAGE_PATH))
         def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
         def filenames = ImmutableSet.copyOf(paths)
         then:
         filenames == ImmutableSet.of('Assets/Acme/Superjson.txt')
+    }
+
+    def "no changes does not create import package"() {
+        when:
+        project.tasks.nxtDo.execute()
+        project.tasks.nxtSync.execute()
+        then:
+        !project.file(Synchroniser.IMPORT_PACKAGE_PATH).exists()
     }
 
 //    def "difference with local changes"() {

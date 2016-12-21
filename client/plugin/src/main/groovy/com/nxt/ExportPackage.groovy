@@ -44,16 +44,18 @@ class ExportPackage extends DefaultTask {
         project.configurations.create('archives')
         project.pluginManager.apply("ivy-publish")
 
-        project.configure(project) {
-            publishing {
-                repositories {
-                    ivy {
-                        // TODO: make configurable
-                        url project.file("nxt/repo")
+        config.repositories.each { r ->
+            project.configure(project) {
+                publishing {
+                    repositories {
+                        ivy {
+                            url r
+                        }
                     }
                 }
             }
         }
+
 
         config.packages.each { id, pkg ->
             ConfigurePackage(project, pkg)

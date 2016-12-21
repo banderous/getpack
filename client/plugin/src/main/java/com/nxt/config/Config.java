@@ -57,6 +57,10 @@ public class Config {
         return packages.remove(new Package(id).key());
     }
 
+    void clearDependencies() {
+        dependencies.clear();
+    }
+
     void addRepository(String url) {
         repositories.add(url);
     }

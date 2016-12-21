@@ -29,7 +29,7 @@ class UBuilder {
     File projectDir
     Config config = new Config()
     Config projectState = new Config()
-    List<String> args = ["-i"]
+    List<String> args = ["-s"]
 
     UBuilder(){
         this(Files.createTempDir())
@@ -48,6 +48,8 @@ class UBuilder {
                 id 'com.nxt.publish'
             }
         """
+
+        withRepository('nxt/repo')
     }
 
     UBuilder saveConfig() {
@@ -113,6 +115,12 @@ class UBuilder {
     UBuilder withRepository(String url) {
         config.addRepository(url)
         saveConfig()
+        this
+    }
+
+    UBuilder clearDependencies() {
+        config.clearDependencies();
+        saveConfig();
         this
     }
 

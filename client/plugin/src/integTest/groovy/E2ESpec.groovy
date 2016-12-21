@@ -53,8 +53,6 @@ class E2ESpec extends BaseE2ESpec {
                 .withDependency(packageId)
                 .withArg("nxtSync")
 
-        println "producer " + repoProject.projectDir
-        println "consumer " + consumer.projectDir
         consumer.build()
 
         // Create a runner that references it

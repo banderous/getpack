@@ -1,6 +1,8 @@
 import com.nxt.UnityLauncher
 import spock.lang.Specification
 
+import java.nio.channels.FileLock
+
 class UnityLauncherSpec extends Specification {
 
     def "detects the correct unity version"() {
@@ -54,13 +56,18 @@ class UnityLauncherSpec extends Specification {
     def "detects if Unity is running"() {
         when:
         def versionPath = "src/test/resources/projects/${version}"
+        def lockPath = "$versionPath/Temp/UnityLockfile"
+        FileLock lock
+        if (locked) {
+            lock = new FileOutputStream(lockPath).getChannel().lock();
+        }
         def isRunning = UnityLauncher.IsUnityRunning(new File(versionPath))
 
         then:
-        isRunning == answer
+        isRunning == locked
 
         where:
-        version| answer
+        version| locked
         "5.0.0p3"| true
         "5.3.5f1"| false
     }

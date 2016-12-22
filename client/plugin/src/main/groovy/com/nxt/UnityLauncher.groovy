@@ -1,5 +1,7 @@
 package com.nxt
 
+import java.nio.channels.OverlappingFileLockException
+
 
 /**
  * Created by alex on 30/11/2016.
@@ -49,7 +51,20 @@ class UnityLauncher {
     }
 
     public static boolean IsUnityRunning(File projectPath) {
-        new File(projectPath, "Temp/UnityLockfile").exists()
+        def lockFile = new File(projectPath, "Temp/UnityLockfile")
+        if (!lockFile.exists()) {
+            return false;
+        }
+        try {
+            def lock = new FileOutputStream(lockFile).getChannel().lock()
+            if (lock) {
+                lock.release()
+                return false
+            }
+        } catch (OverlappingFileLockException e) {
+            println e
+        }
+        return true;
     }
 
     public static File UnityExeForVersion(File searchPath, String version) {

@@ -1,4 +1,6 @@
+import com.google.common.io.Files
 import com.nxt.UnityLauncher
+import org.apache.commons.io.FileUtils
 import spock.lang.Specification
 
 import java.nio.channels.FileLock
@@ -55,13 +57,16 @@ class UnityLauncherSpec extends Specification {
 
     def "detects if Unity is running"() {
         when:
-        def versionPath = "src/test/resources/projects/${version}"
-        def lockPath = "$versionPath/Temp/UnityLockfile"
+
+        def versionPath = new File("src/test/resources/projects/${version}")
+        def tempDir = Files.createTempDir()
+        FileUtils.copyDirectory(versionPath, tempDir)
+        def lockPath = "$tempDir/Temp/UnityLockfile"
         FileLock lock
         if (locked) {
             lock = new FileOutputStream(lockPath).getChannel().lock();
         }
-        def isRunning = UnityLauncher.IsUnityRunning(new File(versionPath))
+        def isRunning = UnityLauncher.IsUnityRunning(tempDir)
 
         then:
         isRunning == locked

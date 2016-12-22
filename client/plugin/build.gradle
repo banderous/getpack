@@ -40,8 +40,8 @@ dependencies {
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {
         exclude module: 'groovy-all'
     }
-    testCompile group: 'org.apache.commons', name: 'commons-compress', version: '1.12'
-
+    testCompile 'org.apache.commons:commons-compress:1.12'
+    testCompile 'commons-io:commons-io:2.5'
 
     archives project(path: ':client:unityPuppet', configuration: 'archives')
 }

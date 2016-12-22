@@ -35,6 +35,8 @@ dependencies {
     compile "com.google.code.gson:gson:2.8.0"
     compile 'com.google.guava:guava:20.0'
     compile 'org.yaml:snakeyaml:1.17'
+    compile 'org.apache.commons:commons-lang3:3.5'
+
 
     testCompile gradleTestKit()
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {

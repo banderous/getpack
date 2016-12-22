@@ -115,10 +115,14 @@ namespace com.nxt
 					files [t++] = f.ToString ();
 				}
 
+				Directory.CreateDirectory (ExportFolder);
 				var destination = Path.Combine (ExportFolder, string.Format ("{0}.unitypackage", Path.GetFileNameWithoutExtension(file)));
 				AssetDatabase.ExportPackage (files, destination,
 											 ExportPackageOptions.Recurse);
-				Debug.Log ("Published to " + destination);
+
+
+
+				Debug.Log ("Published to " + Path.GetFullPath(destination));
 
 			}
 		}

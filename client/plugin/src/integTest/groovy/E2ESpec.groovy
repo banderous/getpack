@@ -14,6 +14,7 @@ class E2ESpec extends BaseE2ESpec {
     def version = "1.0.1"
     def packageId = [group, name, version].join(":")
 
+    @Trouble
     def "export a package"() {
         when:
         def project = UBuilder.Builder()

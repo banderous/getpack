@@ -10,7 +10,7 @@ import java.util.List;
  * Created by alex on 08/12/2016.
  */
 public class Package {
-    String group, name, version;
+    public String group, name, version;
     List<String> roots = Lists.newArrayList();
 
     // Required for serialization.
@@ -24,6 +24,9 @@ public class Package {
         version = l.get(2);
     }
 
+    public List<String> getRoots() {
+        return roots;
+    }
 
     String key() {
         return Joiner.on(":").join(group, name);

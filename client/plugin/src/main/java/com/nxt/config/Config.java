@@ -19,10 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
-class PackageMap extends HashMap<String, Package> {
-
-}
-
 public class Config {
 
     private final static String CONFIG_PATH = "nxt/nxt.json";
@@ -53,6 +49,7 @@ public class Config {
         return pack;
     }
 
+    public PackageMap getPackages() { return packages; }
     public Package removePackage(String id) {
         return packages.remove(new Package(id).key());
     }

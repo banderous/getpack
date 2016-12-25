@@ -128,9 +128,7 @@ class ExportPackage extends DefaultTask {
 
     void exportPackageJob(Project project, Package pack) throws IOException {
         File exportFile = getPath(project, PathType.task, pack);
-        exportFile.getParentFile().mkdirs();
-        exportFile.createNewFile();
-
+        Files.createParentDirs(exportFile);
 
         JsonBuilder builder = new JsonBuilder();
         Path baseDir = Paths.get(project.getProjectDir().getAbsolutePath());

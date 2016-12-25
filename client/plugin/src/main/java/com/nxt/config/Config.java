@@ -85,7 +85,7 @@ public class Config {
     static Config load(File f) {
         try {
             if (!f.exists()) {
-                f.getParentFile().mkdirs();
+                Files.createParentDirs(f);
                 Files.write("{}", f, Charsets.UTF_8);
             }
             return new Gson().fromJson(new FileReader(f), Config.class);

@@ -24,7 +24,6 @@ import java.util.Set;
  */
 public class UnityPackageCreator extends Copy {
 
-
     public static FileTree MergeArchives(Project project, HashMultimap<File, String> filesAndPaths) {
         FileTree result = null;
         for (File file : filesAndPaths.keys()) {

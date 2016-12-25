@@ -60,7 +60,7 @@ public class PackageManifest {
 
     public static void save(PackageManifest manifest, File to) {
         try {
-            to.getParentFile().mkdir();
+            Files.createParentDirs(to);
             Files.write(new Gson().toJson(manifest), to, Charsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);

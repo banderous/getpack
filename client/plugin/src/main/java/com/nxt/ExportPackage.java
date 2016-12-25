@@ -130,14 +130,12 @@ class ExportPackage extends DefaultTask {
         File exportFile = getPath(project, PathType.task, pack);
         Files.createParentDirs(exportFile);
 
-        JsonBuilder builder = new JsonBuilder();
         Path baseDir = Paths.get(project.getProjectDir().getAbsolutePath());
         Set<String> paths = Sets.newHashSet();
         for (File f : project.fileTree("Assets").getFiles()) {
             String s = baseDir.relativize(f.toPath()).toFile().getPath();
             paths.add(s);
         }
-
 
         String json = new Gson().toJson(ImmutableMap.of("task",
                 ImmutableMap.of("files", paths)));

@@ -28,7 +28,6 @@ class InstallPuppet extends  DefaultTask {
 
     private void Install(Project project) throws IOException {
         File f = project.file(PUPPET_PATH);
-
         Files.createParentDirs(f);
         ByteStreams.copy(getClass().getResourceAsStream("/unityPuppet.dll"), new FileOutputStream(f));
     }

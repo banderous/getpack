@@ -23,35 +23,11 @@ public class Config {
 
     private final static String CONFIG_PATH = "nxt/nxt.json";
     private final static String SHADOW_CONFIG_PATH = "nxt/nxt.json.state";
-    PackageMap packages = new PackageMap();
     Set<String> repositories = Sets.newHashSet();
     Set<String> dependencies = Sets.newHashSet();
 
     Config() {
 
-    }
-
-    public Package findPackage(String id) {
-        return packages.get(id);
-    }
-
-    public Package addPackage(String group, String name, String version) {
-        String id = Joiner.on(":").join(group, name, version);
-        return addPackage(id);
-    }
-
-    public Package addPackage(String id) {
-        Package pack = new Package(id);
-        if (packages.containsKey(pack.key())) {
-            throw new GradleException("Package ${id} already installed!");
-        }
-        packages.put(pack.key(), pack);
-        return pack;
-    }
-
-    public PackageMap getPackages() { return packages; }
-    public Package removePackage(String id) {
-        return packages.remove(new Package(id).key());
     }
 
     void clearDependencies() {

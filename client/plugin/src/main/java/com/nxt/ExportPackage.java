@@ -11,6 +11,7 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.nxt.config.*;
 import com.nxt.config.Package;
+import com.nxt.publish.PublishConfig;
 import groovy.json.JsonBuilder;
 import org.apache.commons.lang3.text.WordUtils;
 import org.gradle.api.Action;
@@ -69,7 +70,7 @@ class ExportPackage extends DefaultTask {
 
     }
 
-    public static void Configure(final Project project, final Config config) {
+    public static void Configure(final Project project, final PublishConfig config) {
         project.getConfigurations().create("archives");
         project.getPluginManager().apply("ivy-publish");
 

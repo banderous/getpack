@@ -17,7 +17,7 @@ public class Package {
     Package() {
     }
 
-    Package(String id) {
+    public Package(String id) {
         List<String> l = Splitter.on(":").splitToList(id);
         group = l.get(0);
         name = l.get(1);
@@ -28,7 +28,7 @@ public class Package {
         return roots;
     }
 
-    String key() {
+    public String key() {
         return Joiner.on(":").join(group, name);
     }
 }

@@ -6,6 +6,8 @@ import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import com.nxt.config.Config
 import com.nxt.config.Package
+import com.nxt.config.Util
+import com.nxt.publish.PublishConfig
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
@@ -28,6 +30,7 @@ class UBuilder {
     List<Package> packages = Lists.newArrayList()
     File projectDir
     Config config = new Config()
+    PublishConfig publishConfig = new PublishConfig()
     Config projectState = new Config()
     List<String> args = ["-s"]
 
@@ -59,6 +62,10 @@ class UBuilder {
 
         f = new File(projectDir, "nxt/nxt.json.state")
         Config.save(projectState, f)
+
+        f = new File(projectDir, PublishConfig.PUBLISH_CONFIG_PATH)
+        Util.save(publishConfig, f)
+
         this
     }
 
@@ -105,7 +112,7 @@ class UBuilder {
         withFile(IvyBuilder.assetPathForPackage(id))
         // Assume there is a top level root matching the organisation.
         String group = id.split(":")[0]
-        def pack = config.addPackage(id)
+        def pack = publishConfig.addPackage(id)
         packages.add(pack)
         pack.roots.add("${group.capitalize()}/**".toString())
         saveConfig()
@@ -114,6 +121,7 @@ class UBuilder {
 
     UBuilder withRepository(String url) {
         config.addRepository(url)
+        publishConfig.addRepository(url)
         saveConfig()
         this
     }

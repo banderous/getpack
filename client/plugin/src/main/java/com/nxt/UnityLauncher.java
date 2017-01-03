@@ -2,8 +2,12 @@ package com.nxt;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
@@ -40,8 +44,8 @@ public class UnityLauncher {
                     XPath xpath = XPathFactory.newInstance().newXPath();
                     String expression = "/plist/dict/key[text() = 'CFBundleVersion']/following-sibling::string/text()";
                     try {
-                        InputSource inputSource = new InputSource(new FileInputStream(pList));
-                        String installedVersion = xpath.evaluate(expression, inputSource);
+                        Document doc = NonValidatingDoc(new InputSource(new FileInputStream(pList)));
+                        String installedVersion = xpath.evaluate(expression, doc);
                         if (installedVersion.equals(version)) {
                             return file;
                         }
@@ -55,6 +59,17 @@ public class UnityLauncher {
         }
 
         throw new IllegalArgumentException("Unity version not found: " + version);
+    }
+
+    private static Document NonValidatingDoc(InputSource source) {
+        DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
+        dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
+        try {
+            DocumentBuilder builder = dbfact.newDocumentBuilder();
+            return builder.parse(source);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean IsUnityRunning(File projectPath) {

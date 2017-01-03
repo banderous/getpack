@@ -18,6 +18,8 @@ class LaunchUnity extends  DefaultTask {
 
     @TaskAction
     public void action() throws IOException {
+        boolean isRunning = UnityLauncher.IsUnityRunning(getProject().getProjectDir());
+        Log.L.info(String.format("Unity running %s %s", isRunning, getProject().getProjectDir()));
         if (!UnityLauncher.IsUnityRunning(getProject().getProjectDir())) {
             String version = UnityLauncher.UnityVersion(getProject().getProjectDir());
             File exe = UnityLauncher.UnityExeForVersion(new File("/Applications"), version);

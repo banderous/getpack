@@ -7,6 +7,7 @@ import com.nxt.config.Asset
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
 import groovy.xml.MarkupBuilder
+import org.gradle.api.Project
 
 import java.nio.file.Paths
 
@@ -31,6 +32,10 @@ class IvyBuilder {
 
     public static String assetPathForPackage(vals) {
         return assetPathForPackage(vals.group, vals.name, vals.version)
+    }
+
+    public static boolean isInstalled(Project project, String packageId) {
+        return new File(project.projectDir, assetPathForPackage(packageId)).exists()
     }
 
     public static String assetPathForPackage(String id) {

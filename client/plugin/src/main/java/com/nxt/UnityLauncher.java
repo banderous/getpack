@@ -77,19 +77,30 @@ public class UnityLauncher {
         if (!lockFile.exists()) {
             return false;
         }
+        FileLock lock = null;
         try {
-            FileLock lock = new FileOutputStream(lockFile).getChannel().lock();
-            if (null != lock) {
-                lock.release();
-                return false;
-            }
+            lock = new FileOutputStream(lockFile).getChannel().tryLock();
+            // If unable to lock then Unity is running.
+            return lock == null;
         } catch (OverlappingFileLockException e) {
+            // A lock is already held.
+            return true;
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
             return false;
         } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
-        return true;
+        finally {
+            if (null != lock) {
+                try {
+                    lock.release();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public static File UnityExeForVersion(File searchPath, String version) {

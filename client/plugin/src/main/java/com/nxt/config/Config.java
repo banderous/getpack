@@ -30,7 +30,7 @@ public class Config {
 
     }
 
-    void clearDependencies() {
+    public void clearDependencies() {
         dependencies.clear();
     }
 

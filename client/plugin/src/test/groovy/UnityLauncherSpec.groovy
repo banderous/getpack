@@ -1,4 +1,5 @@
 import com.google.common.io.Files
+import com.nxt.Trouble
 import com.nxt.UnityLauncher
 import org.apache.commons.io.FileUtils
 import spock.lang.Specification
@@ -55,6 +56,7 @@ class UnityLauncherSpec extends Specification {
         thrown(IllegalArgumentException)
     }
 
+    @Trouble
     def "detects if Unity is running"() {
         when:
 
@@ -66,6 +68,7 @@ class UnityLauncherSpec extends Specification {
         if (locked) {
             lock = new FileOutputStream(lockPath).getChannel().lock();
         }
+
         def isRunning = UnityLauncher.IsUnityRunning(tempDir)
 
         then:
@@ -74,7 +77,9 @@ class UnityLauncherSpec extends Specification {
         where:
         version| locked
         "5.0.0p3"| true
+        "5.0.0p3"| false
         "5.3.5f1"| false
+        "5.3.5f1"| true
     }
 
     def "finds Unity executable for version"() {

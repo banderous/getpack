@@ -32,7 +32,7 @@ class UBuilder {
     Config config = new Config()
     PublishConfig publishConfig = new PublishConfig()
     Config projectState = new Config()
-    List<String> args = ["-s"]
+    List<String> args = ["-i"]
 
     UBuilder(){
         this(Files.createTempDir())
@@ -133,6 +133,13 @@ class UBuilder {
     }
 
     UBuilder withDependency(String id) {
+        config.addDependency(id)
+        saveConfig()
+        this
+    }
+
+    UBuilder removeDependency(String id) {
+        config.cl
         config.addDependency(id)
         saveConfig()
         this

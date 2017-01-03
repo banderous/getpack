@@ -1,4 +1,5 @@
 import com.nxt.UBuilder
+import com.nxt.publish.PublishConfig
 import spock.lang.PendingFeature
 import spock.lang.Specification;
 
@@ -6,13 +7,23 @@ import spock.lang.Specification;
  * Created by alex on 22/12/2016.
  */
 public class CreatePackageSpec extends Specification {
-    @PendingFeature
-    def "creating a new package"() {
+
+    def project = UBuilder.Builder().asProject()
+
+    def "with no packages"() {
         when:
-        def project = UBuilder.Builder().asProject()
-        project.tasks.nxtCreatePackage.execute()
+        def config = PublishConfig.load(project)
 
         then:
-        true
+        config.packages.isEmpty()
+    }
+
+    def "creating a new package"() {
+        when:
+        project.tasks.nxtCreatePackage.execute()
+        def config = PublishConfig.load(project)
+        def pack = config.findPackage('com:example')
+        then:
+        pack
     }
 }

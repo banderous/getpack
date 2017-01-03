@@ -5,6 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by alex on 08/12/2016.
@@ -30,5 +31,19 @@ public class Package {
 
     public String key() {
         return Joiner.on(":").join(group, name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        final Package other = (Package) obj;
+        if (null == other) return false;
+
+        return Objects.equals(group, other.group)
+                && Objects.equals(name, other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(group, name);
     }
 }

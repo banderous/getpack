@@ -1,6 +1,7 @@
 package com.nxt
 
 import com.nxt.config.Config
+import com.nxt.publish.ExportPackage
 import com.nxt.publish.PublishConfig
 import org.gradle.testfixtures.ProjectBuilder;
 import spock.lang.Specification
@@ -34,7 +35,7 @@ class ExportSpec extends Specification {
         builder.withFile("Assets/Irrelevant.txt")
         builder.withFile("Assets/Acme/file.meta")
 
-        def tree = ExportPackage.gatherForExport(proj, builder.publishConfig.packages['acme:superjson'])
+        def tree = ExportPackage.gatherForExport(proj, builder.publishConfig.findPackage('acme:superjson'))
 
         then:
         // Ignores puppet dll.

@@ -1,9 +1,8 @@
-package com.nxt;
+package com.nxt.publish;
 
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -11,8 +10,6 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.nxt.config.*;
 import com.nxt.config.Package;
-import com.nxt.publish.PublishConfig;
-import groovy.json.JsonBuilder;
 import org.apache.commons.lang3.text.WordUtils;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
@@ -24,7 +21,6 @@ import org.gradle.api.file.FileTree;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.ivy.IvyArtifact;
 import org.gradle.api.publish.ivy.IvyPublication;
-import org.gradle.api.publish.ivy.plugins.IvyPublishPlugin;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.yaml.snakeyaml.Yaml;
@@ -36,15 +32,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by alex on 02/12/2016.
  */
-class ExportPackage extends DefaultTask {
+public class ExportPackage extends DefaultTask {
 
     enum PathType {
         task("task"),
@@ -88,8 +82,8 @@ class ExportPackage extends DefaultTask {
             }
         });
 
-        for (Map.Entry<String, Package> entry : config.getPackages().entrySet()) {
-            ConfigurePackage(project, entry.getValue());
+        for (Package p : config.getPackages()) {
+            ConfigurePackage(project, p);
         }
     }
 

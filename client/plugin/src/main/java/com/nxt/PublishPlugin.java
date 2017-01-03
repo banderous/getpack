@@ -1,6 +1,7 @@
 package com.nxt;
 
-import com.nxt.config.Config;
+import com.nxt.publish.CreatePackage;
+import com.nxt.publish.ExportPackage;
 import com.nxt.publish.PublishConfig;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -12,6 +13,7 @@ public class PublishPlugin implements Plugin<Project> {
         project.getTasks().create("launchUnity", LaunchUnity.class).dependsOn("installPuppet");
         PublishConfig config = PublishConfig.load(project);
         ExportPackage.Configure(project, config);
+        CreatePackage.Configure(project);
         SyncDeps.Configure(project);
     }
 }

@@ -26,9 +26,13 @@ public class Util {
 
     public static <T> void save(T object, File f) {
         try {
-            Files.write(new Gson().toJson(object), f, Charsets.UTF_8);
+            Files.write(Serialize(object), f, Charsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String Serialize(Object o) {
+        return new Gson().toJson(o);
     }
 }

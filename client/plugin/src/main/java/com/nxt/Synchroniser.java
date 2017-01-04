@@ -11,13 +11,12 @@ import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.tasks.bundling.Compression;
-import org.gradle.api.tasks.bundling.Tar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,8 +34,8 @@ class Synchroniser {
 
 
     public static FileTree Sync(Project project) {
-        Set<PackageManifest> currentManifests = gatherManifests(gatherDependencies(project, Config.loadShadow(project)));
-        Set<PackageManifest> targetManifests = gatherManifests(gatherDependencies(project, Config.load(project)));
+        Set<PackageManifest> currentManifests = gatherManifests(gatherDependencies(project, ProjectConfig.loadShadow(project)));
+        Set<PackageManifest> targetManifests = gatherManifests(gatherDependencies(project, ProjectConfig.load(project)));
 
         Log.L.info("Current manifests: {}, target manifests: {}", currentManifests.size(), targetManifests.size());
         AssetMap current = buildAssetMap(currentManifests);
@@ -49,7 +48,9 @@ class Synchroniser {
 
         Remove(project, difference.getRemove());
         Move(project, difference.getMoved());
-        return Install(project, difference.getAdd(), targetManifests);
+        FileTree result = Install(project, difference.getAdd(), targetManifests);
+        ProjectConfig.UpdateShadowWithConfig(project);
+        return result;
     }
 
     public static FileTree Install(Project project, ImmutableMap<String, Asset> add, Set<PackageManifest> targetManifests) {
@@ -196,7 +197,7 @@ class Synchroniser {
         return result;
     }
 
-    static Set<ResolvedDependency> gatherDependencies(Project project, Config config) {
+    static Set<ResolvedDependency> gatherDependencies(Project project, ProjectConfig config) {
         return gatherDependencies(project, config.getRepositories(), config.getDependencies());
     }
 

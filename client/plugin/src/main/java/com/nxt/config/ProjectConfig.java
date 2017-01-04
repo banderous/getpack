@@ -4,29 +4,29 @@
 package com.nxt.config;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
-import groovy.json.JsonBuilder;
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.io.UncheckedIOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Set;
 
-public class Config {
+public class ProjectConfig {
 
     private final static String CONFIG_PATH = "nxt/nxt.json";
     private final static String SHADOW_CONFIG_PATH = "nxt/nxt.json.state";
     Set<String> repositories = Sets.newHashSet();
     Set<String> dependencies = Sets.newHashSet();
 
-    Config() {
+    ProjectConfig() {
 
     }
 
@@ -50,31 +50,29 @@ public class Config {
         return ImmutableSet.copyOf(dependencies);
     }
 
-    public static Config load(Project project) {
+    public static ProjectConfig load(Project project) {
         return load(project.file(CONFIG_PATH));
     }
 
-    public static Config loadShadow(Project project) {
+    public static ProjectConfig loadShadow(Project project) {
         return load(project.file(SHADOW_CONFIG_PATH));
     }
 
-    static Config load(File f) {
+    public static void UpdateShadowWithConfig(Project project) {
+        Path source = project.file(CONFIG_PATH).toPath();
+        Path dest = project.file(SHADOW_CONFIG_PATH).toPath();
         try {
-            if (!f.exists()) {
-                Files.createParentDirs(f);
-                Files.write("{}", f, Charsets.UTF_8);
-            }
-            return new Gson().fromJson(new FileReader(f), Config.class);
+            java.nio.file.Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
-    static void save(Config config, File f) {
-        try {
-            Files.write(new Gson().toJson(config), f, Charsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    static ProjectConfig load(File f) {
+        return Util.LoadJSONClass(f, ProjectConfig.class);
+    }
+
+    static void save(ProjectConfig config, File f) {
+        Util.save(config, f);
     }
 }

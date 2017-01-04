@@ -4,7 +4,7 @@ import com.google.common.base.Charsets
 import com.google.common.collect.Lists
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
-import com.nxt.config.Config
+import com.nxt.config.ProjectConfig
 import com.nxt.config.Package
 import com.nxt.config.Util
 import com.nxt.publish.PublishConfig
@@ -29,9 +29,9 @@ class UBuilder {
 
     List<Package> packages = Lists.newArrayList()
     File projectDir
-    Config config = new Config()
+    ProjectConfig config = new ProjectConfig()
     PublishConfig publishConfig = new PublishConfig()
-    Config projectState = new Config()
+    ProjectConfig projectState = new ProjectConfig()
     List<String> args = ["-i"]
 
     UBuilder(){
@@ -58,10 +58,7 @@ class UBuilder {
     UBuilder saveConfig() {
         def f = new File(projectDir, "nxt/nxt.json")
         f.getParentFile().mkdirs()
-        Config.save(config, f)
-
-        f = new File(projectDir, "nxt/nxt.json.state")
-        Config.save(projectState, f)
+        ProjectConfig.save(config, f)
 
         f = new File(projectDir, PublishConfig.PUBLISH_CONFIG_PATH)
         Util.save(publishConfig, f)
@@ -148,7 +145,8 @@ class UBuilder {
     UBuilder withInstalledDependency(String id) {
         withFile(IvyBuilder.assetPathForPackage(id))
         projectState.addDependency(id)
-        saveConfig()
+        File f = new File(projectDir, "nxt/nxt.json.state")
+        ProjectConfig.save(projectState, f)
         this
     }
 }

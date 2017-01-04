@@ -8,6 +8,7 @@ import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
+import com.nxt.config.ProjectConfig
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.testfixtures.ProjectBuilder
@@ -19,7 +20,6 @@ import java.nio.file.Paths
  * Created by alex on 09/12/2016.
  */
 class SynchroniserSpec extends Specification {
-    def deps = []
     def superJSON = "acme:superjson:1.0.0"
 
     def builder = UBuilder.Builder()
@@ -217,8 +217,11 @@ class SynchroniserSpec extends Specification {
         def tree = project.tarTree(project.resources.gzip(Synchroniser.IMPORT_PACKAGE_PATH))
         def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
         def filenames = ImmutableSet.copyOf(paths)
+        def shadowConfig = ProjectConfig.loadShadow(project)
         then:
         filenames == ImmutableSet.of('Assets/Acme/Superjson.txt')
+        shadowConfig.dependencies == ImmutableSet.of(superJSON)
+        shadowConfig.repositories == builder.config.repositories
     }
 
     def "new package with transitive dependencies"() {

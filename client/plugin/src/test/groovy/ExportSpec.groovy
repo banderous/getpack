@@ -1,6 +1,5 @@
 package com.nxt
 
-import com.nxt.config.Config
 import com.nxt.publish.ExportPackage
 import com.nxt.publish.PublishConfig
 import org.gradle.testfixtures.ProjectBuilder;

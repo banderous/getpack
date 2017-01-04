@@ -27,7 +27,7 @@ public class PublishConfig {
     public Package addPackage(String id) {
         Package pack = new Package(id);
         if (packages.contains(pack)) {
-            throw new GradleException("Package ${id} already installed!");
+            throw new GradleException("Package already installed: " + id);
         }
         packages.add(pack);
         pack.getRoots().add("Assets");

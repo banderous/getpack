@@ -4,6 +4,7 @@ import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import com.nxt.config.Asset
+import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
 import groovy.xml.MarkupBuilder
@@ -15,7 +16,7 @@ import java.nio.file.Paths
  * Created by alex on 09/12/2016.
  */
 class IvyBuilder {
-    static IvyBuilder Create() {
+    public static IvyBuilder Create() {
         new IvyBuilder()
     }
 
@@ -44,7 +45,7 @@ class IvyBuilder {
     }
 
     public static String assetPathForPackage(String group, String name, String version) {
-        return ['Assets', group.capitalize(), name.capitalize() + ".txt"].join("/")
+        return ['Assets', group.capitalize(), name.capitalize() + "-${version}.txt"].join("/")
     }
 
     File dir = Files.createTempDir()
@@ -56,21 +57,21 @@ class IvyBuilder {
         builder.dir("${parsed.group}/${parsed.name}/${parsed.version}") {
             file("ivy-${parsed.version}.xml", writeIvyModule(deps, parsed))
             file("${parsed.group}.${parsed.name}-${parsed.version}.manifest", manifest.toString())
-            file("${parsed.name}-${parsed.version}.unitypackage", writeUnityPackage(manifest))
+            file("${parsed.name}-${parsed.version}.unitypackage", writeUnityPackage(manifest.files))
         }
 
 
         this
     }
 
-    def writeUnityPackage(PackageManifest man) {
+    public static File writeUnityPackage(AssetMap map) {
         File tarDir = Files.createTempDir()
-        def path = assetPathForPackage(man.pack)
+
         def builder = new FileTreeBuilder(tarDir)
-        man.files.each { a ->
+        map.each { a ->
             builder.dir(a.key) {
                 file("asset", "Fake asset")
-                file("pathname", path)
+                file("pathname", a.value.path)
             }
         }
 

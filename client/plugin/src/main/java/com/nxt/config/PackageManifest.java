@@ -34,7 +34,7 @@ public class PackageManifest {
     }
 
     public void Add(String guid, Path path, String md5) {
-        files.put(guid, new Asset(path, md5));
+        files.put(guid, new Asset(path.toString(), md5));
     }
 
     @Override

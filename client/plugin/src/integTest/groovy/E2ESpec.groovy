@@ -15,9 +15,8 @@ class E2ESpec extends BaseE2ESpec {
     @Shared version = "1.0.0"
     @Shared packageId = [group, name, version].join(":")
 
-    @Shared GradleRunner packageRunner = publishPackage(packageId)
+    @Shared UBuilder packageRunner = publishPackage(packageId)
 
-    @Trouble
     def "export a package"() {
         when:
         def project = UBuilder.Builder()
@@ -39,7 +38,6 @@ class E2ESpec extends BaseE2ESpec {
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
-    @Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)
@@ -62,6 +60,26 @@ class E2ESpec extends BaseE2ESpec {
         }
     }
 
+    def "upgrade a dependency"() {
+        when:
+        def consumer = projectConsumingPackage(packageId)
+        consumer.clearDependencies()
+
+        def newVersion = [group, name, "1.1.0"].join(":")
+        def n = publishPackage(newVersion)
+        consumer.withRepository(n.projectDir.path + "/nxt/repo")
+
+        consumer.withDependency(newVersion)
+        consumer.build()
+
+        then:
+        conditions.within(5) {
+            assert !IvyBuilder.isInstalled(consumer.asProject(), packageId)
+
+            assert IvyBuilder.isInstalled(consumer.asProject(), newVersion)
+        }
+    }
+
     def projectConsumingPackage(String packageId) {
         def result = UBuilder.Builder()
                 .withRepository("${packageRunner.projectDir.path}/nxt/repo")
@@ -74,10 +92,11 @@ class E2ESpec extends BaseE2ESpec {
         return result;
     }
 
-    def publishPackage(String packageId) {
-        UBuilder.Builder()
+    UBuilder publishPackage(String packageId) {
+        def result = UBuilder.Builder()
                 .withPackage(packageId)
                 .withArg("publishAcmeSuperjsonPublicationToIvyRepository")
-                .build()
+        result.build()
+        result
     }
 }

@@ -38,6 +38,11 @@ class UBuilder {
         this(Files.createTempDir())
     }
 
+    @Override
+    public String toString() {
+        return projectDir
+    }
+
     UBuilder(File projectDir) {
         this.projectDir = projectDir
         File tempFile = new File(projectDir, "Assets")

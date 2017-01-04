@@ -1,6 +1,7 @@
 package com.nxt;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
@@ -18,14 +19,22 @@ class LaunchUnity extends  DefaultTask {
 
     @TaskAction
     public void action() throws IOException {
-        boolean isRunning = UnityLauncher.IsUnityRunning(getProject().getProjectDir());
-        Log.L.info(String.format("Unity running %s %s", isRunning, getProject().getProjectDir()));
-        if (!UnityLauncher.IsUnityRunning(getProject().getProjectDir())) {
-            String version = UnityLauncher.UnityVersion(getProject().getProjectDir());
+        Launch(getProject());
+    }
+
+    public static void Launch(Project project) {
+        boolean isRunning = UnityLauncher.IsUnityRunning(project.getProjectDir());
+        Log.L.info(String.format("Unity running %s %s", isRunning, project.getProjectDir()));
+        if (!UnityLauncher.IsUnityRunning(project.getProjectDir())) {
+            String version = UnityLauncher.UnityVersion(project.getProjectDir());
             File exe = UnityLauncher.UnityExeForVersion(new File("/Applications"), version);
             ProcessBuilder builder = new ProcessBuilder();
-            builder.command(exe.getPath(), "-batchmode", "-projectPath", getProject().getProjectDir().getPath());
-            builder.start();
+            builder.command(exe.getPath(), "-batchmode", "-projectPath", project.getProjectDir().getPath());
+            try {
+                builder.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

@@ -12,8 +12,8 @@ public class Asset {
     private Asset() {}
     public transient PackageManifest pack;
 
-    Asset(Path path, String md5) {
-        this.path = path.toString();
+    Asset(String path, String md5) {
+        this.path = path;
         this.md5 = md5;
     }
 

@@ -214,12 +214,12 @@ class SynchroniserSpec extends Specification {
         builder.withDependency(superJSON)
         project.tasks.nxtDo.execute()
         project.tasks.nxtSync.execute()
-        def tree = project.tarTree(project.resources.gzip(Synchroniser.IMPORT_PACKAGE_PATH))
+        def tree = project.tarTree(project.resources.gzip(UnityPuppet.IMPORT_PACKAGE_PATH))
         def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
         def filenames = ImmutableSet.copyOf(paths)
         def shadowConfig = ProjectConfig.loadShadow(project)
         then:
-        filenames == ImmutableSet.of('Assets/Acme/Superjson.txt')
+        filenames == ImmutableSet.of('Assets/Acme/Superjson-1.0.0.txt')
         shadowConfig.dependencies == ImmutableSet.of(superJSON)
         shadowConfig.repositories == builder.config.repositories
     }
@@ -230,10 +230,10 @@ class SynchroniserSpec extends Specification {
         builder.withDependency(withTransitive)
         project.tasks.nxtDo.execute()
         project.tasks.nxtSync.execute()
-        def tree = project.tarTree(project.resources.gzip(Synchroniser.IMPORT_PACKAGE_PATH))
+        def tree = project.tarTree(project.resources.gzip(UnityPuppet.IMPORT_PACKAGE_PATH))
         def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
         def filenames = ImmutableSet.copyOf(paths)
-        def expectedNames = (0..3).collect { "Assets/Com.foo/Level${it}.txt".toString() }
+        def expectedNames = (0..3).collect { "Assets/Com.foo/Level${it}-1.0.0.txt".toString() }
         then:
 
         filenames == ImmutableSet.copyOf(expectedNames)
@@ -245,7 +245,7 @@ class SynchroniserSpec extends Specification {
         project.tasks.nxtDo.execute()
         project.tasks.nxtSync.execute()
         then:
-        !project.file(Synchroniser.IMPORT_PACKAGE_PATH).exists()
+        !project.file(UnityPuppet.IMPORT_PACKAGE_PATH).exists()
     }
 
     Set<ResolvedDependency> resolve(String forPackage) {

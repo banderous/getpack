@@ -29,7 +29,6 @@ interface IChangedFileFilter {
  */
 class Synchroniser {
 
-    public static final String IMPORT_PACKAGE_PATH = "nxt/import/package.unitypackage";
     static Logger logger = LoggerFactory.getLogger("nxt");
 
 

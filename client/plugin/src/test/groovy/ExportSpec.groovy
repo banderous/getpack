@@ -40,7 +40,7 @@ class ExportSpec extends Specification {
         // Ignores puppet dll.
         !tree.files.any { it.path.endsWith(".dll") }
         // Includes our text file
-        tree.files.any { it.path.endsWith("Superjson.txt")}
+        IvyBuilder.isInstalled(builder.asProject(), id)
         // Ignores irrelevant file.
         !tree.files.any { it.path.endsWith("Irrelevant.txt") }
         // Ignores any meta files.
@@ -59,8 +59,8 @@ class ExportSpec extends Specification {
 
         then:
         manifest.files instanceof Map
-        assert manifest.files.any { guid, info -> (info.path == 'Assets/Acme/Superjson.txt'
-            && info.md5 == "5eb28086954dfc9e3313c848d928ca4e")}
+        assert manifest.files.any { guid, info -> (info.path == 'Assets/Acme/Superjson-1.0.1.txt'
+            && info.md5 == "f63671431e05d3286cb0c192e61945e9")}
     }
 
     def "meta parsing"() {

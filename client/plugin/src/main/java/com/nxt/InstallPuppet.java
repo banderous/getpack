@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 /**
  * Created by alex on 02/12/2016.
@@ -22,13 +23,19 @@ class InstallPuppet extends  DefaultTask {
     }
 
     @TaskAction
-    public void install() throws IOException {
+    public void install() {
         Install(getProject());
     }
 
-    private void Install(Project project) throws IOException {
+    public static void Install(Project project) {
         File f = project.file(PUPPET_PATH);
-        Files.createParentDirs(f);
-        ByteStreams.copy(getClass().getResourceAsStream("/unityPuppet.dll"), new FileOutputStream(f));
+        if (!f.exists()) {
+            try {
+                Files.createParentDirs(f);
+                ByteStreams.copy(InstallPuppet.class.getResourceAsStream("/unityPuppet.dll"), new FileOutputStream(f));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 }

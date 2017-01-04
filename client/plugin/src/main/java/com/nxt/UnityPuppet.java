@@ -24,8 +24,11 @@ public class UnityPuppet {
             while(!completed.exists()) {
                 try {
                     Thread.sleep(100);
+                    Log.L.debug("Waiting for {}", completed);
                 } catch (InterruptedException e) { }
             }
+
+            completed.delete();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

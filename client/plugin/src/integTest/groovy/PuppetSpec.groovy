@@ -19,15 +19,21 @@ class PuppetSpec extends BaseE2ESpec {
     def project = UBuilder.Builder()
 
     @Trouble
-    def "installs a package"() {
+    def "installs packages"() {
         when:
-        println project.projectDir
         def path = 'Assets/A.txt'
         def pack = writeUnityPackage([path])
         UnityPuppet.InstallPackage(project.asProject(), pack)
 
+        def path2 = 'Assets/B.txt'
+        pack = writeUnityPackage([path2])
+        UnityPuppet.InstallPackage(project.asProject(), pack)
+
         then:
         project.asProject().file(path).exists()
+        project.asProject().file('nxt/import').list() == []
+
+        project.asProject().file(path2).exists()
     }
 
     def writePackage(pack) {

@@ -57,7 +57,7 @@ class SynchroniserSpec extends Specification {
 
     def "resolves transitive dependencies"() {
         when:
-        def child = buildTransitivePackage(2)
+        def child = buildTransitivePackage(ivyRepo, 2)
         def deps = resolve(child)
         then:
         deps.size() == 3
@@ -68,7 +68,7 @@ class SynchroniserSpec extends Specification {
 
     def "resolves package manifests"() {
         when:
-        def child = buildTransitivePackage(4)
+        def child = buildTransitivePackage(ivyRepo, 4)
         def deps = resolve(child)
         def manifests = Synchroniser.gatherManifests(deps)
         then:
@@ -89,7 +89,7 @@ class SynchroniserSpec extends Specification {
 
     def "builds asset map from all manifests"() {
         when:
-        def child = buildTransitivePackage(3)
+        def child = buildTransitivePackage(ivyRepo, 3)
         def manifests = Synchroniser.gatherManifests(resolve(child))
         def assetMap = Synchroniser.buildAssetMap(manifests)
 
@@ -209,37 +209,6 @@ class SynchroniserSpec extends Specification {
         project.file('Assets/B.txt').exists()
     }
 
-    def "installing new package"() {
-        when:
-        builder.withDependency(superJSON)
-        project.tasks.nxtDo.execute()
-        project.tasks.nxtSync.execute()
-        def tree = project.tarTree(project.resources.gzip(UnityPuppet.IMPORT_PACKAGE_PATH))
-        def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
-        def filenames = ImmutableSet.copyOf(paths)
-        def shadowConfig = ProjectConfig.loadShadow(project)
-        then:
-        filenames == ImmutableSet.of('Assets/Acme/Superjson-1.0.0.txt')
-        shadowConfig.dependencies == ImmutableSet.of(superJSON)
-        shadowConfig.repositories == builder.config.repositories
-    }
-
-    def "new package with transitive dependencies"() {
-        when:
-        def withTransitive = buildTransitivePackage(3)
-        builder.withDependency(withTransitive)
-        project.tasks.nxtDo.execute()
-        project.tasks.nxtSync.execute()
-        def tree = project.tarTree(project.resources.gzip(UnityPuppet.IMPORT_PACKAGE_PATH))
-        def paths = tree.files.findAll { it.name == "pathname"}.collect { it.text }
-        def filenames = ImmutableSet.copyOf(paths)
-        def expectedNames = (0..3).collect { "Assets/Com.foo/Level${it}-1.0.0.txt".toString() }
-        then:
-
-        filenames == ImmutableSet.copyOf(expectedNames)
-    }
-
-
     def "no changes does not create import package"() {
         when:
         project.tasks.nxtDo.execute()
@@ -252,14 +221,14 @@ class SynchroniserSpec extends Specification {
         Synchroniser.gatherDependencies(project, repositories, Sets.newHashSet(forPackage))
     }
 
-    String buildTransitivePackage(int depth) {
+    static String buildTransitivePackage(IvyBuilder ivy, int depth) {
 
         String parent = "com.foo:level0:1.0.0"
-        ivyRepo.withPackage(parent)
+        ivy.withPackage(parent)
 
         (1..depth).each { level ->
             def child = "com.foo:level${level}:1.0.0"
-            ivyRepo.withPackage(child, parent)
+            ivy.withPackage(child, parent)
             parent = child
         }
         parent

@@ -7,18 +7,20 @@ using UnityEngine;
 
 
 [InitializeOnLoad]
-internal class Watcher : AssetPostprocessor
+internal class Watcher
 {
 	const string TaskFolder = "nxt/task";
 	const string ImportFolder = "nxt/import";
 	const string ExportFolder = "nxt/export";
 	static bool initialised = false;
+	static StreamWriter logger = File.AppendText ("nxt/puppet.log");
+	static volatile bool importPending;
 	static Watcher ()
 	{
 		// This can be called multiple times by Unity.
 		if (!initialised) {
 			EditorApplication.update += Update;
-			Debug.Log ("Watcher " + System.Diagnostics.Process.GetCurrentProcess ().Id);
+			log ("Watcher " + System.Diagnostics.Process.GetCurrentProcess ().Id);
 			if (Application.platform == RuntimePlatform.OSXEditor) {
 				Environment.SetEnvironmentVariable ("MONO_MANAGED_WATCHER", "enabled");
 			}
@@ -48,52 +50,57 @@ internal class Watcher : AssetPostprocessor
 		watcher.Created += new FileSystemEventHandler (OnImportDetected);
 		watcher.Changed += new FileSystemEventHandler (OnChangeDetected);
 
-		bool doImport = false;
 		if (Directory.GetFiles (ImportFolder, "*.unitypackage").Length > 0) {
-			doImport = true;
+			importPending = true;
 		}
 
 		// Begin watching.
 		watcher.EnableRaisingEvents = true;
-
-		if (doImport) {
-			DoImport ();
-		}
 	}
 
 	private static void OnChangeDetected (object source, FileSystemEventArgs e)
 	{
-		DoImport ();
+		importPending = true;
 	}
 
 	private static void OnImportDetected (object source, FileSystemEventArgs e)
 	{
-		DoImport ();
+		importPending = true;
 	}
 
 	private static void DoImport ()
 	{
 		foreach (var file in Directory.GetFiles (ImportFolder, "*.unitypackage")) {
-			Debug.Log ("Importing " + file);
+			log ("Importing " + file);
 
 			var dest = file + ".importing";
+			//File.Copy (file, file + DateTime.Now.Ticks + ".copy");
 			File.Move (file, dest);
-			Debug.Log ("Moved it to " + dest);
+
+			log ("Moved it to " + dest);
 			AssetDatabase.ImportPackage (dest, false);
-			startedImport = true;
+			importInProgress = true;
 			updatedSinceImport = false;
 		}
+		importPending = false;
 	}
 
 	static bool updatedSinceImport = false;
-	static bool startedImport = false;
+	static bool importInProgress = false;
 	// Unity imports packages on the main thread,
 	// so we can figure out when it has finished importing by 
 	// waiting for an update after we start the import.
 	static void Update ()
 	{
-		if (startedImport) {
-			updatedSinceImport = true;
+		if (importInProgress) {
+			foreach (var file in Directory.GetFiles (ImportFolder, "*.importing")) {
+				var newFile = Path.ChangeExtension (file, "completed");
+				log ("Moving to " + newFile);
+				File.Move (file, newFile);
+				importInProgress = false;
+			}
+		} else if (importPending) {
+			DoImport ();
 		}
 	}
 
@@ -150,7 +157,7 @@ internal class Watcher : AssetPostprocessor
 
 
 
-			Debug.Log ("Published to " + Path.GetFullPath(destination));
+			log ("Published to " + Path.GetFullPath(destination));
 
 		}
 	}
@@ -158,18 +165,7 @@ internal class Watcher : AssetPostprocessor
 	private static void log (string s)
 	{
 		Debug.Log (s);
-	}
-
-	static void OnPostprocessAllAssets (string [] importedAssets, string [] deletedAssets, string [] movedAssets, string [] movedFromAssetPaths)
-	{
-		if (updatedSinceImport) {
-			foreach (var file in Directory.GetFiles (ImportFolder, "*.importing")) {
-				var newFile = Path.ChangeExtension (file, "completed");
-				Debug.Log ("Moving to " + newFile);
-				File.Move (file, newFile);
-				return;
-			}
-		}
-
+		logger.WriteLine (s);
+		logger.Flush ();
 	}
 }

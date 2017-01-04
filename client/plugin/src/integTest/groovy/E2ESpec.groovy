@@ -1,5 +1,6 @@
-package com.nxt;
+package com.nxt
 
+import com.google.common.collect.ImmutableSet;
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.PendingFeature
 import spock.lang.Shared
@@ -16,6 +17,7 @@ class E2ESpec extends BaseE2ESpec {
     @Shared packageId = [group, name, version].join(":")
 
     @Shared UBuilder packageRunner = publishPackage(packageId)
+    def ivyRepo = IvyBuilder.Create()
 
     def "export a package"() {
         when:
@@ -79,6 +81,26 @@ class E2ESpec extends BaseE2ESpec {
             assert IvyBuilder.isInstalled(consumer.asProject(), newVersion)
         }
     }
+
+    def "package with transitive dependencies"() {
+        when:
+        def withTransitive = SynchroniserSpec.buildTransitivePackage(ivyRepo, 3)
+        def result = UBuilder.Builder()
+                .withRepository(ivyRepo.dir.path)
+                .withDependency(withTransitive)
+                .withArg("nxtSync")
+        result.build()
+
+
+        def tree = result.asProject().fileTree('Assets/Com.foo').exclude('**/*.meta')
+        def paths = tree.files.collect { it.name }
+        def filenames = ImmutableSet.copyOf(paths)
+        def expectedNames = (0..3).collect { "Level${it}-1.0.0.txt".toString() }
+        then:
+
+        filenames == ImmutableSet.copyOf(expectedNames)
+    }
+
 
     def projectConsumingPackage(String packageId) {
         def result = UBuilder.Builder()

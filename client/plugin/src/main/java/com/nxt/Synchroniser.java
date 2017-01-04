@@ -35,10 +35,17 @@ class Synchroniser {
 
 
     public static FileTree Sync(Project project) {
-        AssetMap current = buildAssetMap(gatherManifests(gatherDependencies(project, Config.loadShadow(project))));
+        Set<PackageManifest> currentManifests = gatherManifests(gatherDependencies(project, Config.loadShadow(project)));
         Set<PackageManifest> targetManifests = gatherManifests(gatherDependencies(project, Config.load(project)));
+
+        Log.L.info("Current manifests: {}, target manifests: {}", currentManifests.size(), targetManifests.size());
+        AssetMap current = buildAssetMap(currentManifests);
         AssetMap target = buildAssetMap(targetManifests);
+
         AssetDifference difference = Synchroniser.difference(current, target, Synchroniser.Filter(project));
+        Log.L.info("Files added: {}", difference.getAdd().size());
+        Log.L.info("Files removed: {}", difference.getRemove().size());
+        Log.L.info("Files moved: {}", difference.getMoved().size());
 
         Remove(project, difference.getRemove());
         Move(project, difference.getMoved());

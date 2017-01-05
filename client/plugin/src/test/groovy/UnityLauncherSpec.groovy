@@ -8,8 +8,7 @@ import java.nio.channels.FileLock
 
 class UnityLauncherSpec extends Specification {
 
-    def "detects the correct unity version"() {
-
+    def "detects the last used unity version for a project"() {
         when:
         def versionPath = "src/test/resources/projects/${expectedVersion}"
         def version = UnityLauncher.UnityVersion(new File(versionPath))
@@ -18,42 +17,53 @@ class UnityLauncherSpec extends Specification {
         version == expectedVersion
 
         where:
-        expectedVersion| _
-        "5.0.0p3"| _
-        "5.3.5f1"| _
+        expectedVersion << ["5.0.0p3", "5.3.5f1"]
     }
 
-    def "fails if project not found"() {
-
+    def "returns null if no version file exists"() {
         when:
         def version = UnityLauncher.UnityVersion(new File("nonsense"))
 
         then:
-        thrown(IllegalArgumentException)
+        version == null
     }
 
-    def "finds the install directory of the specified unity version"() {
+    def "finds the installed Editors"() {
         when:
         def searchPath = new File("src/test/resources/Applications")
-        def unityPath = UnityLauncher.UnityPathForVersion(searchPath, version)
+        def editors = UnityLauncher.FindInstalledEditors(searchPath)
 
         then:
-        unityPath instanceof File
-        unityPath == new File("src/test/resources", expectedPath);
-
-        where:
-        version| expectedPath
-        "5.0.0p3"| "Applications/Unity 5.0.0p3"
-        "5.3.5f1"| "Applications/Unity 5.3.5f1"
+        editors == [
+                "5.0.0p3": new File("src/test/resources/Applications/Unity 5.0.0p3/Unity.app/Contents/MacOS/Unity"),
+                "5.3.5f1": new File("src/test/resources/Applications/Unity 5.3.5f1/Unity.app/Contents/MacOS/Unity")
+        ]
     }
 
-    def "throws if unity with version not found"() {
+    def editors = ['5.0.0': new File('a'), '5.0.1': new File('b')]
+
+    def "selects the editor version matching the project"() {
         when:
-        def searchPath = new File("src/test/resources/Applications")
-        UnityLauncher.UnityPathForVersion(searchPath, "nonsense")
+        def editor = UnityLauncher.SelectEditor(editors, "5.0.1")
 
         then:
-        thrown(IllegalArgumentException)
+        editor == new File('b')
+    }
+
+    def "throws if the projects unity version isn't found"() {
+        when:
+        UnityLauncher.SelectEditor(editors, "5.0.2")
+
+        then:
+        thrown IllegalArgumentException
+    }
+
+    def "selects the highest editor version if no project version is specified"() {
+        when:
+        def editor = UnityLauncher.SelectEditor(editors, null)
+
+        then:
+        editor == new File('b')
     }
 
     @Trouble
@@ -80,18 +90,5 @@ class UnityLauncherSpec extends Specification {
         "5.0.0p3"| false
         "5.3.5f1"| false
         "5.3.5f1"| true
-    }
-
-    def "finds Unity executable for version"() {
-        when:
-        def executablePath = UnityLauncher.UnityExeForVersion(new File('src/test/resources/Applications'), version)
-
-        then:
-        executablePath == answer
-
-        where:
-        version| answer
-        "5.0.0p3"| new File('src/test/resources/Applications/Unity 5.0.0p3/Unity.app/Contents/MacOS/Unity')
-        "5.3.5f1"| new File('src/test/resources/Applications/Unity 5.3.5f1/Unity.app/Contents/MacOS/Unity')
     }
 }

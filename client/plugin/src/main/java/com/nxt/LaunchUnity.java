@@ -26,8 +26,7 @@ class LaunchUnity extends  DefaultTask {
         boolean isRunning = UnityLauncher.IsUnityRunning(project.getProjectDir());
         Log.L.info(String.format("Unity running %s %s", isRunning, project.getProjectDir()));
         if (!UnityLauncher.IsUnityRunning(project.getProjectDir())) {
-            String version = UnityLauncher.UnityVersion(project.getProjectDir());
-            File exe = UnityLauncher.UnityExeForVersion(new File("/Applications"), version);
+            File exe = UnityLauncher.SelectEditorForProject(project.getProjectDir());
             ProcessBuilder builder = new ProcessBuilder();
             builder.command(exe.getPath(), "-batchmode", "-projectPath", project.getProjectDir().getPath());
             try {

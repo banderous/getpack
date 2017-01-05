@@ -1,6 +1,8 @@
 package com.nxt;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -14,6 +16,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.Map;
 
 
 /**
@@ -25,7 +28,8 @@ public class UnityLauncher {
         File versionFile = new File(projectPath, "ProjectSettings/ProjectVersion.txt");
 
         if (!versionFile.exists()) {
-            throw new IllegalArgumentException("Project not found at ${projectPath}");
+            Log.L.debug("No version file found for " + projectPath);
+            return null;
         }
 
         try {
@@ -36,7 +40,8 @@ public class UnityLauncher {
         }
     }
 
-    public static File UnityPathForVersion(File searchPath, String version) {
+    public static Map<String, File> FindInstalledEditors(File searchPath) {
+        Map<String, File> result = Maps.newHashMap();
         for (File file : searchPath.listFiles()) {
             if (file.isDirectory()) {
                 File pList = new File(file, "Unity.app/Contents/Info.plist");
@@ -46,9 +51,8 @@ public class UnityLauncher {
                     try {
                         Document doc = NonValidatingDoc(new InputSource(new FileInputStream(pList)));
                         String installedVersion = xpath.evaluate(expression, doc);
-                        if (installedVersion.equals(version)) {
-                            return file;
-                        }
+                        File executable = new File(file, "Unity.app/Contents/MacOS/Unity");
+                        result.put(installedVersion, executable);
                     } catch (XPathExpressionException e) {
                         throw new RuntimeException(e);
                     } catch (FileNotFoundException e) {
@@ -58,7 +62,26 @@ public class UnityLauncher {
             }
         }
 
-        throw new IllegalArgumentException("Unity version not found: " + version);
+        return result;
+    }
+
+    public static File SelectEditorForProject(File project) {
+        String version = UnityVersion(project);
+        return SelectEditor(FindInstalledEditors(new File("/Applications")), version);
+    }
+
+    public static File SelectEditor(Map<String, File> editors, String projectVersion) {
+        if (null == projectVersion) {
+            String highestVersion = ImmutableSortedSet.copyOf(editors.keySet()).last();
+            Log.L.debug("Selecting highest editor version: {}", highestVersion);
+            return editors.get(highestVersion);
+        }
+
+        if (editors.containsKey(projectVersion)) {
+            return editors.get(projectVersion);
+        }
+
+        throw new IllegalArgumentException("Required editor version not installed: " + projectVersion);
     }
 
     private static Document NonValidatingDoc(InputSource source) {
@@ -101,11 +124,5 @@ public class UnityLauncher {
                 }
             }
         }
-    }
-
-    public static File UnityExeForVersion(File searchPath, String version) {
-        // TODO: Windows
-        File unityPath = UnityPathForVersion(searchPath, version);
-        return new File(unityPath, "Unity.app/Contents/MacOS/Unity");
     }
 }

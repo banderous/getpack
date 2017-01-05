@@ -1,9 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Collections.Generic;
 using UnityEditor;
 
-internal class Exporter
+internal static class Exporter
 {
     public const string TaskFolder = "nxt/task";
     public const string TaskExtension = "*.task";
@@ -14,8 +13,8 @@ internal class Exporter
         foreach (var file in Directory.GetFiles (TaskFolder, TaskExtension)) {
 
             // Read the list of files to export.
-            var json = System.IO.File.ReadAllText (file);
-            Dictionary<string, object> dic = (Dictionary<string, object>)com.nxt.MiniJSON.Deserialize (json);
+            var json = File.ReadAllText (file);
+            var dic = (Dictionary<string, object>)com.nxt.MiniJSON.Deserialize (json);
             var task = (Dictionary<string, object>)dic ["task"];
             var fileList = (List<object>)task ["files"];
             var files = new string [fileList.Count];

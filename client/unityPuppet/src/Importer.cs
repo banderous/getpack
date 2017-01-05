@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 
-internal class Importer
+internal static class Importer
 {
     public const string ImportFolder = "nxt/import";
     public const string ImportExtension = "*.unitypackage";

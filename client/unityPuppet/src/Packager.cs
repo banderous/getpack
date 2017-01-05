@@ -13,7 +13,7 @@ internal class Watcher
     static StreamWriter logger = File.AppendText ("nxt/puppet.log");
 
     public delegate void Action ();
-    public static List<Action> Tasks = new List<Action> ();
+    private static List<Action> Tasks = new List<Action> ();
 
     static Watcher ()
     {

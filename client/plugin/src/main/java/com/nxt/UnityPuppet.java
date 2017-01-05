@@ -21,10 +21,13 @@ public class UnityPuppet {
             Files.createParentDirs(dest);
             Files.move(unitypackage, dest);
             File completed = project.file(IMPORT_PACKAGE_PATH + ".completed");
+            TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
+                    "Timed out waiting for import of " + completed);
             while(!completed.exists()) {
                 try {
                     Thread.sleep(100);
                     Log.L.debug("Waiting for {}", completed);
+                    timer.throwIfExceeded();
                 } catch (InterruptedException e) { }
             }
 

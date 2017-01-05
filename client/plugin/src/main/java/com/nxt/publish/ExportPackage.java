@@ -8,13 +8,14 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.nxt.Constants;
 import com.nxt.Log;
+import com.nxt.TimeoutTimer;
 import com.nxt.config.*;
 import com.nxt.config.Package;
 import org.apache.commons.lang3.text.WordUtils;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.file.ConfigurableFileTree;
@@ -211,15 +212,14 @@ public class ExportPackage extends DefaultTask {
 
         cleanExistingPackage();
         exportPackageJob(getProject(), pack);
-        long startTime = System.currentTimeMillis();
+        TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
+                "Timed out waiting for export of " + unityPackage);
+
         while(!unityPackage.exists())
         {
             Thread.sleep(100);
             Log.L.debug("Waiting for export of {}", unityPackage);
-            // TODO - sensible timeout
-            if (System.currentTimeMillis() - startTime > 5000) {
-                throw new GradleException("Timed out waiting for export of " + unityPackage);
-            }
+            timer.throwIfExceeded();
         }
     }
 }

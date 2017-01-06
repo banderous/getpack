@@ -18,7 +18,9 @@ public class Util {
                 Files.createParentDirs(f);
                 Files.write("{}", f, Charsets.UTF_8);
             }
-            return new Gson().fromJson(new FileReader(f), c);
+            try(FileReader reader = new FileReader(f)) {
+                return new Gson().fromJson(reader, c);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

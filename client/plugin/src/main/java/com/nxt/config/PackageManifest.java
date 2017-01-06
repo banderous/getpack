@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -34,7 +35,7 @@ public class PackageManifest {
     }
 
     public void Add(String guid, Path path, String md5) {
-        files.put(guid, new Asset(path.toString(), md5));
+        files.put(guid, new Asset(FilenameUtils.separatorsToUnix(path.toString()), md5));
     }
 
     @Override

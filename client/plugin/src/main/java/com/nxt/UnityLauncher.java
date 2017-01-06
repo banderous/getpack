@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,7 +39,7 @@ public class UnityLauncher {
         }
     }
 
-    public static Map<String, File> FindInstalledEditors(File searchPath) {
+    public static Map<String, File> FindInstalledEditorsOSX(File searchPath) {
         Map<String, File> result = Maps.newHashMap();
         for (File file : searchPath.listFiles()) {
             if (file.isDirectory()) {
@@ -67,7 +66,7 @@ public class UnityLauncher {
 
     public static File SelectEditorForProject(File project) {
         String version = UnityVersion(project);
-        return SelectEditor(FindInstalledEditors(new File("/Applications")), version);
+        return SelectEditor(FindInstalledEditorsOSX(new File("/Applications")), version);
     }
 
     public static File SelectEditor(Map<String, File> editors, String projectVersion) {
@@ -124,5 +123,37 @@ public class UnityLauncher {
                 }
             }
         }
+    }
+
+    public static Map<String, File> FindInstalledEditorsWindows(File searchPath) {
+        Map<String, File> result = Maps.newHashMap();
+        for (File file : searchPath.listFiles()) {
+            if (file.isDirectory()) {
+                File packageManager = new File(file, "Editor/Data/PackageManager/Unity//PackageManager");
+                if (packageManager.exists()) {
+                    String[] contents = packageManager.list();
+                    if (null != contents && contents.length == 1) {
+                        File ivy = new File(packageManager, contents[0] + "/ivy.xml");
+                        if (ivy.exists()) {
+                            XPath xpath = XPathFactory.newInstance().newXPath();
+                            String expression = "/ivy-module/info/@unityVersion";
+                            try {
+                                Document doc = NonValidatingDoc(new InputSource(new FileInputStream(ivy)));
+                                String installedVersion = xpath.evaluate(expression, doc);
+                                File executable = new File(file, "Editor/Unity.exe");
+                                result.put(installedVersion, executable);
+                            } catch (XPathExpressionException e) {
+                                throw new RuntimeException(e);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+
     }
 }

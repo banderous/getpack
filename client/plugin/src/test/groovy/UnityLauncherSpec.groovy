@@ -28,15 +28,26 @@ class UnityLauncherSpec extends Specification {
         version == null
     }
 
-    def "finds the installed Editors"() {
+    def "finds the installed Editors on OSX"() {
         when:
         def searchPath = new File("src/test/resources/Applications")
-        def editors = UnityLauncher.FindInstalledEditors(searchPath)
+        def editors = UnityLauncher.FindInstalledEditorsOSX(searchPath)
 
         then:
         editors == [
                 "5.0.0p3": new File("src/test/resources/Applications/Unity 5.0.0p3/Unity.app/Contents/MacOS/Unity"),
                 "5.3.5f1": new File("src/test/resources/Applications/Unity 5.3.5f1/Unity.app/Contents/MacOS/Unity")
+        ]
+    }
+
+    def "finds the installed Editors on Windows"() {
+        when:
+        def searchPath = new File("src/test/resources/ProgramFiles")
+        def editors = UnityLauncher.FindInstalledEditorsWindows(searchPath)
+
+        then:
+        editors == [
+                "5.5.0f3": new File("src/test/resources/ProgramFiles/Unity 5.5/Editor/Unity.exe")
         ]
     }
 

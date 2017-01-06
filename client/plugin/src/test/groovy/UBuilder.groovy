@@ -8,6 +8,7 @@ import com.nxt.config.ProjectConfig
 import com.nxt.config.Package
 import com.nxt.config.Util
 import com.nxt.publish.PublishConfig
+import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
@@ -99,6 +100,7 @@ class UBuilder {
         // Put a GUID in based on file path.
         def baseURL = Paths.get(projectDir.path)
         def relativePath = baseURL.relativize(tempFile.toPath()).toFile().path
+        relativePath = FilenameUtils.separatorsToUnix(relativePath)
         def md5 = Hashing.md5().hashString(relativePath, Charsets.UTF_8).toString()
         meta << new Yaml().dump([guid: md5])
 

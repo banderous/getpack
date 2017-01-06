@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem;
 
 task build(type: Exec) {
     inputs.dir 'lib'
@@ -8,7 +9,13 @@ task build(type: Exec) {
     ext.dll = file('bin/Debug/unityPuppet.dll')
     outputs.file dll
 
-    executable 'xbuild'
+    // Shell exec doesn't seem to find xbuild on the path unless
+    // we specify its extension.
+    if (OperatingSystem.current().isWindows()) {
+        executable 'xbuild.bat'
+    } else {
+        executable 'xbuild'
+    }
     args file("${project.name}.sln")
 }
 

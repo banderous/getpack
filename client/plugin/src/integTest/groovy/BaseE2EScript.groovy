@@ -11,6 +11,8 @@ class BaseE2ESpec extends Specification {
         // Kill all the Unity processes we start.
         if (Util.OnOSX()) {
             "pkill Unity".execute()
+        } else if (Util.OnWindows()) {
+            "taskkill /F /IM Unity.exe /T".execute()
         }
     }
 }

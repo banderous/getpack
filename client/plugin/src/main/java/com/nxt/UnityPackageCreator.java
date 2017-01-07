@@ -32,7 +32,7 @@ public class UnityPackageCreator extends Copy {
             PatternSet pattern = new PatternSet();
 
             for (String s : filesAndPaths.get(file)) {
-                pattern.include(String.format("./%s/**", s));
+                pattern.include(String.format("**/%s/**", s));
             }
             FileTree tree = project.tarTree(resource).matching(pattern);
             if (null == result) {

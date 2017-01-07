@@ -3,6 +3,7 @@ package com.nxt.config;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import org.gradle.internal.os.OperatingSystem;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,6 +13,14 @@ import java.io.IOException;
  * Created by alex on 01/01/2017.
  */
 public class Util {
+    public static boolean OnOSX() {
+        return OperatingSystem.current().isMacOsX();
+    }
+
+    public static boolean OnWindows() {
+        return OperatingSystem.current().isWindows();
+    }
+
     public static <T> T LoadJSONClass(File f, Class<T> c) {
         try {
             if (!f.exists()) {

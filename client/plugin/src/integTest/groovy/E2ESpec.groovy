@@ -1,6 +1,6 @@
 package com.nxt
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.PendingFeature
 import spock.lang.Shared
@@ -40,6 +40,7 @@ class E2ESpec extends BaseE2ESpec {
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
+    @com.nxt.Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)

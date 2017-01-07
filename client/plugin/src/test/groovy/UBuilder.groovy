@@ -49,9 +49,6 @@ class UBuilder {
         File tempFile = new File(projectDir, "Assets")
         tempFile.mkdir()
 
-        tempFile = new File(projectDir, "ProjectSettings/ProjectVersion.txt");
-        tempFile.getParentFile().mkdirs()
-        tempFile << "m_EditorVersion: 5.3.4f1"
         new File(projectDir, "build.gradle") << """
             plugins {
                 id 'com.nxt.publish'

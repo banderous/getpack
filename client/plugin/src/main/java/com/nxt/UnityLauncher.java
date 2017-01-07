@@ -4,6 +4,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
+import com.nxt.config.Util;
+import org.gradle.api.GradleException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -66,7 +68,16 @@ public class UnityLauncher {
 
     public static File SelectEditorForProject(File project) {
         String version = UnityVersion(project);
-        return SelectEditor(FindInstalledEditorsOSX(new File("/Applications")), version);
+        Map<String, File> installedEditors;
+        if (Util.OnOSX()) {
+            installedEditors = FindInstalledEditorsOSX(new File("/Applications"));
+        } else if (Util.OnWindows()) {
+            installedEditors = FindInstalledEditorsWindows(new File("c:/Program Files"),
+                    new File("C:/Program Files (x86)"));
+        } else {
+            throw new GradleException("Only Windows and Mac Supported");
+        }
+        return SelectEditor(installedEditors, version);
     }
 
     public static File SelectEditor(Map<String, File> editors, String projectVersion) {
@@ -99,53 +110,46 @@ public class UnityLauncher {
         if (!lockFile.exists()) {
             return false;
         }
-        FileLock lock = null;
-        try {
-            lock = new FileOutputStream(lockFile).getChannel().tryLock();
+        try(FileOutputStream out = new FileOutputStream(lockFile)) {
+            FileLock lock = out.getChannel().tryLock();
             // If unable to lock then Unity is running.
             return lock == null;
         } catch (OverlappingFileLockException e) {
             // A lock is already held.
             return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
+        } catch (FileNotFoundException f) {
+            Log.L.info("FileNotFoundException opening lock file, Unity running.");
+            // Java throws a FileNotFoundException if the file is locked.
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
-        finally {
-            if (null != lock) {
-                try {
-                    lock.release();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
-    public static Map<String, File> FindInstalledEditorsWindows(File searchPath) {
+    public static Map<String, File> FindInstalledEditorsWindows(File... searchPaths) {
         Map<String, File> result = Maps.newHashMap();
-        for (File file : searchPath.listFiles()) {
-            if (file.isDirectory()) {
-                File packageManager = new File(file, "Editor/Data/PackageManager/Unity//PackageManager");
-                if (packageManager.exists()) {
-                    String[] contents = packageManager.list();
-                    if (null != contents && contents.length == 1) {
-                        File ivy = new File(packageManager, contents[0] + "/ivy.xml");
-                        if (ivy.exists()) {
-                            XPath xpath = XPathFactory.newInstance().newXPath();
-                            String expression = "/ivy-module/info/@unityVersion";
-                            try {
-                                Document doc = NonValidatingDoc(new InputSource(new FileInputStream(ivy)));
-                                String installedVersion = xpath.evaluate(expression, doc);
-                                File executable = new File(file, "Editor/Unity.exe");
-                                result.put(installedVersion, executable);
-                            } catch (XPathExpressionException e) {
-                                throw new RuntimeException(e);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
+        for (File searchPath : searchPaths) {
+            for (File file : searchPath.listFiles()) {
+                if (file.isDirectory()) {
+                    File packageManager = new File(file, "Editor/Data/PackageManager/Unity//PackageManager");
+                    if (packageManager.exists()) {
+                        String[] contents = packageManager.list();
+                        if (null != contents && contents.length == 1) {
+                            File ivy = new File(packageManager, contents[0] + "/ivy.xml");
+                            if (ivy.exists()) {
+                                XPath xpath = XPathFactory.newInstance().newXPath();
+                                String expression = "/ivy-module/info/@unityVersion";
+                                try {
+                                    Document doc = NonValidatingDoc(new InputSource(new FileInputStream(ivy)));
+                                    String installedVersion = xpath.evaluate(expression, doc);
+                                    File executable = new File(file, "Editor/Unity.exe");
+                                    result.put(installedVersion, executable);
+                                } catch (XPathExpressionException e) {
+                                    throw new RuntimeException(e);
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }

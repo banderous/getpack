@@ -57,7 +57,9 @@ class Synchroniser {
             Map<String, File> filesByGUID = buildGUIDToUnitypackageMap(targetManifests);
             HashMultimap<File, String> guidsByFile = HashMultimap.create();
             for (Map.Entry<String, Asset> entry : add.entrySet()) {
+                Log.L.info("Add " + entry.getKey() + " " + entry.getValue().getPath());
                 File f = filesByGUID.get(entry.getKey());
+                Log.L.info("Putting " + f.getPath() + " " + entry.getKey());
                 guidsByFile.put(f, entry.getKey());
             }
 

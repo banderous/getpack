@@ -15,7 +15,7 @@ class ExportSpec extends Specification {
         def project = ProjectBuilder.builder().build()
         def config = new PublishConfig()
         config.addPackage(id)
-        ExportPackage.Configure(project, config)
+        ExportPackage.configure(project, config)
 
         then:
         project.tasks.nxtExportAcmeSuperjson
@@ -55,7 +55,7 @@ class ExportSpec extends Specification {
                       .withPackage(id)
                       .asProject()
 
-        def manifest = ExportPackage.GenerateManifest(project, builder.packages.first())
+        def manifest = ExportPackage.generateManifest(project, builder.packages.first())
 
         then:
         manifest.files instanceof Map
@@ -66,7 +66,7 @@ class ExportSpec extends Specification {
     def "meta parsing"() {
         when:
         def path = new File('src/test/resources/meta/prefab.meta')
-        def meta = ExportPackage.GetGUID(path)
+        def meta = ExportPackage.getGUID(path)
 
         then:
         meta == "4f04e8e06b86e4610af0205cbb62425c"

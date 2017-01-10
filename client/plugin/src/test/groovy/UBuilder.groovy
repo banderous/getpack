@@ -92,7 +92,7 @@ class UBuilder {
         tempFile.getParentFile().mkdirs()
         tempFile << tempFile.name
 
-        // Create an accompanying meta file.
+        // create an accompanying meta file.
         File meta = new File(tempFile.path + ".meta")
         // Put a GUID in based on file path.
         def baseURL = Paths.get(projectDir.path)

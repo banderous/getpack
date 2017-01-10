@@ -11,39 +11,43 @@ import java.util.Objects;
  * Created by alex on 08/12/2016.
  */
 public class Package {
-    public String group, name, version;
-    List<String> roots = Lists.newArrayList();
+  public String group;
+  public String name;
+  public String version;
+  List<String> roots = Lists.newArrayList();
 
-    // Required for serialization.
-    Package() {
+  // Required for serialization.
+  Package() {
+  }
+
+  public Package(String id) {
+    List<String> l = Splitter.on(":").splitToList(id);
+    group = l.get(0);
+    name = l.get(1);
+    version = l.get(2);
+  }
+
+  public List<String> getRoots() {
+    return roots;
+  }
+
+  public String key() {
+    return Joiner.on(":").join(group, name);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    final Package other = (Package) obj;
+    if (null == other) {
+      return false;
     }
 
-    public Package(String id) {
-        List<String> l = Splitter.on(":").splitToList(id);
-        group = l.get(0);
-        name = l.get(1);
-        version = l.get(2);
-    }
+    return Objects.equals(group, other.group)
+        && Objects.equals(name, other.name);
+  }
 
-    public List<String> getRoots() {
-        return roots;
-    }
-
-    public String key() {
-        return Joiner.on(":").join(group, name);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        final Package other = (Package) obj;
-        if (null == other) return false;
-
-        return Objects.equals(group, other.group)
-                && Objects.equals(name, other.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(group, name);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(group, name);
+  }
 }

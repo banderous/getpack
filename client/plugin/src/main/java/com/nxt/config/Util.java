@@ -13,37 +13,37 @@ import java.io.IOException;
  * Created by alex on 01/01/2017.
  */
 public class Util {
-    public static boolean OnOSX() {
-        return OperatingSystem.current().isMacOsX();
-    }
+  public static boolean onOSX() {
+    return OperatingSystem.current().isMacOsX();
+  }
 
-    public static boolean OnWindows() {
-        return OperatingSystem.current().isWindows();
-    }
+  public static boolean onWindows() {
+    return OperatingSystem.current().isWindows();
+  }
 
-    public static <T> T LoadJSONClass(File f, Class<T> c) {
-        try {
-            if (!f.exists()) {
-                Files.createParentDirs(f);
-                Files.write("{}", f, Charsets.UTF_8);
-            }
-            try(FileReader reader = new FileReader(f)) {
-                return new Gson().fromJson(reader, c);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+  public static <T> T loadJSONClass(File f, Class<T> c) {
+    try {
+      if (!f.exists()) {
+        Files.createParentDirs(f);
+        Files.write("{}", f, Charsets.UTF_8);
+      }
+      try (FileReader reader = new FileReader(f)) {
+        return new Gson().fromJson(reader, c);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    public static <T> void save(T object, File f) {
-        try {
-            Files.write(Serialize(object), f, Charsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+  public static <T> void save(T object, File f) {
+    try {
+      Files.write(serialize(object), f, Charsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    public static String Serialize(Object o) {
-        return new Gson().toJson(o);
-    }
+  public static String serialize(Object o) {
+    return new Gson().toJson(o);
+  }
 }

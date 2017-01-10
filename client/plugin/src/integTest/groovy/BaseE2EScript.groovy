@@ -1,17 +1,14 @@
 package com.nxt
 
-import com.nxt.config.Util;
-import org.gradle.testkit.runner.GradleRunner
+import com.nxt.config.Util
 import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
-import com.nxt.Trouble
 
 class BaseE2ESpec extends Specification {
     def cleanupSpec() {
         // Kill all the Unity processes we start.
-        if (Util.OnOSX()) {
+        if (Util.onOSX()) {
             "pkill Unity".execute()
-        } else if (Util.OnWindows()) {
+        } else if (Util.onWindows()) {
             "taskkill /F /IM Unity.exe /T".execute()
         }
     }

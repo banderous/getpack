@@ -46,7 +46,7 @@ class E2ESpec extends BaseE2ESpec {
         def consumer = projectConsumingPackage(packageId)
         consumer.build()
 
-        // Create a runner that references it
+        // create a runner that references it
         then:
         IvyBuilder.isInstalled(consumer.asProject(), packageId)
     }

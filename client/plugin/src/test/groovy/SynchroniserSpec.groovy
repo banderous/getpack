@@ -3,15 +3,12 @@ package com.nxt
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
-import com.google.common.io.Files
 import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
-import com.nxt.config.ProjectConfig
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedDependency
-import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
 import java.nio.file.Paths
@@ -103,7 +100,7 @@ class SynchroniserSpec extends Specification {
             def path = a.size > 1 ? a[1] : a[0] + '.txt'
             def hash = a.size > 2 ? a[2] : a[0]
 
-            result.Add(a[0], Paths.get(path), hash)
+            result.add(a[0], Paths.get(path), hash)
         }
         result.files
     }
@@ -191,7 +188,7 @@ class SynchroniserSpec extends Specification {
             b.file(f, 'Contents')
         }
 
-        Synchroniser.Remove(project, files)
+        Synchroniser.remove(project, files)
 
         then:
         files.every { !project.file(it).exists() }
@@ -203,7 +200,7 @@ class SynchroniserSpec extends Specification {
             file('A.txt', "A");
         }
 
-        Synchroniser.Move(project, ImmutableMap.of('Assets/A.txt', 'Assets/B.txt'))
+        Synchroniser.move(project, ImmutableMap.of('Assets/A.txt', 'Assets/B.txt'))
         then:
         !project.file('Assets/A.txt').exists()
         project.file('Assets/B.txt').exists()

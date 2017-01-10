@@ -1,10 +1,7 @@
 import com.google.common.collect.HashMultimap
-import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
-import com.google.common.collect.Sets
 import com.google.common.io.Files
 import com.nxt.CreateTarGZ
-import com.nxt.Trouble
 import com.nxt.UBuilder
 import com.nxt.UnityPackageCreator
 import spock.lang.Specification
@@ -23,7 +20,7 @@ class UnityPackageCreatorSpec extends Specification {
         HashMultimap<File, String> input = HashMultimap.create()
         input.put(a, "Include")
         input.put(b, "And")
-        def tree = UnityPackageCreator.MergeArchives(project, input);
+        def tree = UnityPackageCreator.mergeArchives(project, input);
         def names = ImmutableSet.copyOf(tree.files.collect { it.getName() })
 
         then:
@@ -39,7 +36,7 @@ class UnityPackageCreatorSpec extends Specification {
         }
 
         File archive = File.createTempFile("foo","bar")
-        CreateTarGZ.Create(folder, archive)
+        CreateTarGZ.create(folder, archive)
         archive
     }
 }

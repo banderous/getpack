@@ -1,9 +1,5 @@
 package com.nxt.publish
 
-import com.google.common.collect.ImmutableSet
-import com.google.common.collect.Sets
-import com.google.common.io.Files
-import com.nxt.config.PackageMap
 import com.nxt.config.Util
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
@@ -36,7 +32,7 @@ class PublishConfigSpec extends Specification {
 
     def "serializes empty fields"() {
         when:
-        def str = Util.Serialize(config)
+        def str = Util.serialize(config)
         def result = new JsonSlurper().parseText str
         then:
         result.packages == []

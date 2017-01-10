@@ -11,29 +11,30 @@ import java.io.IOException;
 /**
  * Created by alex on 02/12/2016.
  */
-class LaunchUnity extends  DefaultTask {
+class LaunchUnity extends DefaultTask {
 
-    @Inject
-    public LaunchUnity() {
-    }
+  @Inject
+  public LaunchUnity() {
+  }
 
-    @TaskAction
-    public void action() throws IOException {
-        Launch(getProject());
+  public static void launch(Project project) {
+    boolean isRunning = UnityLauncher.isUnityRunning(project.getProjectDir());
+    Log.L.info(String.format("Unity running %s %s", isRunning, project.getProjectDir()));
+    if (!UnityLauncher.isUnityRunning(project.getProjectDir())) {
+      File exe = UnityLauncher.selectEditorForProject(project.getProjectDir());
+      ProcessBuilder builder = new ProcessBuilder();
+      builder.command(exe.getPath(), "-batchmode", "-projectPath",
+          project.getProjectDir().getPath());
+      try {
+        builder.start();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
+  }
 
-    public static void Launch(Project project) {
-        boolean isRunning = UnityLauncher.IsUnityRunning(project.getProjectDir());
-        Log.L.info(String.format("Unity running %s %s", isRunning, project.getProjectDir()));
-        if (!UnityLauncher.IsUnityRunning(project.getProjectDir())) {
-            File exe = UnityLauncher.SelectEditorForProject(project.getProjectDir());
-            ProcessBuilder builder = new ProcessBuilder();
-            builder.command(exe.getPath(), "-batchmode", "-projectPath", project.getProjectDir().getPath());
-            try {
-                builder.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+  @TaskAction
+  public void action() throws IOException {
+    launch(getProject());
+  }
 }

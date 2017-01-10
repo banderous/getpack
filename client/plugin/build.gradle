@@ -3,6 +3,7 @@ import groovy.json.JsonBuilder
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'ivy-publish'
+apply plugin: 'checkstyle'
 
 sourceSets {
     integrationTest {
@@ -27,6 +28,13 @@ configurations {
 repositories {
     mavenCentral()
 }
+
+checkstyle {
+    toolVersion = "7.4"
+    ignoreFailures = false
+}
+
+println checkstyle.ignoreFailures
 
 dependencies {
     compile gradleApi()

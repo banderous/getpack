@@ -3,7 +3,6 @@ package com.nxt
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
-import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
@@ -77,7 +76,7 @@ class IvyBuilder {
 
         // Write the unitypackage.
         File unityPackage = File.createTempFile("fake", "fake")
-        CreateTarGZ.Create(tarDir, unityPackage);
+        CreateTarGZ.create(tarDir, unityPackage);
         return unityPackage
     }
 
@@ -87,7 +86,7 @@ class IvyBuilder {
         def path = assetPathForPackage(id)
         def contents = new File(path).name
         def hash = Hashing.md5().hashString(contents, Charsets.UTF_8).toString();
-        m.Add(guid, Paths.get(path), hash)
+        m.add(guid, Paths.get(path), hash)
 
         return m
     }

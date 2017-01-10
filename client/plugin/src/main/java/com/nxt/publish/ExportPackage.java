@@ -11,8 +11,8 @@ import com.google.gson.Gson;
 import com.nxt.Constants;
 import com.nxt.Log;
 import com.nxt.TimeoutTimer;
-import com.nxt.config.*;
 import com.nxt.config.Package;
+import com.nxt.config.PackageManifest;
 import org.apache.commons.lang3.text.WordUtils;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
@@ -42,184 +42,182 @@ import java.util.Set;
  */
 public class ExportPackage extends DefaultTask {
 
-    enum PathType {
-        task("task"),
-        export("unitypackage"),
-        manifest("manifest");
+  @OutputFile
+  File unityPackage;
+  @OutputFile
+  File manifest;
+  Package pack;
 
-        String extension;
-        PathType(String extension) {
-            this.extension = extension;
-        }
-    }
+  @Inject
+  public ExportPackage() {
 
-    @OutputFile
-    File unityPackage;
+  }
 
-    @OutputFile
-    File manifest;
+  public static void configure(final Project project, final PublishConfig config) {
+    project.getConfigurations().create("archives");
+    project.getPluginManager().apply("ivy-publish");
 
-    Package pack;
-
-    @Inject
-    public ExportPackage() {
-
-    }
-
-    public static void Configure(final Project project, final PublishConfig config) {
-        project.getConfigurations().create("archives");
-        project.getPluginManager().apply("ivy-publish");
-
-        project.getExtensions().configure(PublishingExtension.class, new Action<PublishingExtension>() {
+    project.getExtensions().configure(PublishingExtension.class, new Action<PublishingExtension>() {
+      @Override
+      public void execute(PublishingExtension e) {
+        for (final String url : config.getRepositories()) {
+          e.getRepositories().ivy(new Action<IvyArtifactRepository>() {
             @Override
-            public void execute(PublishingExtension e) {
-                for (final String url : config.getRepositories()) {
-                    e.getRepositories().ivy(new Action<IvyArtifactRepository>() {
-                        @Override
-                        public void execute(IvyArtifactRepository ivyArtifactRepository) {
-                            ivyArtifactRepository.setUrl(url);
-                        }
-                    });
-                }
+            public void execute(IvyArtifactRepository ivyArtifactRepository) {
+              ivyArtifactRepository.setUrl(url);
             }
+          });
+        }
+      }
+    });
+
+    for (Package p : config.getPackages()) {
+      configurePackage(project, p);
+    }
+  }
+
+  private static void configurePackage(Project project, final Package pkg) {
+    final String packageId = WordUtils.capitalize(pkg.group) + WordUtils.capitalize(pkg.name);
+    String taskName = "nxtExport" + packageId;
+
+    final ExportPackage task = project.getTasks().create(taskName, ExportPackage.class);
+    task.dependsOn("launchUnity");
+    task.unityPackage = getPath(project, PathType.export, pkg);
+    task.manifest = getPath(project, PathType.manifest, pkg);
+    task.pack = pkg;
+
+    project.getExtensions().configure(PublishingExtension.class, new Action<PublishingExtension>() {
+      @Override
+      public void execute(PublishingExtension e) {
+        IvyPublication i = e.getPublications().create(packageId, IvyPublication.class);
+        i.setOrganisation(pkg.group);
+        i.setModule(pkg.name);
+        i.setRevision(pkg.version);
+        i.artifact(task.unityPackage, new Action<IvyArtifact>() {
+          @Override
+          public void execute(IvyArtifact ivyArtifact) {
+            ivyArtifact.builtBy(task);
+          }
         });
 
-        for (Package p : config.getPackages()) {
-            ConfigurePackage(project, p);
-        }
-    }
-
-    private static void ConfigurePackage(Project project, final Package pkg) {
-        final String packageId = WordUtils.capitalize(pkg.group) + WordUtils.capitalize(pkg.name);
-        String taskName = "nxtExport" + packageId;
-
-        final ExportPackage task = project.getTasks().create(taskName, ExportPackage.class);
-        task.dependsOn("launchUnity");
-        task.unityPackage = getPath(project, PathType.export, pkg);
-        task.manifest = getPath(project, PathType.manifest, pkg);
-        task.pack = pkg;
-
-        project.getExtensions().configure(PublishingExtension.class, new Action<PublishingExtension>() {
-            @Override
-            public void execute(PublishingExtension e) {
-                IvyPublication i = e.getPublications().create(packageId, IvyPublication.class);
-                i.setOrganisation(pkg.group);
-                i.setModule(pkg.name);
-                i.setRevision(pkg.version);
-                i.artifact(task.unityPackage, new Action<IvyArtifact>() {
-                    @Override
-                    public void execute(IvyArtifact ivyArtifact) {
-                        ivyArtifact.builtBy(task);
-                    }
-                });
-
-                i.artifact(task.manifest, new Action<IvyArtifact>() {
-                    @Override
-                    public void execute(IvyArtifact ivyArtifact) {
-                        ivyArtifact.builtBy(task);
-                    }
-                });
-            }
+        i.artifact(task.manifest, new Action<IvyArtifact>() {
+          @Override
+          public void execute(IvyArtifact ivyArtifact) {
+            ivyArtifact.builtBy(task);
+          }
         });
+      }
+    });
+  }
+
+  static FileTree gatherForExport(Project project, Package pack) {
+    ConfigurableFileTree tree = project.fileTree("Assets");
+    tree.exclude("Plugins/nxt");
+    tree.exclude("**/*.meta");
+
+    for (String s : pack.getRoots()) {
+      tree.include(s);
+    }
+    return tree;
+  }
+
+  static File getPath(Project project, PathType type, Package pack) {
+    String path = String.format("nxt/%s/%s.%s.%s", type, pack.group, pack.name, type.extension);
+    return project.file(path);
+  }
+
+  public static PackageManifest generateManifest(Project project, Package pack) {
+    FileTree tree = gatherForExport(project, pack);
+    return generateManifest(project, tree, pack);
+  }
+
+  public static PackageManifest generateManifest(Project project, FileTree tree, Package pack) {
+    // Relativize the paths to the project root,
+    // so they start 'Assets/...".
+    Path baseURL = Paths.get(project.getProjectDir().getPath());
+
+    PackageManifest manifest = new PackageManifest(pack);
+    for (File file : tree.getFiles()) {
+      String guid = getGUIDForAsset(file);
+      String md5 = generateMD5(file);
+      Path path = baseURL.relativize(file.toPath());
+      manifest.add(guid, path, md5);
     }
 
-    void exportPackageJob(Project project, Package pack) throws IOException {
-        File exportFile = getPath(project, PathType.task, pack);
-        Files.createParentDirs(exportFile);
+    return manifest;
+  }
 
-        Path baseDir = Paths.get(project.getProjectDir().getAbsolutePath());
-        Set<String> paths = Sets.newHashSet();
-        for (File f : project.fileTree("Assets").getFiles()) {
-            String s = baseDir.relativize(f.toPath()).toFile().getPath();
-            paths.add(s);
-        }
+  public static String getGUIDForAsset(File asset) {
+    return getGUID(new File(asset.getPath() + ".meta"));
+  }
 
-        String json = new Gson().toJson(ImmutableMap.of("task",
-                ImmutableMap.of("files", paths)));
+  public static String getGUID(File meta) {
+    Yaml yaml = new Yaml();
+    try {
+      Map map = (Map) yaml.load(new FileInputStream(meta));
+      return map.get("guid").toString();
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-        Files.write(json, exportFile, Charsets.UTF_8);
+  public static String generateMD5(File f) {
+    try {
+      HashCode md5 = Files.hash(f, Hashing.md5());
+      return md5.toString();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  void exportPackageJob(Project project, Package pack) throws IOException {
+    File exportFile = getPath(project, PathType.task, pack);
+    Files.createParentDirs(exportFile);
+
+    Path baseDir = Paths.get(project.getProjectDir().getAbsolutePath());
+    Set<String> paths = Sets.newHashSet();
+    for (File f : project.fileTree("Assets").getFiles()) {
+      String s = baseDir.relativize(f.toPath()).toFile().getPath();
+      paths.add(s);
     }
 
-    static FileTree gatherForExport(Project project, Package pack) {
-        ConfigurableFileTree tree = project.fileTree("Assets");
-        tree.exclude("Plugins/nxt");
-        tree.exclude("**/*.meta");
+    String json = new Gson().toJson(ImmutableMap.of("task",
+        ImmutableMap.of("files", paths)));
 
-        for (String s : pack.getRoots()) {
-            tree.include(s);
-        }
-        return tree;
+    Files.write(json, exportFile, Charsets.UTF_8);
+  }
+
+  void cleanExistingPackage() {
+    if (unityPackage.exists()) {
+      unityPackage.delete();
     }
+  }
 
-    void cleanExistingPackage() {
-        if (unityPackage.exists()) {
-            unityPackage.delete();
-        }
+  @TaskAction
+  public void action() throws IOException, InterruptedException {
+    PackageManifest.save(generateManifest(getProject(), pack), manifest);
+
+    cleanExistingPackage();
+    exportPackageJob(getProject(), pack);
+    TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
+        "Timed out waiting for export of " + unityPackage);
+
+    while (!unityPackage.exists()) {
+      Thread.sleep(100);
+      Log.L.debug("Waiting for export of {}", unityPackage);
+      timer.throwIfExceeded();
     }
+  }
 
-    static File getPath(Project project, PathType type, Package pack) {
-        String path = String.format("nxt/%s/%s.%s.%s", type, pack.group, pack.name, type.extension);
-        return project.file(path);
+  enum PathType {
+    task("task"),
+    export("unitypackage"),
+    manifest("manifest");
+
+    String extension;
+
+    PathType(String extension) {
+      this.extension = extension;
     }
-
-    public static PackageManifest GenerateManifest(Project project, Package pack) {
-        FileTree tree = gatherForExport(project, pack);
-        return GenerateManifest(project, tree, pack);
-    }
-
-    public static PackageManifest GenerateManifest(Project project, FileTree tree, Package pack) {
-        // Relativize the paths to the project root,
-        // so they start 'Assets/...".
-        Path baseURL = Paths.get(project.getProjectDir().getPath());
-
-        PackageManifest manifest = new PackageManifest(pack);
-        for (File file : tree.getFiles()) {
-            String guid = GetGUIDForAsset(file);
-            String md5 = generateMD5(file);
-            Path path = baseURL.relativize(file.toPath());
-            manifest.Add(guid, path, md5);
-        }
-
-        return manifest;
-    }
-
-    public static String GetGUIDForAsset(File asset) {
-        return GetGUID(new File(asset.getPath() + ".meta"));
-    }
-
-    public static String GetGUID(File meta) {
-        Yaml yaml = new Yaml();
-        try {
-            Map map = (Map) yaml.load(new FileInputStream(meta));
-            return map.get("guid").toString();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String generateMD5(File f) {
-        try {
-            HashCode md5 = Files.hash(f, Hashing.md5());
-            return md5.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @TaskAction
-    public void action() throws IOException, InterruptedException {
-        PackageManifest.save(GenerateManifest(getProject(), pack), manifest);
-
-        cleanExistingPackage();
-        exportPackageJob(getProject(), pack);
-        TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
-                "Timed out waiting for export of " + unityPackage);
-
-        while(!unityPackage.exists())
-        {
-            Thread.sleep(100);
-            Log.L.debug("Waiting for export of {}", unityPackage);
-            timer.throwIfExceeded();
-        }
-    }
+  }
 }

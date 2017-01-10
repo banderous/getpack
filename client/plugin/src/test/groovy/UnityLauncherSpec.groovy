@@ -11,7 +11,7 @@ class UnityLauncherSpec extends Specification {
     def "detects the last used unity version for a project"() {
         when:
         def versionPath = "src/test/resources/projects/${expectedVersion}"
-        def version = UnityLauncher.UnityVersion(new File(versionPath))
+        def version = UnityLauncher.unityVersion(new File(versionPath))
 
         then:
         version == expectedVersion
@@ -22,7 +22,7 @@ class UnityLauncherSpec extends Specification {
 
     def "returns null if no version file exists"() {
         when:
-        def version = UnityLauncher.UnityVersion(new File("nonsense"))
+        def version = UnityLauncher.unityVersion(new File("nonsense"))
 
         then:
         version == null
@@ -31,7 +31,7 @@ class UnityLauncherSpec extends Specification {
     def "finds the installed Editors on OSX"() {
         when:
         def searchPath = new File("src/test/resources/Applications")
-        def editors = UnityLauncher.FindInstalledEditorsOSX(searchPath)
+        def editors = UnityLauncher.findInstalledEditorsOSX(searchPath)
 
         then:
         editors == [
@@ -43,7 +43,7 @@ class UnityLauncherSpec extends Specification {
     def "finds the installed Editors on Windows"() {
         when:
         def searchPath = new File("src/test/resources/ProgramFiles")
-        def editors = UnityLauncher.FindInstalledEditorsWindows(searchPath)
+        def editors = UnityLauncher.findInstalledEditorsWindows(searchPath)
 
         then:
         editors == [
@@ -55,7 +55,7 @@ class UnityLauncherSpec extends Specification {
 
     def "selects the editor version matching the project"() {
         when:
-        def editor = UnityLauncher.SelectEditor(editors, "5.0.1")
+        def editor = UnityLauncher.selectEditor(editors, "5.0.1")
 
         then:
         editor == new File('b')
@@ -63,7 +63,7 @@ class UnityLauncherSpec extends Specification {
 
     def "throws if the projects unity version isn't found"() {
         when:
-        UnityLauncher.SelectEditor(editors, "5.0.2")
+        UnityLauncher.selectEditor(editors, "5.0.2")
 
         then:
         thrown IllegalArgumentException
@@ -71,7 +71,7 @@ class UnityLauncherSpec extends Specification {
 
     def "selects the highest editor version if no project version is specified"() {
         when:
-        def editor = UnityLauncher.SelectEditor(editors, null)
+        def editor = UnityLauncher.selectEditor(editors, null)
 
         then:
         editor == new File('b')
@@ -90,7 +90,7 @@ class UnityLauncherSpec extends Specification {
             lock = new FileOutputStream(lockPath).getChannel().lock();
         }
 
-        def isRunning = UnityLauncher.IsUnityRunning(tempDir)
+        def isRunning = UnityLauncher.isUnityRunning(tempDir)
 
         then:
         isRunning == locked

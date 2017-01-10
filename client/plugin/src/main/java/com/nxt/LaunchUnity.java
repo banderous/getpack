@@ -19,9 +19,10 @@ class LaunchUnity extends DefaultTask {
 
   public static void launch(Project project) {
     boolean isRunning = UnityLauncher.isUnityRunning(project.getProjectDir());
-    Log.L.info(String.format("Unity running %s %s", isRunning, project.getProjectDir()));
+    Log.L.info("Unity running {} {}", isRunning, project.getProjectDir());
     if (!UnityLauncher.isUnityRunning(project.getProjectDir())) {
       File exe = UnityLauncher.selectEditorForProject(project.getProjectDir());
+      Log.L.info("Launching {} for {}", exe, project.getProjectDir());
       ProcessBuilder builder = new ProcessBuilder();
       builder.command(exe.getPath(), "-batchmode", "-projectPath",
           project.getProjectDir().getPath());

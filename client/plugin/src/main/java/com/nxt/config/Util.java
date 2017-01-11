@@ -3,6 +3,7 @@ package com.nxt.config;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.gradle.internal.os.OperatingSystem;
 
 import java.io.File;
@@ -44,6 +45,6 @@ public class Util {
   }
 
   public static String serialize(Object o) {
-    return new Gson().toJson(o);
+    return new GsonBuilder().setPrettyPrinting().create().toJson(o);
   }
 }

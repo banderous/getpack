@@ -40,7 +40,26 @@ class E2ESpec extends BaseE2ESpec {
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
-    @com.nxt.Trouble
+    @Trouble
+    def "publish a package with a dependency"() {
+        when:
+        def userId = 'acme:usesjson:1.0.0'
+        def user = UBuilder.Builder().withPackage(userId)
+        user.publishConfig.findPackage('acme:usesjson').getDependencies().add(packageId)
+        user.saveConfig()
+
+        user.withArg('publishAcmeUsesjsonPublicationToIvyRepository').build()
+
+        def modulePath = user.asProject().file("nxt/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
+        println modulePath.text
+        def ivy = new XmlSlurper().parse(modulePath)
+        def dependency = ivy.dependencies.dependency[0]
+        then:
+        dependency.@org == 'acme'
+        dependency.@name == 'superjson'
+        dependency.@rev == '1.0.0'
+    }
+
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)
@@ -83,7 +102,7 @@ class E2ESpec extends BaseE2ESpec {
         }
     }
 
-    def "package with transitive dependencies"() {
+    def "consume package with transitive dependencies"() {
         when:
         def withTransitive = SynchroniserSpec.buildTransitivePackage(ivyRepo, 3)
         def result = UBuilder.Builder()

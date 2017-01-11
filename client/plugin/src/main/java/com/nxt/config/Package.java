@@ -15,6 +15,7 @@ public class Package {
   public String name;
   public String version;
   List<String> roots = Lists.newArrayList();
+  List<String> dependencies = Lists.newArrayList();
 
   // Required for serialization.
   Package() {
@@ -29,6 +30,10 @@ public class Package {
 
   public List<String> getRoots() {
     return roots;
+  }
+
+  public List<String> getDependencies() {
+    return dependencies;
   }
 
   public String key() {

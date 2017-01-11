@@ -28,7 +28,6 @@ class UBuilder {
         new UBuilder(f)
     }
 
-    List<Package> packages = Lists.newArrayList()
     File projectDir
     ProjectConfig config = new ProjectConfig()
     PublishConfig publishConfig = new PublishConfig()
@@ -114,7 +113,6 @@ class UBuilder {
         // Assume there is a top level root matching the organisation.
         String group = id.split(":")[0]
         def pack = publishConfig.addPackage(id)
-        packages.add(pack)
         pack.roots.add("${group.capitalize()}/**".toString())
         saveConfig()
         this

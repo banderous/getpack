@@ -55,7 +55,7 @@ class ExportSpec extends Specification {
                       .withPackage(id)
                       .asProject()
 
-        def manifest = ExportPackage.generateManifest(project, builder.packages.first())
+        def manifest = ExportPackage.generateManifest(project, builder.publishConfig.packages.first())
 
         then:
         manifest.files instanceof Map

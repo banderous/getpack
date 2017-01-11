@@ -13,15 +13,19 @@ import com.nxt.Log;
 import com.nxt.TimeoutTimer;
 import com.nxt.config.Package;
 import com.nxt.config.PackageManifest;
+import groovy.util.Node;
+import groovy.util.NodeList;
 import org.apache.commons.lang3.text.WordUtils;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.XmlProvider;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.ivy.IvyArtifact;
+import org.gradle.api.publish.ivy.IvyConfigurationContainer;
 import org.gradle.api.publish.ivy.IvyPublication;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
@@ -93,6 +97,7 @@ public class ExportPackage extends DefaultTask {
         i.setOrganisation(pkg.group);
         i.setModule(pkg.name);
         i.setRevision(pkg.version);
+
         i.artifact(task.unityPackage, new Action<IvyArtifact>() {
           @Override
           public void execute(IvyArtifact ivyArtifact) {
@@ -104,6 +109,20 @@ public class ExportPackage extends DefaultTask {
           @Override
           public void execute(IvyArtifact ivyArtifact) {
             ivyArtifact.builtBy(task);
+          }
+        });
+
+        i.getDescriptor().withXml(new Action<XmlProvider>() {
+          @Override
+          public void execute(XmlProvider xmlProvider) {
+            Node deps = (Node) ((NodeList) xmlProvider.asNode().get("dependencies")).get(0);
+            for (String dep : pkg.getDependencies()) {
+              Package pack = new Package(dep);
+              new Node(deps, "dependency", ImmutableMap.of(
+                  "org", pack.group,
+                  "name", pack.name,
+                  "rev", pack.version));
+            }
           }
         });
       }

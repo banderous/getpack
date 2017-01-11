@@ -1,5 +1,6 @@
 package com.nxt
 
+import com.google.common.collect.ImmutableSet
 import com.nxt.publish.ExportPackage
 import com.nxt.publish.PublishConfig
 import org.gradle.testfixtures.ProjectBuilder;
@@ -21,6 +22,7 @@ class ExportSpec extends Specification {
         project.tasks.nxtExportAcmeSuperjson
     }
 
+    @Trouble
     def "gathers files in package roots"() {
         when:
         def builder = UBuilder.Builder()
@@ -32,19 +34,13 @@ class ExportSpec extends Specification {
         proj.tasks.installPuppet.execute()
 
         builder.withFile("Assets/Irrelevant.txt")
+        builder.withFile("Assets/More/IrrelevantStuff.txt")
         builder.withFile("Assets/Acme/file.meta")
 
         def tree = ExportPackage.gatherForExport(proj, builder.publishConfig.findPackage('acme:superjson'))
-
+        def names = ImmutableSet.copyOf(tree.files.collect { f-> f.name })
         then:
-        // Ignores puppet dll.
-        !tree.files.any { it.path.endsWith(".dll") }
-        // Includes our text file
-        IvyBuilder.isInstalled(builder.asProject(), id)
-        // Ignores irrelevant file.
-        !tree.files.any { it.path.endsWith("Irrelevant.txt") }
-        // Ignores any meta files.
-        !tree.files.any { it.path.endsWith("meta") }
+        names == ImmutableSet.of('Superjson-1.0.1.txt')
     }
 
     def "manifest generation"() {

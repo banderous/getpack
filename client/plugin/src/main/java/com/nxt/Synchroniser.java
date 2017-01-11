@@ -33,7 +33,7 @@ class Synchroniser {
     Set<PackageManifest> targetManifests =
         gatherManifests(gatherDependencies(project, ProjectConfig.load(project)));
 
-    Log.L.info("Current manifests: {}, target manifests: {}", currentManifests.size(),
+    Log.L.info("Current packages: {}, target packages: {}", currentManifests.size(),
         targetManifests.size());
     AssetMap current = buildAssetMap(currentManifests);
     AssetMap target = buildAssetMap(targetManifests);

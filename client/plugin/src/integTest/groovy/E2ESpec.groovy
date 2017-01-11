@@ -40,7 +40,6 @@ class E2ESpec extends BaseE2ESpec {
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
-    @Trouble
     def "publish a package with a dependency"() {
         when:
         def userId = 'acme:usesjson:1.0.0'

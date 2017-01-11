@@ -71,8 +71,6 @@ task getPuppet(type: Copy, dependsOn: ':client:unityPuppet:build') {
 
 classes.dependsOn getPuppet
 
-compileGroovy.groovyOptions.configurationScript = file('src/groovyCompile/groovycConfig.groovy')
-
 publishing {
     repositories {
         ivy {
@@ -89,4 +87,16 @@ publishing {
             }
         }
     }
+}
+
+// Run only tests annotated with @Trouble.
+task testTrouble(type: Test) {
+    systemProperty 'test.trouble', true
+}
+
+// Run only integration tests annoted with @Trouble.
+task integrationTrouble(type: Test) {
+    systemProperty 'test.trouble', true
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }

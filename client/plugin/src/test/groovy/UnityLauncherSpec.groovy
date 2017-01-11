@@ -77,7 +77,6 @@ class UnityLauncherSpec extends Specification {
         editor == new File('b')
     }
 
-    @Trouble
     def "detects if Unity is running"() {
         when:
 

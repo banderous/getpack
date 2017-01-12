@@ -1,5 +1,6 @@
 package com.nxt;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,6 +47,7 @@ class Synchroniser {
     Log.L.info("Files moved: {}", difference.getMoved().size());
 
     remove(project, difference.getRemove());
+    cleanOldPackageDirs(project.getProjectDir(), difference.getRemove());
     move(project, difference.getMoved());
     FileTree result = install(project, difference.getAdd(), targetManifests);
     ProjectConfig.updateShadowWithConfig(project);
@@ -76,6 +79,39 @@ class Synchroniser {
       File to = project.file(entry.getValue());
       from.renameTo(to);
     }
+  }
+
+  public static void cleanOldPackageDirs(File folder, ImmutableSet<String> pathsRemoved) {
+    Log.L.debug("Cleaning old directories: {}", pathsRemoved);
+    for (String root : getPackageRoots(pathsRemoved)) {
+      removeEmptyFoldersRecursive(new File(folder, root));
+    }
+  }
+
+  public static void removeEmptyFoldersRecursive(File folder) {
+    for (File file : folder.listFiles()) {
+      if (file.isDirectory()) {
+        removeEmptyFoldersRecursive(file);
+      }
+    }
+
+    if (folder.isDirectory() && folder.listFiles().length == 0) {
+      Log.L.info("Removing empty folder {}", folder);
+      folder.delete();
+    }
+  }
+
+  public static ImmutableSet<String> getPackageRoots(ImmutableSet<String> packagePaths) {
+    Set<String> roots = Sets.newHashSet();
+    for (String path : packagePaths) {
+      String[] splits = path.split("/");
+      if (splits.length >= 2) {
+        String potentialRoot = splits[0] + "/" + splits[1];
+        roots.add(potentialRoot);
+      }
+    }
+
+    return ImmutableSet.copyOf(roots);
   }
 
   private static void remove(Project project, ImmutableSet<String> remove) {

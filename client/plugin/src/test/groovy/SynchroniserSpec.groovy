@@ -3,6 +3,7 @@ package com.nxt
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
+import com.google.common.io.Files
 import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
@@ -162,7 +163,6 @@ class SynchroniserSpec extends Specification {
         }
     }
 
-
     def "difference with local changes"() {
         when:
         def diff = Synchroniser.difference(old, latest, allChangedFilter)
@@ -179,7 +179,6 @@ class SynchroniserSpec extends Specification {
         diff.add.keySet() == ImmutableSet.of('added')
     }
 
-
     def "removing old files"() {
         when:
         def files = ImmutableSet.of('Assets/A.txt', 'Assets/A.txt.meta')
@@ -192,6 +191,50 @@ class SynchroniserSpec extends Specification {
 
         then:
         files.every { !project.file(it).exists() }
+    }
+
+    def "finding package roots"() {
+        when:
+        def paths = ImmutableSet.of(
+                'Assets/Acme/foo.txt',
+                'Assets/Acme/Subfolder/bat.txt',
+                'Assets/MoreAcme/Nested/baz.txt'
+        )
+        def roots = Synchroniser.getPackageRoots(paths)
+
+        then:
+        roots == ImmutableSet.of(
+                'Assets/Acme',
+                'Assets/MoreAcme'
+        )
+    }
+
+    def "removing old directories"() {
+        when:
+        def folder = Files.createTempDir()
+        new FileTreeBuilder(folder).Assets {
+            Acme {
+                'foo.txt'('contents')
+                Subfolder { }
+            }
+            MoreAcme {
+                Nested { }
+            }
+            SomeoneElse {
+            }
+        }
+        def roots = ImmutableSet.of(
+                'Assets/Acme',
+                'Assets/MoreAcme'
+        )
+
+        Synchroniser.cleanOldPackageDirs(folder, roots)
+
+        then:
+        !new File(folder, 'Assets/MoreAcme').exists()
+        !new File(folder, 'Assets/Acme/Subfolder').exists()
+        new File(folder, 'Assets/Acme').exists()
+        new File(folder, 'Assets/SomeoneElse').exists()
     }
 
     def "moving files"() {

@@ -83,9 +83,8 @@ class E2ESpec extends BaseE2ESpec {
         consumer.build()
 
         then:
-        conditions.within(5) {
-            assert !IvyBuilder.isInstalled(consumer.asProject(), packageId)
-        }
+        !IvyBuilder.isInstalled(consumer.asProject(), packageId)
+        !consumer.asProject().file('Assets/Acme').exists()
     }
 
     def "upgrade a dependency"() {

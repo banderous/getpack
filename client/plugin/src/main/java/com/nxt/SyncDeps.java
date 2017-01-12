@@ -28,7 +28,7 @@ public class SyncDeps extends DefaultTask {
     tar.setDestinationDir(project.file("nxt/import"));
     tar.setBaseName("package");
     tar.setExtension("staged");
-    tar.setCompression(Compression.GZIP);
+    tar.setCompression(Compression.NONE);
 
     Task sync = project.getTasks().create("nxtSync");
     sync.dependsOn(tar);

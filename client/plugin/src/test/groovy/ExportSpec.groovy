@@ -31,7 +31,6 @@ class ExportSpec extends Specification {
 
 
         def proj = builder.asProject()
-        proj.tasks.installPuppet.execute()
 
         builder.withFile("Assets/Irrelevant.txt")
         builder.withFile("Assets/More/IrrelevantStuff.txt")

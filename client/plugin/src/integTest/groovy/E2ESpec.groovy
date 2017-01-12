@@ -18,16 +18,21 @@ class E2ESpec extends BaseE2ESpec {
 
     @Shared UBuilder packageRunner = publishPackage(packageId)
     def ivyRepo = IvyBuilder.Create()
-
     def "export a package"() {
         when:
         def project = UBuilder.Builder()
                 .withPackage(packageId)
                 .withArg("nxtExportAcmeSuperjson")
-                .build()
+        project.withFile('Assets/Irrelevant/File.txt')
+        project.build()
 
+        def p = project.asProject()
+        def pack = p.file("nxt/export/acme.superjson.unitypackage")
+        def tar = p.tarTree(p.resources.gzip(pack))
+        def paths = tar.findAll { x-> x.name.equals('pathname') }.collect { f -> f.text }
         then:
-        assert new File(project.projectDir, "nxt/export/acme.superjson.unitypackage").exists()
+        pack.exists()
+        paths == ['Assets/Acme/Superjson-1.0.0.txt']
     }
 
     def "publish a package"() {
@@ -63,7 +68,6 @@ class E2ESpec extends BaseE2ESpec {
         when:
         def consumer = projectConsumingPackage(packageId)
         consumer.build()
-
         // create a runner that references it
         then:
         IvyBuilder.isInstalled(consumer.asProject(), packageId)

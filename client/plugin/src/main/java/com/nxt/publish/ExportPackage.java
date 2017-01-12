@@ -16,10 +16,7 @@ import com.nxt.config.PackageManifest;
 import groovy.util.Node;
 import groovy.util.NodeList;
 import org.apache.commons.lang3.text.WordUtils;
-import org.gradle.api.Action;
-import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
-import org.gradle.api.XmlProvider;
+import org.gradle.api.*;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.FileTree;
@@ -135,8 +132,11 @@ public class ExportPackage extends DefaultTask {
     tree.exclude("**/*.meta");
 
     for (String s : pack.getRoots()) {
+      Log.L.info("Including {}", s);
       tree.include(s);
     }
+
+    Log.L.info("Total files {}", tree.getFiles().size());
     return tree;
   }
 
@@ -151,6 +151,7 @@ public class ExportPackage extends DefaultTask {
   }
 
   public static PackageManifest generateManifest(Project project, FileTree tree, Package pack) {
+    Log.L.debug("Generating manifest for {} files", tree.getFiles().size());
     // Relativize the paths to the project root,
     // so they start 'Assets/...".
     Path baseURL = Paths.get(project.getProjectDir().getPath());
@@ -189,13 +190,13 @@ public class ExportPackage extends DefaultTask {
     }
   }
 
-  void exportPackageJob(Project project, Package pack) throws IOException {
+  void exportPackageJob(Project project, FileTree tree) throws IOException {
     File exportFile = getPath(project, PathType.task, pack);
     Files.createParentDirs(exportFile);
 
     Path baseDir = Paths.get(project.getProjectDir().getAbsolutePath());
     Set<String> paths = Sets.newHashSet();
-    for (File f : project.fileTree("Assets").getFiles()) {
+    for (File f : tree) {
       String s = baseDir.relativize(f.toPath()).toFile().getPath();
       paths.add(s);
     }
@@ -214,10 +215,12 @@ public class ExportPackage extends DefaultTask {
 
   @TaskAction
   public void action() throws IOException, InterruptedException {
-    PackageManifest.save(generateManifest(getProject(), pack), manifest);
+    FileTree tree = gatherForExport(getProject(), pack);
+
+    PackageManifest.save(generateManifest(getProject(), tree, pack), manifest);
 
     cleanExistingPackage();
-    exportPackageJob(getProject(), pack);
+    exportPackageJob(getProject(), tree);
     TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
         "Timed out waiting for export of " + unityPackage);
 

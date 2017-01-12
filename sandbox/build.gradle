@@ -1,12 +1,13 @@
 buildscript {
     repositories {
         mavenCentral()
-        ivy {
-            url file("../build/repo")
-        }
     }
     dependencies {
-        classpath 'com.outlinegames:plugin:1.0.0'
+        classpath 'com.outlinegames:plugin:1.+'
     }
 }
-apply plugin: 'com.nxt.publish'
+
+subprojects {
+    apply plugin: 'com.nxt.publish'
+}
+

@@ -23,7 +23,7 @@ internal class Watcher
                 Environment.SetEnvironmentVariable ("MONO_MANAGED_WATCHER", "enabled");
             }
 
-            WatchForJobs (Exporter.TaskFolder, Exporter.TaskExtension, Exporter.DoExport);
+            WatchForJobs (Exporter.ExportFolder, Exporter.TaskExtension, Exporter.DoExport);
             WatchForJobs (Importer.ImportFolder, Importer.ImportExtension, Importer.DoImport);
             EditorApplication.update += Update;
             initialised = true;

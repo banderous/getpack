@@ -141,7 +141,8 @@ public class ExportPackage extends DefaultTask {
   }
 
   static File getPath(Project project, PathType type, Package pack) {
-    String path = String.format("nxt/%s/%s.%s.%s", type, pack.group, pack.name, type.extension);
+    String path = String.format("nxt/%s/%s.%s.%s", type.path, pack.group, pack.name,
+        type.extension);
     return project.file(path);
   }
 
@@ -232,14 +233,22 @@ public class ExportPackage extends DefaultTask {
   }
 
   enum PathType {
-    task("task"),
+    // Tasks go in the export folder.
+    task("task", "export"),
     export("unitypackage"),
     manifest("manifest");
 
     String extension;
+    String path;
 
     PathType(String extension) {
       this.extension = extension;
+      this.path = toString();
+    }
+
+    PathType(String extension, String path) {
+      this.extension = extension;
+      this.path = path;
     }
   }
 }

@@ -4,13 +4,12 @@ using UnityEditor;
 
 internal static class Exporter
 {
-    public const string TaskFolder = "nxt/task";
     public const string TaskExtension = "*.task";
     public const string ExportFolder = "nxt/export";
 
     internal static void DoExport ()
     {
-        foreach (var file in Directory.GetFiles (TaskFolder, TaskExtension)) {
+        foreach (var file in Directory.GetFiles (ExportFolder, TaskExtension)) {
 
             // Read the list of files to export.
             var json = File.ReadAllText (file);
@@ -24,14 +23,12 @@ internal static class Exporter
             }
 
             Directory.CreateDirectory (ExportFolder);
-            var destination = Path.Combine (ExportFolder, string.Format ("{0}.unitypackage", Path.GetFileNameWithoutExtension (file)));
+            var destination = Path.ChangeExtension (file, "unitypackage");
             AssetDatabase.ExportPackage (files, destination,
                                          ExportPackageOptions.Recurse);
 
-
-
+            File.Delete (file);
             Watcher.log ("Published to " + Path.GetFullPath (destination));
-
         }
     }
 }

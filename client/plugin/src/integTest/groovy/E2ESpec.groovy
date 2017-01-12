@@ -33,6 +33,9 @@ class E2ESpec extends BaseE2ESpec {
         then:
         pack.exists()
         paths == ['Assets/Acme/Superjson-1.0.0.txt']
+        project.asProject().fileTree('nxt/export') {
+            include '*.task'
+        }.isEmpty()
     }
 
     def "publish a package"() {

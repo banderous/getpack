@@ -19,7 +19,7 @@ public class UnityPuppet {
 
     try {
       Files.createParentDirs(dest);
-      Files.move(unitypackage, dest);
+      Files.copy(unitypackage, dest);
       File completed = project.file(IMPORT_PACKAGE_PATH + ".completed");
       TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
           "Timed out waiting for import of " + completed);

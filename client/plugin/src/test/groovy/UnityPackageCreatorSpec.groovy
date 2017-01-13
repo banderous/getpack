@@ -2,8 +2,8 @@ import com.google.common.collect.HashMultimap
 import com.google.common.collect.ImmutableSet
 import com.google.common.io.Files
 import com.nxt.CreateTarGZ
+import com.nxt.Synchroniser
 import com.nxt.UBuilder
-import com.nxt.UnityPackageCreator
 import spock.lang.Specification
 
 /**
@@ -20,7 +20,7 @@ class UnityPackageCreatorSpec extends Specification {
         HashMultimap<File, String> input = HashMultimap.create()
         input.put(a, "Include")
         input.put(b, "And")
-        def tree = UnityPackageCreator.mergeArchives(project, input);
+        def tree = Synchroniser.mergeArchives(project, input);
         def names = ImmutableSet.copyOf(tree.files.collect { it.getName() })
 
         then:

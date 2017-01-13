@@ -11,6 +11,7 @@ import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.bundling.Compression;
 import org.gradle.api.tasks.bundling.Tar;
+import org.gradle.wrapper.Install;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -19,7 +20,8 @@ import java.util.concurrent.Callable;
  * Created by alex on 15/12/2016.
  */
 public class SyncDeps extends DefaultTask {
-  public FileTree unityFiles;
+  public InstallDetails unityFiles;
+  FileTree toMerge;
 
   static void configure(Project project) {
     SyncDeps build = project.getTasks().create("nxtDo", SyncDeps.class);
@@ -49,6 +51,10 @@ public class SyncDeps extends DefaultTask {
         if (staged.exists()) {
           UnityPuppet.installPackage(project, staged);
         }
+
+        for (File file : build.unityFiles.getUnityPackages()) {
+          UnityPuppet.installPackage(project, file);
+        }
       }
     });
 
@@ -67,7 +73,7 @@ public class SyncDeps extends DefaultTask {
     return new Callable<FileTree>() {
       @Override
       public FileTree call() throws Exception {
-        return unityFiles;
+        return toMerge;
       }
     };
   }
@@ -75,5 +81,6 @@ public class SyncDeps extends DefaultTask {
   @TaskAction
   public void sync() {
     unityFiles = Synchroniser.sync(getProject());
+    toMerge = unityFiles.getPartialPackages();
   }
 }

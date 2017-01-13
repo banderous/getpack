@@ -67,6 +67,7 @@ class E2ESpec extends BaseE2ESpec {
         dependency.@rev == '1.0.0'
     }
 
+    @Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)

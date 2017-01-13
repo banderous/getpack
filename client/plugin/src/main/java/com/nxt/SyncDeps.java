@@ -39,10 +39,9 @@ public class SyncDeps extends DefaultTask {
     tar.setExtension("staged");
     tar.setCompression(Compression.NONE);
 
-    Task sync = project.getTasks().create("nxtSync");
-    sync.getInputs().file(project.file(ProjectConfig.CONFIG_PATH));
-    sync.dependsOn(tar);
-    sync.doLast(new Action<Task>() {
+    Task install = project.getTasks().create("nxtInstall");
+    install.dependsOn(tar);
+    install.doLast(new Action<Task>() {
       @Override
       public void execute(Task task) {
         File staged = project.file("nxt/import/package.staged");
@@ -50,6 +49,16 @@ public class SyncDeps extends DefaultTask {
         if (staged.exists()) {
           UnityPuppet.installPackage(project, staged);
         }
+      }
+    });
+
+    Task sync = project.getTasks().create("nxtSync");
+    sync.dependsOn(install);
+    sync.getInputs().file(project.file(ProjectConfig.CONFIG_PATH));
+    sync.doLast(new Action<Task>() {
+      @Override
+      public void execute(Task task) {
+        ProjectConfig.updateShadowWithConfig(project);
       }
     });
   }

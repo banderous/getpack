@@ -49,8 +49,9 @@ class Synchroniser {
     remove(project, difference.getRemove());
     cleanOldPackageDirs(project.getProjectDir(), difference.getRemove());
     move(project, difference.getMoved());
+
     FileTree result = install(project, difference.getAdd(), targetManifests);
-    ProjectConfig.updateShadowWithConfig(project);
+
     return result;
   }
 

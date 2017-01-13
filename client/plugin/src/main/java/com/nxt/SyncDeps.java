@@ -1,5 +1,6 @@
 package com.nxt;
 
+import com.nxt.config.ProjectConfig;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
@@ -39,6 +40,7 @@ public class SyncDeps extends DefaultTask {
     tar.setCompression(Compression.NONE);
 
     Task sync = project.getTasks().create("nxtSync");
+    sync.getInputs().file(project.file(ProjectConfig.CONFIG_PATH));
     sync.dependsOn(tar);
     sync.doLast(new Action<Task>() {
       @Override

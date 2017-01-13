@@ -32,7 +32,7 @@ class E2ESpec extends BaseE2ESpec {
         def paths = tar.findAll { x-> x.name.equals('pathname') }.collect { f -> f.text }
         then:
         pack.exists()
-        paths == ['Assets/Acme/Superjson-1.0.0.txt']
+        paths == [IvyBuilder.assetPathForPackage(packageId)]
         project.asProject().fileTree('nxt/export') {
             include '*.task'
         }.isEmpty()

@@ -1,10 +1,12 @@
 package com.nxt;
 
+import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileTree;
+import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.bundling.Compression;
 import org.gradle.api.tasks.bundling.Tar;
@@ -24,6 +26,12 @@ public class SyncDeps extends DefaultTask {
     Tar tar = project.getTasks().create("nxtTar", Tar.class);
     tar.dependsOn(build);
     tar.from(build.getUnityFiles());
+    tar.getOutputs().upToDateWhen(new Spec<Task>() {
+      @Override
+      public boolean isSatisfiedBy(Task task) {
+        return false;
+      }
+    });
 
     tar.setDestinationDir(project.file("nxt/import"));
     tar.setBaseName("package");

@@ -54,7 +54,7 @@ class ExportSpec extends Specification {
 
         then:
         manifest.files instanceof Map
-        assert manifest.files.any { guid, info -> (info.path == 'Assets/Acme/Superjson-1.0.1.txt'
+        assert manifest.files.any { guid, info -> (info.path == IvyBuilder.assetPathForPackage(id)
             && info.md5 == "f63671431e05d3286cb0c192e61945e9")}
     }
 

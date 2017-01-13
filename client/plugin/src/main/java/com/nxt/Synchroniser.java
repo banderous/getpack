@@ -98,6 +98,7 @@ class Synchroniser {
     if (folder.isDirectory() && folder.listFiles().length == 0) {
       Log.L.info("Removing empty folder {}", folder);
       folder.delete();
+      new File(folder.getParent(), folder.getName() + ".meta").delete();
     }
   }
 

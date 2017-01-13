@@ -44,7 +44,7 @@ class IvyBuilder {
     }
 
     public static String assetPathForPackage(String group, String name, String version) {
-        return ['Assets', group.capitalize(), name.capitalize() + "-${version}.txt"].join("/")
+        return ['Assets', group.capitalize(), name.capitalize(), name.capitalize() + "-${version}.txt"].join("/")
     }
 
     File dir = Files.createTempDir()

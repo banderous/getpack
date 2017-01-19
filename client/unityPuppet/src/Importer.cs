@@ -21,6 +21,8 @@ internal static class Importer
                 var newFile = Path.ChangeExtension (dest, "completed");
                 Watcher.log ("Moving to " + newFile);
                 File.Move (dest, newFile);
+                // Schedule another iteration for any further imports.
+                Watcher.AddTask (DoImport);
             });
             break;
         }

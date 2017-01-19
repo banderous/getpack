@@ -19,9 +19,6 @@ internal class Watcher
         // This can be called multiple times by Unity.
         if (!initialised) {
             log ("Watcher " + System.Diagnostics.Process.GetCurrentProcess ().Id);
-            if (Application.platform == RuntimePlatform.OSXEditor) {
-                Environment.SetEnvironmentVariable ("MONO_MANAGED_WATCHER", "enabled");
-            }
 
             WatchForJobs (Exporter.ExportFolder, Exporter.TaskExtension, Exporter.DoExport);
             WatchForJobs (Importer.ImportFolder, Importer.ImportExtension, Importer.DoImport);
@@ -55,24 +52,11 @@ internal class Watcher
     {
         Directory.CreateDirectory (folder);
 
-        // Create a new FileSystemWatcher and set its properties.
-        var watcher = new FileSystemWatcher ();
-        watcher.Path = folder;
-
-        watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
-            | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-        watcher.Filter = filter;
-
-        watcher.Created += (sender, args) => AddTask(task);
-        watcher.Changed += (sender, args) => AddTask(task);
-
-        // Is there already work pending?
-        if (Directory.GetFiles (folder, filter).Length > 0) {
-            AddTask (task);
-        }
-
-        // Begin watching.
-        watcher.EnableRaisingEvents = true;
+        EditorApplication.update += () => {
+            if (Directory.GetFiles (folder, filter).Length > 0) {
+                AddTask (task);
+            }
+        };
     }
 
     public static void log (string s)

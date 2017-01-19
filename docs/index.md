@@ -17,6 +17,8 @@ GPM gives you the full power of [Gradle's dependency management](https://docs.gr
 
 Package authors are free to delete, rename and move files when creating new package versions.
 
+GPM features an upgrade process that compares
+
 ## Usage
 
 ### Declaring dependencies

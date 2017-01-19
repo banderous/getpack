@@ -26,12 +26,12 @@ public class Util {
     try {
       if (!f.exists()) {
         Files.createParentDirs(f);
-        Files.write("{}", f, Charsets.UTF_8);
+        save(c.newInstance(), f);
       }
       try (FileReader reader = new FileReader(f)) {
         return new Gson().fromJson(reader, c);
       }
-    } catch (IOException e) {
+    } catch (IOException | IllegalAccessException | InstantiationException e) {
       throw new RuntimeException(e);
     }
   }

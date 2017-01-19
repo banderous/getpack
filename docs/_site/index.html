@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="nxt : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/assets/css/style.css?v=46478a78b3a28419f50a5c7b5d99b9627e5b6cb6">
+
+    <title>nxt</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="http://github.com/banderous/nxt">View on GitHub</a>
+
+          <h1 id="project_title">nxt</h1>
+          <h2 id="project_tagline"></h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        
+<p>GPM is a free &amp; open source package manager for Unity built on <a href="https://gradle.org/">Gradle</a>.</p>
+
+<h2 id="features">Features</h2>
+
+<h3 id="dependency-management">Dependency management</h3>
+
+<p>GPM gives you the full power of <a href="https://docs.gradle.org/current/userguide/dependency_management.html">Gradle’s dependency management</a> including:</p>
+
+<ul>
+  <li>Transitive dependencies</li>
+  <li>Multiple package repositories</li>
+  <li>Dependency substitution</li>
+</ul>
+
+<h3 id="refactorable-packages">Refactorable packages</h3>
+
+<p>Package authors are free to delete, rename and move files when creating new package versions.</p>
+
+<h2 id="usage">Usage</h2>
+
+<h3 id="declaring-dependencies">Declaring dependencies</h3>
+
+<p>State <strong>what</strong> your project depends on in the <strong>project manifest</strong>:</p>
+
+<div class="language-json-doc highlighter-rouge"><pre class="highlight"><code><span class="c1">// ProjectConfig.json</span><span class="w">
+</span><span class="p">{</span><span class="w">
+    </span><span class="nt">"repositories"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://github.com/a_repo"</span><span class="p">],</span><span class="w">
+    </span><span class="nt">"dependencies"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"com:gaia.thirdparty:1.0.0"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"com.google:android-support:4.3.1"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h3 id="synchronisation">Synchronisation</h3>
+
+<p>Packages are installed, removed and upgraded automatically by the <strong>synchronisation process</strong>.</p>
+
+<p>This process detects changes to your project manifest and applies them automatically:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>blah sync
+</code></pre>
+</div>
+
+<h3 id="creating-packages">Creating packages</h3>
+
+<p>Packages are declared in the <strong>publisher configuration</strong>:</p>
+
+<div class="language-json-doc highlighter-rouge"><pre class="highlight"><code><span class="c1">// PublishConfig.json</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="c1">// Packages can be published to any of Gradle's supported formats.</span><span class="w">
+  </span><span class="c1">// Eg. Amazon S3, HTTP, FTP.</span><span class="w">
+  </span><span class="nt">"repositories"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"s3://amazonaws.com/..."</span><span class="p">],</span><span class="w">
+  </span><span class="nt">"packages"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"acme:superjson:1.2.0"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="c1">// Declare the path(s) to be published in this project.</span><span class="w">
+        </span><span class="nt">"roots"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="s2">"Acme/Superjson/**"</span><span class="w">
+        </span><span class="p">],</span><span class="w">
+        </span><span class="c1">// Any dependencies required by this package are declared here.</span><span class="w">
+        </span><span class="nt">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>Packages can be published individually by name</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gradle publishAcmeSuperjson
+</code></pre>
+</div>
+
+<p>Of if a project declares multiple packages they can all be published in a single command:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gradle publish
+</code></pre>
+</div>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">nxt maintained by <a href="http://github.com/banderous">banderous</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+
+
+  </body>
+</html>

@@ -50,7 +50,7 @@ class UBuilder {
 
         new File(projectDir, "build.gradle") << """
             plugins {
-                id 'com.nxt.publish'
+                id 'com.banderous.gpm'
             }
         """
 

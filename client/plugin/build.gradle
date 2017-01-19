@@ -1,9 +1,38 @@
 import groovy.json.JsonBuilder
 
+// Apply the publishing plugin.
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+    }
+}
+apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'ivy-publish'
 apply plugin: 'checkstyle'
+
+version = "0.1"
+group = "com.banderous.gpm"
+
+pluginBundle {
+    website = 'https://banderous.github.io/gpm'
+    vcsUrl = 'https://github.com/banderous/gpm'
+    description = 'A Unity package manager'
+    tags = ['Unity', 'Package manager']
+
+    plugins {
+        gpmPlugin {
+            id = 'com.banderous.gpm'
+            displayName = 'Game Package Manager'
+        }
+    }
+}
 
 sourceSets {
     integrationTest {
@@ -16,9 +45,6 @@ sourceSets {
     }
 }
 
-group 'com.outlinegames'
-version '1.0.0'
-
 configurations {
     archives
     integrationTestCompile.extendsFrom testCompile
@@ -26,15 +52,13 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 checkstyle {
     toolVersion = "7.4"
     ignoreFailures = false
 }
-
-println checkstyle.ignoreFailures
 
 dependencies {
     compile gradleApi()

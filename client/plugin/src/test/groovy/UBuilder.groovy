@@ -32,7 +32,7 @@ class UBuilder {
     ProjectConfig config = new ProjectConfig()
     PublishConfig publishConfig = new PublishConfig()
     ProjectConfig projectState = new ProjectConfig()
-    List<String> args = ["-i"]
+    List<String> args = ["-d"]
 
     UBuilder(){
         this(Files.createTempDir())

@@ -78,7 +78,8 @@ public class ExportPackage extends DefaultTask {
   }
 
   private static void configurePackage(Project project, final Package pkg) {
-    final String packageId = WordUtils.capitalize(pkg.group) + WordUtils.capitalize(pkg.name);
+    final String packageId = WordUtils.capitalize(pkg.getGroup())
+        + WordUtils.capitalize(pkg.getName());
     String taskName = "nxtExport" + packageId;
 
     final ExportPackage task = project.getTasks().create(taskName, ExportPackage.class);
@@ -91,9 +92,9 @@ public class ExportPackage extends DefaultTask {
       @Override
       public void execute(PublishingExtension e) {
         IvyPublication i = e.getPublications().create(packageId, IvyPublication.class);
-        i.setOrganisation(pkg.group);
-        i.setModule(pkg.name);
-        i.setRevision(pkg.version);
+        i.setOrganisation(pkg.getGroup());
+        i.setModule(pkg.getName());
+        i.setRevision(pkg.getVersion());
 
         i.artifact(task.unityPackage, new Action<IvyArtifact>() {
           @Override
@@ -116,9 +117,9 @@ public class ExportPackage extends DefaultTask {
             for (String dep : pkg.getDependencies()) {
               Package pack = new Package(dep);
               new Node(deps, "dependency", ImmutableMap.of(
-                  "org", pack.group,
-                  "name", pack.name,
-                  "rev", pack.version));
+                  "org", pack.getGroup(),
+                  "name", pack.getName(),
+                  "rev", pack.getVersion()));
             }
           }
         });
@@ -141,7 +142,7 @@ public class ExportPackage extends DefaultTask {
   }
 
   static File getPath(Project project, PathType type, Package pack) {
-    String path = String.format("nxt/%s/%s.%s.%s", type.path, pack.group, pack.name,
+    String path = String.format("nxt/%s/%s.%s.%s", type.path, pack.getGroup(), pack.getName(),
         type.extension);
     return project.file(path);
   }

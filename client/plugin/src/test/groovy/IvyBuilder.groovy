@@ -52,7 +52,7 @@ class IvyBuilder {
     IvyBuilder withPackage(String id, String[] deps) {
         def parsed = parseId(id)
         def builder = new FileTreeBuilder(dir)
-        def manifest = createManifest(parsed)
+        def manifest = createManifest(id)
         builder.dir("${parsed.group}/${parsed.name}/${parsed.version}") {
             file("ivy-${parsed.version}.xml", writeIvyModule(deps, parsed))
             file("${parsed.group}.${parsed.name}-${parsed.version}.manifest", manifest.toString())
@@ -80,9 +80,10 @@ class IvyBuilder {
         return unityPackage
     }
 
-    def createManifest(id) {
+    def createManifest(String id) {
         def m = new PackageManifest(new Package(id));
-        def guid = Hashing.md5().hashString(id.name, Charsets.UTF_8).toString()
+        def bits = parseId(id)
+        def guid = Hashing.md5().hashString(bits.name, Charsets.UTF_8).toString()
         def path = assetPathForPackage(id)
         def contents = new File(path).name
         def hash = Hashing.md5().hashString(contents, Charsets.UTF_8).toString();

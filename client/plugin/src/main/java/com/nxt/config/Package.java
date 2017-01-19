@@ -11,9 +11,7 @@ import java.util.Objects;
  * Created by alex on 08/12/2016.
  */
 public class Package {
-  public String group;
-  public String name;
-  public String version;
+  public String id;
   List<String> roots = Lists.newArrayList();
   List<String> dependencies = Lists.newArrayList();
 
@@ -21,11 +19,24 @@ public class Package {
   Package() {
   }
 
+  public String getGroup() {
+    return getComponents().get(0);
+  }
+
+  public String getName() {
+    return getComponents().get(1);
+  }
+
+  public String getVersion() {
+    return getComponents().get(2);
+  }
+
+  private List<String> getComponents() {
+    return Splitter.on(":").splitToList(id);
+  }
+
   public Package(String id) {
-    List<String> l = Splitter.on(":").splitToList(id);
-    group = l.get(0);
-    name = l.get(1);
-    version = l.get(2);
+    this.id = id;
   }
 
   public List<String> getRoots() {
@@ -37,7 +48,7 @@ public class Package {
   }
 
   public String key() {
-    return Joiner.on(":").join(group, name);
+    return Joiner.on(":").join(getGroup(), getName());
   }
 
   @Override
@@ -47,12 +58,12 @@ public class Package {
       return false;
     }
 
-    return Objects.equals(group, other.group)
-        && Objects.equals(name, other.name);
+    return Objects.equals(getGroup(), other.getGroup())
+        && Objects.equals(getName(), other.getName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(group, name);
+    return Objects.hash(getGroup(), getName());
   }
 }

@@ -133,7 +133,7 @@ public class ExportPackage extends DefaultTask {
     tree.exclude("**/*.meta");
 
     for (String s : pack.getRoots()) {
-      Log.L.info("Including {}", s);
+      Log.L.info("Including '{}'", s);
       tree.include(s);
     }
 
@@ -218,7 +218,7 @@ public class ExportPackage extends DefaultTask {
   @TaskAction
   public void action() throws IOException, InterruptedException {
     FileTree tree = gatherForExport(getProject(), pack);
-
+    Log.L.info("Gathered {} files for export", tree.getFiles().size());
     PackageManifest.save(generateManifest(getProject(), tree, pack), manifest);
 
     cleanExistingPackage();

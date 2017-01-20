@@ -3,11 +3,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.outlinegames:plugin:1.+'
+        classpath 'com.banderous.upm:plugin:1.+'
     }
 }
 
 subprojects {
-    apply plugin: 'com.nxt.publish'
+    apply plugin: 'com.banderous.upm'
 }
 

@@ -18,17 +18,17 @@ apply plugin: 'ivy-publish'
 apply plugin: 'checkstyle'
 
 version = "0.1"
-group = "com.banderous.gpm"
+group = "com.banderous.upm"
 
 pluginBundle {
-    website = 'https://banderous.github.io/gpm'
-    vcsUrl = 'https://github.com/banderous/gpm'
+    website = 'https://banderous.github.io/upm'
+    vcsUrl = 'https://github.com/banderous/upm'
     description = 'A Unity package manager'
     tags = ['Unity', 'Package manager']
 
     plugins {
-        gpmPlugin {
-            id = 'com.banderous.gpm'
+        upmPlugin {
+            id = 'com.banderous.upm'
             displayName = 'Game Package Manager'
         }
     }

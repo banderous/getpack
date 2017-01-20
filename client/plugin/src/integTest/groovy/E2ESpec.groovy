@@ -22,7 +22,7 @@ class E2ESpec extends BaseE2ESpec {
         when:
         def project = UBuilder.Builder()
                 .withPackage(packageId)
-                .withArg("gpmPublishAcmeSuperjson")
+                .withArg("upmPublishAcmeSuperjson")
         project.withFile('Assets/Irrelevant/File.txt')
         project.build()
 

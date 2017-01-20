@@ -1,13 +1,13 @@
 
 
-GPM is a free & open source package manager for Unity built on [Gradle](https://gradle.org/).
+Upm is a free & open source package manager for Unity built on [Gradle](https://gradle.org/).
 
 
 ## Features
 
 ### Dependency management
 
-GPM gives you the full power of [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) including:
+Upm gives you the full power of [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) including:
 
 * Transitive dependencies
 * Multiple package repositories
@@ -17,15 +17,13 @@ GPM gives you the full power of [Gradle's dependency management](https://docs.gr
 
 Package authors are free to delete, rename and move files when creating new package versions.
 
-GPM features an upgrade process that compares
-
 ## Getting started
 
-Apply the GPM Gradle plugin to your build.gradle file.
+Apply the upm Gradle plugin to your build.gradle file.
 
 ```groovy
 plugins {
-    id 'com.banderous.gpm' version '1.0.0'
+    id 'com.banderous.upm' version '0.1'
 }
 ```
 

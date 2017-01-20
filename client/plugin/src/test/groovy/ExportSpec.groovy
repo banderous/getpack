@@ -19,7 +19,7 @@ class ExportSpec extends Specification {
         ExportPackage.configure(project, config)
 
         then:
-        project.tasks.gpmPublishAcmeSuperjson
+        project.tasks.upmPublishAcmeSuperjson
     }
 
     @Trouble

@@ -80,7 +80,7 @@ public class ExportPackage extends DefaultTask {
   private static void configurePackage(Project project, final Package pkg) {
     final String packageId = WordUtils.capitalize(pkg.getGroup())
         + WordUtils.capitalize(pkg.getName());
-    String taskName = "gpmPublish" + packageId;
+    String taskName = "upmPublish" + packageId;
 
     final ExportPackage task = project.getTasks().create(taskName, ExportPackage.class);
     task.dependsOn("launchUnity");

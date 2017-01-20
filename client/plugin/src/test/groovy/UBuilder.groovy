@@ -54,11 +54,11 @@ class UBuilder {
             }
         """
 
-        withRepository('nxt/repo')
+        withRepository('upm/repo')
     }
 
     UBuilder saveConfig() {
-        def f = new File(projectDir, "nxt/nxt.json")
+        def f = new File(projectDir, "upm/upm.json")
         f.getParentFile().mkdirs()
         ProjectConfig.save(config, f)
 
@@ -147,7 +147,7 @@ class UBuilder {
     UBuilder withInstalledDependency(String id) {
         withFile(IvyBuilder.assetPathForPackage(id))
         projectState.addDependency(id)
-        File f = new File(projectDir, "nxt/nxt.json.state")
+        File f = new File(projectDir, "upm/upm.json.state")
         ProjectConfig.save(projectState, f)
         this
     }

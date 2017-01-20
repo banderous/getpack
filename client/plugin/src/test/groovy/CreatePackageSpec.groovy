@@ -20,7 +20,7 @@ public class CreatePackageSpec extends Specification {
 
     def "creating a new package"() {
         when:
-        project.tasks.nxtCreatePackage.execute()
+        project.tasks.upmCreatePackage.execute()
         def config = PublishConfig.load(project)
         def pack = config.findPackage('com:example')
         then:

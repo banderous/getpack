@@ -26,7 +26,7 @@ class PuppetSpec extends BaseE2ESpec {
 
         then:
         project.asProject().file(path).exists()
-        project.asProject().file('nxt/import').list() == []
+        project.asProject().file('upm/import').list() == []
 
         project.asProject().file(path2).exists()
     }

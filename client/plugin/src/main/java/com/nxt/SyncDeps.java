@@ -24,9 +24,9 @@ public class SyncDeps extends DefaultTask {
   FileTree toMerge;
 
   static void configure(Project project) {
-    SyncDeps build = project.getTasks().create("nxtDo", SyncDeps.class);
+    SyncDeps build = project.getTasks().create("upmDo", SyncDeps.class);
 
-    Tar tar = project.getTasks().create("nxtTar", Tar.class);
+    Tar tar = project.getTasks().create("upmTar", Tar.class);
     tar.dependsOn(build);
     tar.from(build.getUnityFiles());
     tar.getOutputs().upToDateWhen(new Spec<Task>() {
@@ -36,17 +36,17 @@ public class SyncDeps extends DefaultTask {
       }
     });
 
-    tar.setDestinationDir(project.file("nxt/import"));
+    tar.setDestinationDir(project.file("upm/import"));
     tar.setBaseName("package");
     tar.setExtension("staged");
     tar.setCompression(Compression.NONE);
 
-    Task install = project.getTasks().create("nxtInstall");
+    Task install = project.getTasks().create("upmInstall");
     install.dependsOn(tar);
     install.doLast(new Action<Task>() {
       @Override
       public void execute(Task task) {
-        File staged = project.file("nxt/import/package.staged");
+        File staged = project.file("upm/import/package.staged");
 
         if (staged.exists()) {
           UnityPuppet.installPackage(project, staged);

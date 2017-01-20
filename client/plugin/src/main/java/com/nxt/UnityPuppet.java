@@ -10,7 +10,7 @@ import java.io.IOException;
  * Created by alex on 04/01/2017.
  */
 public class UnityPuppet {
-  public static final String IMPORT_PACKAGE_PATH = "nxt/import/package.unitypackage";
+  public static final String IMPORT_PACKAGE_PATH = "upm/import/package.unitypackage";
 
   public static void installPackage(Project project, File unitypackage) {
     InstallPuppet.install(project);

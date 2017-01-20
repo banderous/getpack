@@ -17,8 +17,8 @@ import java.util.Set;
 
 public class ProjectConfig {
 
-  public static final String CONFIG_PATH = "nxt/nxt.json";
-  public static final String SHADOW_CONFIG_PATH = "nxt/nxt.json.state";
+  public static final String CONFIG_PATH = "upm/upm.json";
+  public static final String SHADOW_CONFIG_PATH = "upm/upm.json.state";
   Set<String> repositories = Sets.newHashSet();
   Set<String> dependencies = Sets.newHashSet();
 

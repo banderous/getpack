@@ -9,7 +9,7 @@ using UnityEngine;
 internal class Watcher
 {
     static bool initialised;
-    static readonly StreamWriter logger = File.AppendText ("nxt/puppet.log");
+    static readonly StreamWriter logger = File.AppendText ("upm/puppet.log");
 
     public delegate void Action ();
     private static List<Action> Tasks = new List<Action> ();

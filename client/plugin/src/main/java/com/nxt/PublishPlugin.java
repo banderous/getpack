@@ -1,5 +1,6 @@
 package com.nxt;
 
+import com.nxt.config.ProjectConfig;
 import com.nxt.publish.CreatePackage;
 import com.nxt.publish.ExportPackage;
 import com.nxt.publish.PublishConfig;
@@ -15,5 +16,7 @@ public class PublishPlugin implements Plugin<Project> {
     ExportPackage.configure(project, config);
     CreatePackage.configure(project);
     SyncDeps.configure(project);
+    // Ensure a project config exists.
+    ProjectConfig.load(project);
   }
 }

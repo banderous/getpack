@@ -58,7 +58,7 @@ class UBuilder {
     }
 
     UBuilder saveConfig() {
-        def f = new File(projectDir, "upm/upm.json")
+        def f = new File(projectDir, "upm/project.json")
         f.getParentFile().mkdirs()
         ProjectConfig.save(config, f)
 
@@ -147,7 +147,7 @@ class UBuilder {
     UBuilder withInstalledDependency(String id) {
         withFile(IvyBuilder.assetPathForPackage(id))
         projectState.addDependency(id)
-        File f = new File(projectDir, "upm/upm.json.state")
+        File f = new File(projectDir, "upm/project.json.state")
         ProjectConfig.save(projectState, f)
         this
     }

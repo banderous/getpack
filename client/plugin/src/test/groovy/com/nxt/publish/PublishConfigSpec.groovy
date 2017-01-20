@@ -18,7 +18,7 @@ class PublishConfigSpec extends Specification {
 
         then:
         config.packages.size() == 1
-        config.findPackage('com:acme').roots == ['Plugins/Acme']
+        config.findPackage('com:acme').roots == ['Plugins/Acme/**']
     }
 
     def "creating a duplicate package"() {

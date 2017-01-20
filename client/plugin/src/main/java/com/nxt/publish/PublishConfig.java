@@ -41,7 +41,7 @@ public class PublishConfig {
       throw new GradleException("Package already installed: " + id);
     }
     packages.add(pack);
-    pack.getRoots().add("Plugins/" + StringUtils.capitalize(pack.getName()));
+    pack.getRoots().add("Plugins/" + StringUtils.capitalize(pack.getName()) + "/**");
     return pack;
   }
 

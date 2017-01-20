@@ -19,7 +19,15 @@ Package authors are free to delete, rename and move files when creating new pack
 
 GPM features an upgrade process that compares
 
-## Usage
+## Getting started
+
+Apply the GPM Gradle plugin to your build.gradle file.
+
+```groovy
+plugins {
+    id 'com.banderous.gpm' version '1.0.0'
+}
+```
 
 ### Declaring dependencies
 

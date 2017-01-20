@@ -14,11 +14,11 @@ class PublishConfigSpec extends Specification {
 
     def "creating a package"() {
         when:
-        config.addPackage("a:b:1.0.0")
+        config.addPackage("com:acme:1.0.0")
 
         then:
         config.packages.size() == 1
-        config.findPackage('a:b').roots == ['Assets']
+        config.findPackage('com:acme').roots == ['Plugins/Acme']
     }
 
     def "creating a duplicate package"() {

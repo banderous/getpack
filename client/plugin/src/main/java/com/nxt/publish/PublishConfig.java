@@ -3,6 +3,7 @@ package com.nxt.publish;
 import com.google.common.collect.Sets;
 import com.nxt.config.Package;
 import com.nxt.config.Util;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 
@@ -40,7 +41,7 @@ public class PublishConfig {
       throw new GradleException("Package already installed: " + id);
     }
     packages.add(pack);
-    pack.getRoots().add("Plugins/" + pack.getName());
+    pack.getRoots().add("Plugins/" + StringUtils.capitalize(pack.getName()));
     return pack;
   }
 

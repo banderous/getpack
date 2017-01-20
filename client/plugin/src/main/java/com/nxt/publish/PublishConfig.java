@@ -40,7 +40,7 @@ public class PublishConfig {
       throw new GradleException("Package already installed: " + id);
     }
     packages.add(pack);
-    pack.getRoots().add("Assets");
+    pack.getRoots().add("Plugins/" + pack.getName());
     return pack;
   }
 

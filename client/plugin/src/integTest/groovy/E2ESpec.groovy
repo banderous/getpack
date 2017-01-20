@@ -114,7 +114,7 @@ class E2ESpec extends BaseE2ESpec {
         def result = UBuilder.Builder()
                 .withRepository(ivyRepo.dir.path)
                 .withDependency(withTransitive)
-                .withArg("nxtSync")
+                .withArg("upmSync")
         result.build()
 
 
@@ -132,7 +132,7 @@ class E2ESpec extends BaseE2ESpec {
         def result = UBuilder.Builder()
                 .withRepository("${packageRunner.projectDir.path}/nxt/repo")
                 .withDependency(packageId)
-                .withArg("nxtSync")
+                .withArg("upmSync")
         result.build()
         conditions.within(5) {
             assert IvyBuilder.isInstalled(result.asProject(), packageId)

@@ -58,7 +58,7 @@ public class SyncDeps extends DefaultTask {
       }
     });
 
-    Task sync = project.getTasks().create("nxtSync");
+    Task sync = project.getTasks().create("upmSync");
     sync.dependsOn(install);
     sync.getInputs().file(project.file(ProjectConfig.CONFIG_PATH));
     sync.doLast(new Action<Task>() {

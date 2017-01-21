@@ -211,7 +211,10 @@ public class ExportPackage extends DefaultTask {
 
   void cleanExistingPackage() {
     if (unityPackage.exists()) {
+      Log.L.info("Cleaning existing export {}", unityPackage);
       unityPackage.delete();
+    } else {
+      Log.L.info("No existing export to clean for {}", unityPackage);
     }
   }
 

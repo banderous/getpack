@@ -48,6 +48,23 @@ class E2ESpec extends BaseE2ESpec {
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
+    @Trouble
+    def "publish a new version of a package"() {
+        when:
+        UBuilder publish = publishPackage(packageId)
+        File f = publish.asProject().file(IvyBuilder.assetPathForPackage(packageId));
+        File to = new File(f.path + ".v2")
+        f.renameTo(to);
+
+        File meta = new File(f.path + ".meta")
+        to = new File(to.path + ".meta")
+        meta.renameTo(to)
+        publish.build();
+
+        then:
+        to.exists();
+    }
+
     def "publish a package with a dependency"() {
         when:
         def userId = 'acme:usesjson:1.0.0'
@@ -67,7 +84,6 @@ class E2ESpec extends BaseE2ESpec {
         dependency.@rev == '1.0.0'
     }
 
-    @Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)

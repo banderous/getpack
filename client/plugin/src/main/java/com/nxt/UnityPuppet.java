@@ -14,7 +14,7 @@ public class UnityPuppet {
 
   public static void installPackage(Project project, File unitypackage) {
     InstallPuppet.install(project);
-    LaunchUnity.launch(project);
+    LaunchUnity.launch(project, true);
     File dest = project.file(IMPORT_PACKAGE_PATH);
 
     try {

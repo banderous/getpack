@@ -1,5 +1,8 @@
 package com.nxt;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import org.gradle.api.DefaultTask;
@@ -7,10 +10,7 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 /**
  * Created by alex on 02/12/2016.
@@ -24,14 +24,23 @@ class InstallPuppet extends DefaultTask {
 
   public static void install(Project project) {
     File f = project.file(PUPPET_PATH);
-    if (!f.exists()) {
-      try {
-        Files.createParentDirs(f);
-        ByteStreams.copy(InstallPuppet.class.getResourceAsStream("/unityPuppet.dll"),
-            new FileOutputStream(f));
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
+
+    try (InputStream in = InstallPuppet.class.getResourceAsStream("/unityPuppet.dll")) {
+      Log.L.info("Unity puppet installed {}", f.exists());
+      if (f.exists()) {
+        HashCode currentHash = Files.hash(f, Hashing.md5());
+        HashCode newHash = new HashingInputStream(Hashing.md5(), in).hash();
+        boolean upToDate = currentHash.equals(newHash);
+        Log.L.info("Unity puppet up to date {}", upToDate);
+        if (upToDate) {
+          return;
+        }
       }
+      Files.createParentDirs(f);
+      ByteStreams.copy(InstallPuppet.class.getResourceAsStream("/unityPuppet.dll"),
+              new FileOutputStream(f));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
   }
 

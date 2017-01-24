@@ -29,23 +29,22 @@ internal class Watcher
 
     static void Update ()
     {
-        lock(Tasks) {
-            foreach (var task in Tasks) {
+        if (Tasks.Count > 0) {
+            var clone = new List<Action> (Tasks);
+            Tasks.Clear ();
+            foreach (var task in clone) {
                 try {
                     task ();
                 } catch (Exception e) {
                     log (e.ToString ());
                 }
             }
-            Tasks.Clear ();
         }
     }
 
     public static void AddTask (Action action)
     {
-        lock(Tasks) {
-            Tasks.Add (action);
-        }
+        Tasks.Add (action);
     }
 
     private static void WatchForJobs (string folder, string filter, Action task)

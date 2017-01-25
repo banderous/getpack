@@ -10,17 +10,18 @@ import java.io.IOException;
  * Created by alex on 04/01/2017.
  */
 public class UnityPuppet {
-  public static final String IMPORT_PACKAGE_PATH = "upm/import/package.unitypackage";
+  public static final String IMPORT_PACKAGE_PATH = "upm/import";
 
   public static void installPackage(Project project, File unitypackage) {
     InstallPuppet.install(project);
     LaunchUnity.launch(project, true);
-    File dest = project.file(IMPORT_PACKAGE_PATH);
+    File dest = project.file(IMPORT_PACKAGE_PATH + "/" + unitypackage.getName());
+    File completed = project.file(dest.getPath() + ".completed");
 
     try {
       Files.createParentDirs(dest);
       Files.copy(unitypackage, dest);
-      File completed = project.file(IMPORT_PACKAGE_PATH + ".completed");
+
       TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
           "Timed out waiting for import of " + completed);
       while (!completed.exists()) {
@@ -32,7 +33,6 @@ public class UnityPuppet {
           // Nothing to do here.
         }
       }
-
       completed.delete();
     } catch (IOException e) {
       throw new RuntimeException(e);

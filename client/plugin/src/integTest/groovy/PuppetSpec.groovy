@@ -2,6 +2,7 @@ import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import com.nxt.BaseE2ESpec
 import com.nxt.IvyBuilder
+import com.nxt.Trouble
 import com.nxt.UBuilder
 import com.nxt.UnityPuppet
 import com.nxt.config.Asset
@@ -14,6 +15,7 @@ import com.nxt.config.AssetMap
 class PuppetSpec extends BaseE2ESpec {
     def project = UBuilder.Builder()
 
+    @Trouble
     def "installs packages"() {
         when:
         def path = 'Assets/A.txt'

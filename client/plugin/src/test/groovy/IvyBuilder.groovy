@@ -75,7 +75,7 @@ class IvyBuilder {
         }
 
         // Write the unitypackage.
-        File unityPackage = File.createTempFile("fake", "fake")
+        File unityPackage = File.createTempFile("fake", ".unitypackage")
         CreateTarGZ.create(tarDir, unityPackage);
         return unityPackage
     }

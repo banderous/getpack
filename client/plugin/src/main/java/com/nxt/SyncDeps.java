@@ -25,6 +25,7 @@ public class SyncDeps extends DefaultTask {
 
   static void configure(Project project) {
     SyncDeps build = project.getTasks().create("upmDo", SyncDeps.class);
+    build.dependsOn("launchUnity");
 
     Tar tar = project.getTasks().create("upmTar", Tar.class);
     tar.dependsOn(build);

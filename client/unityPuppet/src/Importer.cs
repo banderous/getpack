@@ -11,8 +11,7 @@ internal static class Importer
             Watcher.log ("Importing " + file);
 
             var dest = file + ".importing";
-            //File.Copy (file, file + DateTime.Now.Ticks + ".copy");
-            File.Move (file, dest);
+            MoveDestructive (file, dest);
             Watcher.log ("Moved it to " + dest);
             AssetDatabase.ImportPackage (dest, false);
 
@@ -20,12 +19,20 @@ internal static class Importer
             Watcher.AddTask (() => {
                 var newFile = Path.ChangeExtension (dest, "completed");
                 Watcher.log ("Moving to " + newFile);
-                File.Move (dest, newFile);
+                MoveDestructive (dest, newFile);
 
                 // Schedule another iteration for any further imports.
                 Watcher.AddTask (DoImport);
             });
             break;
         }
+    }
+
+    private static void MoveDestructive (string source, string to)
+    {
+        if (File.Exists (to)) {
+            File.Delete (to);
+        }
+        File.Move (source, to);
     }
 }

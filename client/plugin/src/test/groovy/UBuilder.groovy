@@ -50,15 +50,15 @@ class UBuilder {
 
         new File(projectDir, "build.gradle") << """
             plugins {
-                id 'com.banderous.upm'
+                id 'com.banderous.gp'
             }
         """
 
-        withRepository('upm/repo')
+        withRepository('gp/repo')
     }
 
     UBuilder saveConfig() {
-        def f = new File(projectDir, "upm/project.json")
+        def f = new File(projectDir, "gp/project.json")
         f.getParentFile().mkdirs()
         ProjectConfig.save(config, f)
 
@@ -147,7 +147,7 @@ class UBuilder {
     UBuilder withInstalledDependency(String id) {
         withFile(IvyBuilder.assetPathForPackage(id))
         projectState.addDependency(id)
-        File f = new File(projectDir, "upm/project.json.state")
+        File f = new File(projectDir, "gp/project.json.state")
         ProjectConfig.save(projectState, f)
         this
     }

@@ -80,7 +80,7 @@ public class ExportPackage extends DefaultTask {
   private static void configurePackage(Project project, final Package pkg) {
     final String packageId = WordUtils.capitalize(pkg.getGroup())
         + WordUtils.capitalize(pkg.getName());
-    String taskName = "upmPublish" + packageId;
+    String taskName = "gpPublish" + packageId;
 
     final ExportPackage task = project.getTasks().create(taskName, ExportPackage.class);
     task.dependsOn("launchUnity");
@@ -129,7 +129,7 @@ public class ExportPackage extends DefaultTask {
 
   static FileTree gatherForExport(Project project, Package pack) {
     ConfigurableFileTree tree = project.fileTree("Assets");
-    tree.exclude("Plugins/upm");
+    tree.exclude("Plugins/gp");
     tree.exclude("**/*.meta");
 
     for (String s : pack.getRoots()) {
@@ -142,7 +142,7 @@ public class ExportPackage extends DefaultTask {
   }
 
   static File getPath(Project project, PathType type, Package pack) {
-    String path = String.format("upm/%s/%s.%s.%s", type.path, pack.getGroup(), pack.getName(),
+    String path = String.format("gp/%s/%s.%s.%s", type.path, pack.getGroup(), pack.getName(),
         type.extension);
     return project.file(path);
   }

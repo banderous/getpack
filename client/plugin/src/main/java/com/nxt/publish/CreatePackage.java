@@ -10,7 +10,7 @@ import org.gradle.api.Task;
 public class CreatePackage {
   public static void configure(Project project) {
 
-    project.getTasks().create("upmCreatePackage").doLast(new Action<Task>() {
+    project.getTasks().create("gpCreatePackage").doLast(new Action<Task>() {
       @Override
       public void execute(Task task) {
         PublishConfig config = PublishConfig.load(project);

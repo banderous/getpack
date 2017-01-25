@@ -16,7 +16,7 @@ import java.io.*;
  * Created by alex on 02/12/2016.
  */
 class InstallPuppet extends DefaultTask {
-  public static final String PUPPET_PATH = "Assets/Plugins/upm/Editor/unityPuppet.dll";
+  public static final String PUPPET_PATH = "Assets/Plugins/gp/Editor/unityPuppet.dll";
 
   @Inject
   public InstallPuppet() {

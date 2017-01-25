@@ -14,7 +14,7 @@ import java.util.Set;
  * Created by alex on 01/01/2017.
  */
 public class PublishConfig {
-  public static final String PUBLISH_CONFIG_PATH = "upm/publish.json";
+  public static final String PUBLISH_CONFIG_PATH = "gp/publish.json";
 
   private Set<Package> packages = Sets.newHashSet();
   private Set<String> repositories = Sets.newHashSet();

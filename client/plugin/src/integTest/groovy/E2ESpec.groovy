@@ -22,18 +22,18 @@ class E2ESpec extends BaseE2ESpec {
         when:
         def project = UBuilder.Builder()
                 .withPackage(packageId)
-                .withArg("upmPublishAcmeSuperjson")
+                .withArg("gpPublishAcmeSuperjson")
         project.withFile('Assets/Irrelevant/File.txt')
         project.build()
 
         def p = project.asProject()
-        def pack = p.file("upm/export/acme.superjson.unitypackage")
+        def pack = p.file("gp/export/acme.superjson.unitypackage")
         def tar = p.tarTree(p.resources.gzip(pack))
         def paths = tar.findAll { x-> x.name.equals('pathname') }.collect { f -> f.text }
         then:
         pack.exists()
         paths == [IvyBuilder.assetPathForPackage(packageId)]
-        project.asProject().fileTree('upm/export') {
+        project.asProject().fileTree('gp/export') {
             include '*.task'
         }.isEmpty()
     }
@@ -41,7 +41,7 @@ class E2ESpec extends BaseE2ESpec {
     def "publish a package"() {
         when:
         // Ivy repo is org/name/version.
-        def modulePath = new File(packageRunner.projectDir, "upm/repo/${group}/${name}/${version}")
+        def modulePath = new File(packageRunner.projectDir, "gp/repo/${group}/${name}/${version}")
 
         then:
         new File(modulePath, "${name}-${version}.unitypackage").exists()
@@ -57,7 +57,7 @@ class E2ESpec extends BaseE2ESpec {
 
         user.withArg('publishAcmeUsesjsonPublicationToIvyRepository').build()
 
-        def modulePath = user.asProject().file("upm/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
+        def modulePath = user.asProject().file("gp/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
         println modulePath.text
         def ivy = new XmlSlurper().parse(modulePath)
         def dependency = ivy.dependencies.dependency[0]
@@ -95,7 +95,7 @@ class E2ESpec extends BaseE2ESpec {
 
         def newVersion = [group, name, "1.1.0"].join(":")
         def n = publishPackage(newVersion)
-        consumer.withRepository(n.projectDir.path + "/upm/repo")
+        consumer.withRepository(n.projectDir.path + "/gp/repo")
 
         consumer.withDependency(newVersion)
         consumer.build()
@@ -114,7 +114,7 @@ class E2ESpec extends BaseE2ESpec {
         def result = UBuilder.Builder()
                 .withRepository(ivyRepo.dir.path)
                 .withDependency(withTransitive)
-                .withArg("upmSync")
+                .withArg("gpSync")
         result.build()
 
 
@@ -130,9 +130,9 @@ class E2ESpec extends BaseE2ESpec {
 
     def projectConsumingPackage(String packageId) {
         def result = UBuilder.Builder()
-                .withRepository("${packageRunner.projectDir.path}/upm/repo")
+                .withRepository("${packageRunner.projectDir.path}/gp/repo")
                 .withDependency(packageId)
-                .withArg("upmSync")
+                .withArg("gpSync")
         result.build()
         conditions.within(5) {
             assert IvyBuilder.isInstalled(result.asProject(), packageId)

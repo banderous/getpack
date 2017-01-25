@@ -251,8 +251,8 @@ class SynchroniserSpec extends Specification {
 
     def "no changes does not create import package"() {
         when:
-        project.tasks.upmDo.execute()
-        project.tasks.upmSync.execute()
+        project.tasks.gpDo.execute()
+        project.tasks.gpSync.execute()
         then:
         !project.file(UnityPuppet.IMPORT_PACKAGE_PATH).exists()
     }

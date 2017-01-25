@@ -3,7 +3,7 @@ using UnityEditor;
 
 internal static class Importer
 {
-    public const string ImportFolder = "upm/import";
+    public const string ImportFolder = "gp/import";
     public const string ImportExtension = "*.unitypackage";
     public static void DoImport ()
     {

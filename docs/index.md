@@ -1,13 +1,13 @@
 
 
-Upm is a free & open source package manager for Unity built on [Gradle](https://gradle.org/).
+GetPack is a free & open source package manager for Unity built on [Gradle](https://gradle.org/).
 
 
 ## Features
 
 ### Dependency management
 
-Upm gives you the full power of [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) including:
+GetPack gives you the full power of [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) including:
 
 * Transitive dependencies
 * Multiple package repositories
@@ -19,11 +19,11 @@ Package authors are free to delete, rename and move files when creating new pack
 
 ## Getting started
 
-Apply the upm Gradle plugin to your build.gradle file.
+Apply the GetPack Gradle plugin to your build.gradle file.
 
 ```groovy
 plugins {
-    id 'com.banderous.upm' version '0.1'
+    id 'com.banderous.gp' version '0.1'
 }
 ```
 

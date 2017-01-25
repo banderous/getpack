@@ -28,7 +28,7 @@ import java.util.Set;
  */
 class Synchroniser {
 
-  static Logger logger = LoggerFactory.getLogger("upm");
+  static Logger logger = LoggerFactory.getLogger("gp");
   static int count = 1;
 
   public static InstallDetails sync(Project project) {
@@ -295,7 +295,7 @@ class Synchroniser {
       });
     }
 
-    Configuration conf = project.getConfigurations().create("upmTmp" + count++);
+    Configuration conf = project.getConfigurations().create("gpTmp" + count++);
     for (String id : dependencies) {
       conf.getDependencies().add(project.getDependencies().create(id));
     }

@@ -24,10 +24,10 @@ public class SyncDeps extends DefaultTask {
   FileTree toMerge;
 
   static void configure(Project project) {
-    SyncDeps build = project.getTasks().create("upmDo", SyncDeps.class);
+    SyncDeps build = project.getTasks().create("gpDo", SyncDeps.class);
     build.dependsOn("launchUnity");
 
-    Tar tar = project.getTasks().create("upmTar", Tar.class);
+    Tar tar = project.getTasks().create("gpTar", Tar.class);
     tar.dependsOn(build);
     tar.from(build.getUnityFiles());
     tar.getOutputs().upToDateWhen(new Spec<Task>() {
@@ -37,17 +37,17 @@ public class SyncDeps extends DefaultTask {
       }
     });
 
-    tar.setDestinationDir(project.file("upm/import"));
+    tar.setDestinationDir(project.file("gp/import"));
     tar.setBaseName("package");
     tar.setExtension("staged");
     tar.setCompression(Compression.NONE);
 
-    Task install = project.getTasks().create("upmInstall");
+    Task install = project.getTasks().create("gpInstall");
     install.dependsOn(tar);
     install.doLast(new Action<Task>() {
       @Override
       public void execute(Task task) {
-        File staged = project.file("upm/import/package.staged");
+        File staged = project.file("gp/import/package.staged");
 
         if (staged.exists()) {
           UnityPuppet.installPackage(project, staged);
@@ -59,7 +59,7 @@ public class SyncDeps extends DefaultTask {
       }
     });
 
-    Task sync = project.getTasks().create("upmSync");
+    Task sync = project.getTasks().create("gpSync");
     sync.dependsOn(install);
     sync.getInputs().file(project.file(ProjectConfig.CONFIG_PATH));
     sync.doLast(new Action<Task>() {

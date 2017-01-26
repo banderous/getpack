@@ -14,55 +14,25 @@ import org.gradle.api.tasks.bundling.Tar;
 import org.gradle.wrapper.Install;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
  * Created by alex on 15/12/2016.
  */
 public class SyncDeps extends DefaultTask {
-  public InstallDetails unityFiles;
-  FileTree toMerge;
+  List<FilteredManifest> manifests;
 
   static void configure(Project project) {
     SyncDeps build = project.getTasks().create("gpDo", SyncDeps.class);
     build.dependsOn("launchUnity");
 
-    Tar tar = project.getTasks().create("gpTar", Tar.class);
-    tar.dependsOn(build);
-    tar.from(build.getUnityFiles());
-    tar.getOutputs().upToDateWhen(new Spec<Task>() {
-      @Override
-      public boolean isSatisfiedBy(Task task) {
-        return false;
-      }
-    });
-
-    tar.setDestinationDir(project.getBuildDir());
-    tar.setBaseName("package");
-    tar.setExtension("unitypackage");
-    tar.setCompression(Compression.NONE);
-
     Task install = project.getTasks().create("gpInstall");
-    install.dependsOn(tar);
+    install.dependsOn(build);
     install.doLast(new Action<Task>() {
       @Override
       public void execute(Task task) {
-        for (File file : build.unityFiles.getUnityPackages()) {
-          UnityPuppet.installPackage(project, file);
-        }
-
-        try {
-          FileTree tree = build.getUnityFiles().call();
-          if (tree != null && !tree.isEmpty()) {
-            File staged = new File(project.getBuildDir(), "package.unitypackage");
-
-            if (staged.exists()) {
-              UnityPuppet.installPackage(project, staged);
-            }
-          }
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
+        Synchroniser.installPackages(project, build.manifests);
       }
     });
 
@@ -77,18 +47,8 @@ public class SyncDeps extends DefaultTask {
     });
   }
 
-  public Callable<FileTree> getUnityFiles() {
-    return new Callable<FileTree>() {
-      @Override
-      public FileTree call() throws Exception {
-        return toMerge;
-      }
-    };
-  }
-
   @TaskAction
   public void sync() {
-    unityFiles = Synchroniser.sync(getProject());
-    toMerge = unityFiles.getPartialPackages();
+    manifests = Synchroniser.sync(getProject());
   }
 }

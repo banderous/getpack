@@ -69,12 +69,13 @@ dependencies {
     compile 'org.yaml:snakeyaml:1.17'
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'commons-io:commons-io:2.5'
+    compile 'org.apache.commons:commons-compress:1.12'
 
     testCompile gradleTestKit()
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {
         exclude module: 'groovy-all'
     }
-    testCompile 'org.apache.commons:commons-compress:1.12'
+
 
     archives project(path: ':client:unityPuppet', configuration: 'archives')
 }

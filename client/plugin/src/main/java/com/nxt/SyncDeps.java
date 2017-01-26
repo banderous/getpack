@@ -37,9 +37,9 @@ public class SyncDeps extends DefaultTask {
       }
     });
 
-    tar.setDestinationDir(project.file("gp/import"));
+    tar.setDestinationDir(project.getBuildDir());
     tar.setBaseName("package");
-    tar.setExtension("staged");
+    tar.setExtension("unitypackage");
     tar.setCompression(Compression.NONE);
 
     Task install = project.getTasks().create("gpInstall");
@@ -47,14 +47,21 @@ public class SyncDeps extends DefaultTask {
     install.doLast(new Action<Task>() {
       @Override
       public void execute(Task task) {
-        File staged = project.file("gp/import/package.staged");
-
-        if (staged.exists()) {
-          UnityPuppet.installPackage(project, staged);
-        }
-
         for (File file : build.unityFiles.getUnityPackages()) {
           UnityPuppet.installPackage(project, file);
+        }
+
+        try {
+          FileTree tree = build.getUnityFiles().call();
+          if (tree != null && !tree.isEmpty()) {
+            File staged = new File(project.getBuildDir(), "package.unitypackage");
+
+            if (staged.exists()) {
+              UnityPuppet.installPackage(project, staged);
+            }
+          }
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         }
       }
     });

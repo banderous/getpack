@@ -70,7 +70,6 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'commons-io:commons-io:2.5'
 
-
     testCompile gradleTestKit()
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {
         exclude module: 'groovy-all'

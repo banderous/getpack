@@ -95,24 +95,6 @@ task getPuppet(type: Copy, dependsOn: ':client:unityPuppet:build') {
 
 classes.dependsOn getPuppet
 
-publishing {
-    repositories {
-        ivy {
-            // change to point to your repo, e.g. http://my.org/repo
-            url "${rootProject.buildDir}/repo"
-        }
-    }
-    publications {
-        ivy(IvyPublication) {
-            from components.java
-            artifact(jar) {
-                type "source"
-                conf "runtime"
-            }
-        }
-    }
-}
-
 // Run only tests annotated with @Trouble.
 task testTrouble(type: Test) {
     systemProperty 'test.trouble', true

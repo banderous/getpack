@@ -1,11 +1,9 @@
-
-
-GetPack is a free & open source package manager for Unity built on [Gradle](https://gradle.org/).
-
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mMxtlVLgDkI" frameborder="0" allowfullscreen></iframe>
 
 ## Features
 
 ### Dependency management
+
 
 GetPack gives you the full power of [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) including:
 

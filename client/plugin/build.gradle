@@ -18,7 +18,7 @@ apply plugin: 'ivy-publish'
 apply plugin: 'checkstyle'
 
 version = "0.1"
-group = "com.banderous.gp"
+group = "com.banderous.getpack"
 
 pluginBundle {
     website = 'https://banderous.github.io/getpack'
@@ -28,7 +28,7 @@ pluginBundle {
 
     plugins {
         gpPlugin {
-            id = 'com.banderous.gp'
+            id = 'com.banderous.getpack'
             displayName = 'A package manager for Unity'
         }
     }

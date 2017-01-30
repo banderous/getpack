@@ -21,7 +21,7 @@ Apply the GetPack Gradle plugin to your build.gradle file.
 
 ```groovy
 plugins {
-    id 'com.banderous.gp' version '0.1'
+    id 'com.banderous.getpack' version '0.1'
 }
 ```
 

@@ -14,7 +14,7 @@ GetPack gives you the power of [Gradle's dependency management](https://docs.gra
 <div class="note warning">
   <h5>Back up your project!</h5>
   <p>
-  You must use an SCM tool like Git or SVN when using GetPack, we will not be responsible for any loss of work arising from use or misuse of GetPack!
+  You must use an SCM tool like Git or SVN when using GetPack, we are not responsible for any loss of work arising from use or misuse of GetPack!
   </p>
 </div>
 

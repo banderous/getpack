@@ -1,6 +1,7 @@
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mMxtlVLgDkI" frameborder="0" allowfullscreen></iframe>
 
-## Features
+## Why GetPack?
+
 
 ### Dependency management
 
@@ -9,6 +10,13 @@ GetPack gives you the power of [Gradle's dependency management](https://docs.gra
 * Transitive dependencies
 * Multiple package repositories
 * Dependency substitution
+
+<div class="note warning">
+  <h5>Back up your project!</h5>
+  <p>
+  You must use an SCM tool like Git or SVN when using GetPack, we will not be responsible for any loss of work arising from use or misuse of GetPack!
+  </p>
+</div>
 
 ### Refactorable packages
 

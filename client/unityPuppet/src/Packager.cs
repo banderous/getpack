@@ -18,6 +18,7 @@ internal class Watcher
     {
         // This can be called multiple times by Unity.
         if (!initialised) {
+            Importer.CleanOldImports ();
             log ("Watcher " + System.Diagnostics.Process.GetCurrentProcess ().Id);
 
             WatchForJobs (Exporter.ExportFolder, Exporter.TaskExtension, Exporter.DoExport);

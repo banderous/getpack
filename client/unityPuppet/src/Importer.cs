@@ -28,6 +28,20 @@ internal static class Importer
         }
     }
 
+    public static void CleanOldImports ()
+    {
+        if (Directory.Exists (ImportFolder)) {
+            try {
+                foreach (var file in Directory.GetFiles (ImportFolder, ".importing")) {
+                    var newFile = Path.ChangeExtension (file, "completed");
+                    MoveDestructive (file, newFile);
+                }
+            } catch (IOException i) {
+                Watcher.log (i.ToString ());
+            }
+        }
+    }
+
     private static void MoveDestructive (string source, string to)
     {
         if (File.Exists (to)) {

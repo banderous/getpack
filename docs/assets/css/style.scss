@@ -12,7 +12,6 @@ header p {
   font-size: 22px;
 }
 
-
 /* Note types */
 
 .note {
@@ -70,6 +69,7 @@ header p {
   p {
     font-weight: 400;
     font-size: .95em;
+    margin-bottom: 1em;
   }
 
   &:after {

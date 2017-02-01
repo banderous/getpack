@@ -1,7 +1,14 @@
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mMxtlVLgDkI" frameborder="0" allowfullscreen></iframe>
+# What?
 
-## Why GetPack?
+GetPack automates the installing, removing and upgrading of Unity plugins, built as a [Gradle](https://gradle.org/) plugin to bring powerful features including dependency management.
 
+This video provides an overview of managing plugins using GetPack:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gw4GXONRhXI" frameborder="0" allowfullscreen></iframe>
+
+# Why?
+
+GetPack provides a number of features
 
 ### Dependency management
 
@@ -11,13 +18,6 @@ GetPack gives you the power of [Gradle's dependency management](https://docs.gra
 * Multiple package repositories
 * Dependency substitution
 
-<div class="note warning">
-  <h5>Back up your project!</h5>
-  <p>
-  You must use an SCM tool like Git or SVN when using GetPack, we are not responsible for any loss of work arising from use or misuse of GetPack!
-  </p>
-</div>
-
 ### Refactorable packages
 
 Package authors are free to delete, rename and move files when creating new package versions.
@@ -26,9 +26,18 @@ Package authors are free to delete, rename and move files when creating new pack
 
 GetPack supports any existing plugin directory structure including multiple root folders (though a single root folder is encouraged).
 
-## Getting started
+# Getting started
 
-Apply the GetPack Gradle plugin to your build.gradle file.
+<div class="note warning">
+  <h5>Back up your project!</h5>
+  <p>You are strongly advised to use an SCM tool like Git or SVN when using GetPack.</p>
+</div>
+
+## Applying the plugin
+
+GetPack is a plugin for the [Gradle build system](https://gradle.org); the same build system used in the Android SDK.
+
+You apply the GetPack plugin to your Gradle project by putting the following at the top of your `build.gradle` file in the root folder of your Unity project.
 
 ```groovy
 plugins {
@@ -36,21 +45,38 @@ plugins {
 }
 ```
 
+## The project manifest
 
-### Declaring dependencies
+The project manifest lists the plugins your project depends on, and GetPack uses it during **synchronisation** to decide what to install, uninstall and upgrade.
 
-State **what** your project depends on in the **project manifest**:
+The manifest is a JSON file found at `gp/ProjectConfig.json` containing two fields.
+
+<div class="note info">
+  <h5>You can copy this sample</h5>
+  <p>Try pasting this sample into your own project manifest and synchronising.</p>
+</div>
 
 ```json-doc
-// gp/ProjectConfig.json
 {
-    "repositories" : ["https://github.com/a_repo"],
+    "repositories" : ["https://github.com/banderous/getpack-sandbox/tree/master/build/repo"],
     "dependencies" : [
-        "com.darktable:minijson:1.0.0",
+        "darktable:minijson:1.0.0",
         "com.google:android-support:23.0.0"
     ]
 }
 ```
+
+### repositories
+
+A list of one or more package repositories where GetPack should retrieve packages.
+
+### dependencies
+
+A list of package identifiers that this project depends on.
+
+Package identifiers are made up of the publisher, the name of the package and a version, colon delimited.
+
+
 
 ### Running GetPack
 
@@ -74,8 +100,6 @@ gradle gpCreatePackage
 ```
 
 A package has one or more root folders specified as [Ant includes](https://ant.apache.org/manual/dirtasks.html).
-
-
 
 
 ```json-doc

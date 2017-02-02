@@ -204,7 +204,7 @@ GetPack creates a new task for each package called publish[Publisher][Name], so 
 gradle publishAcmeExample
 ```
 
-Of if all packages can all be published in a single command:
+Or all packages in a project can be published in a single command:
 
 ```shell
 gradle publish

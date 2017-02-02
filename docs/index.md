@@ -143,9 +143,13 @@ The upgrade process allows users to keep local changes if desired, and package a
 GetPack performs a three-way comparison between the **current** version installed in the project,
 the **incoming** version to be installed, and the **local** files as they currently exist in the project.
 
-<p align="center">
-<img src="assets/images/upgrade_flow.png" width="373" height="445" />
-</p>
+<dl>
+  <dt>Has the user modified the file since installation?</dt>
+  <dd>If not, take the incoming file</dd>
+  <dt>Has the package author changed the file between current and incoming?</dt>
+  <dd>If not, take the local file</dd>
+  <dt>User chooses local or incoming file</dt>
+</dl>
 
 ---
 
@@ -205,16 +209,3 @@ Of if all packages can all be published in a single command:
 ```shell
 gradle publish
 ```
----
-
-## Package format
-
-GetPack publishes packages in the [Apache Ivy](http://ant.apache.org/ivy/history/latest-milestone/terminology.html) format, and a package consists of two main files.
-
-### A .unitypackage
-
-This contains all Assets and metadata in the normal Unity format.
-
-### A .manifest
-
-This is a JSON file describing the Assets in the package; their GUIDs, paths and file hashes, used by GetPack when uninstalling and upgrading packages.

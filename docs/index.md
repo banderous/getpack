@@ -36,7 +36,7 @@ GetPack uses [Gradle's dependency management](https://docs.gradle.org/current/us
 ### Unobtrusive
 
 GetPack supports any existing plugin directory structure including multiple root folders, and uses the `.unitypackage` format for packaging Assets, so Asset GUIDs and metadata are preserved.
-
+ 
 ___
 
 # Requirements

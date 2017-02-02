@@ -2,31 +2,40 @@
 
 GetPack makes it easier to share, reuse and update Unity plugins.
 
-
-
 <iframe width="560" height="315" src="https://www.youtube.com/embed/gw4GXONRhXI" frameborder="0" allowfullscreen></iframe>
 &nbsp;
+
+### Take control of your plugins
+
+State **what** packages your project needs in the **project manifest:**
+
+```json
+{
+    "dependencies" : [
+        "darktable:minijson:1.0.0",
+        "com.google:android-support:23.0.0",
+        "com.facebook:unity-sdk:4.2.0",
+    ]
+}
+```
+
+GetPack takes care of **installing**, **removing** and **upgrading** packages automatically; simply edit your project manifest and state what you want.
+
+What's more, GetPack's upgrade process can help you preserve local changes, and lets package authors move and rename files when publishing new versions.
 
 ### Dependency management
 
 Unity developers use plugins to avoid reinventing the wheel and reuse great work,
-but it's much harder for Unity plugin makers to do the same thing.
+but it's much harder for plugin makers to do the same.
 
 Unity plugins are forced to bundle dependencies, causing plugins to conflict with each other
 and <a href="https://www.google.com/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=android+support+library+conflict+unity">much pain for everyone</a>.
 
-GetPack uses [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) so plugins declare dependencies instead of bundling them.
-
-
-### Easy upgrades
-
-Switching between package versions is as easy as changing a version number in a JSON file.
-
-What's more, GetPack will preserve local changes during upgrades where possible, and package authors are able to move and rename files when publishing new versions.
+GetPack uses [Gradle's dependency management](https://docs.gradle.org/current/userguide/dependency_management.html) so plugins can declare dependencies instead of bundling them.
 
 ### Unobtrusive
 
-GetPack supports any existing plugin directory structure including multiple root folders.
+GetPack supports any existing plugin directory structure including multiple root folders, and uses the `.unitypackage` format for packaging Assets, so Asset GUIDs and metadata are preserved.
 
 # Requirements
 
@@ -34,7 +43,7 @@ GetPack supports any existing plugin directory structure including multiple root
 * [JRE/JDK](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
 * [Gradle](https://gradle.org/gradle-download)
 
-Follow [Gradle's installation instructions](https://docs.gradle.org/current/userguide/installation.html) ensuring that it is added to your path and running `gradle` from the command prompt succeeds.
+Follow [Gradle's installation instructions](https://docs.gradle.org/current/userguide/installation.html) ensuring that it is added to your path; check that running `gradle` from the command prompt succeeds.
 
 <div class="note unreleased">
   <h5>Work in progress</h5>
@@ -50,22 +59,32 @@ Follow [Gradle's installation instructions](https://docs.gradle.org/current/user
 
 ## Applying the plugin
 
-GetPack is implemented as a Gradle plugin that is applied to a Gradle project.
+GetPack is implemented as a plugin for the Gradle build system.
 
-1. Create a text file called `build.gradle` next to your Assets folder.
+1. Create a text file called `build.gradle` next to your project's Assets folder.
 2. Paste the following into it:
 
 ```groovy
 plugins {
-    id 'com.banderous.getpack' version '0.1'
+    id 'com.banderous.getpack' version '0.1.1'
 }
 ```
 
+<ol start="3">
+  <li>Run <code>gradle tasks</code> at a command prompt in your project folder to see the key tasks GetPack offers and create a default project manifest.</li>
+</ol>
+
+
+```shell
+gradle tasks
+```
+
+
 ## The project manifest
 
-The project manifest is where you declare what plugins your project depends on.
+You install, remove and up/downgrade packages just by editing your manifest and **synchronising**.
 
-You can install, remove and up/downgrade packages just by editing your manifest and **synchronising**.
+
 
 The project manifest is found at `gp/project.json`.
 
@@ -93,12 +112,11 @@ The project manifest is found at `gp/project.json`.
 
 **Package identifiers** are made up of the publisher, the name of the package and a version, colon delimited.
 
-
 ## Synchronisation
 
-Packages are installed, uninstalled and upgraded with the `gpSync` task, which **synchronises** your project's files to your project's manifest.
+Packages are installed, uninstalled and upgraded with a single task; `gpSync`, which **synchronises** the packages installed to match those declared in the project manifest.
 
-New packages added to your manifest are installed, removed packages are uninstalled and changed version numbers are up/downgraded.
+`gpSync` detects any changes made to the project manifest since the last execution of `gpSync`, such as new, removed or changed packages, and performs any necessary installs, uninstalls or upgrades.
 
 ```shell
 gradle gpSync
@@ -108,20 +126,17 @@ gradle gpSync
   <p>All GetPack tasks automatically find and launch the correct version of the Unity Editor for your project if it isn't already open.</p>
 </div>
 
-### Package installation
+### Uninstallation
 
-New packages are installed when added to the project manifest. GetPack uses Unity's `.unitypackage` format for packaging Assets, so Asset GUIDs and metadata are preserved.
+GetPack uninstalls a package if it is removed from the project manifest (and not a transient dependency of another package).
 
-### Package uninstallation
+The uninstallation process removes a package's files from the project *except files that have been modified*.
 
-GetPack uninstalls a package if it is removed from the project manifest.
+---
 
-The uninstallation process removes a package's files from the project **except where those files have been modified**.
+### Upgrades
 
-
-### Package upgrades
-
-GetPack upgrades a package when you've changed its version number in your project manifest.
+GetPack upgrades a package when its version number in the project manifest has changes since the last `gpSync`.
 
 The upgrade process allows users to keep local changes if desired, and package authors to rename and move files when publishing new versions.
 
@@ -140,13 +155,13 @@ the **incoming** version to be installed, and the **local** files as they curren
 
 ### The shadow manifest
 
-In order to detect when you've changed your project manifest, GetPack maintains another JSON file called the **shadow manifest**, at `gp/project.json.state`.
+In order to detect changes to the project manifest, GetPack maintains another JSON file called the **shadow manifest**, at `gp/project.json.state`.
 
-GetPack updates the shadow config automatically during the synchronisation process and it should not be manually edited.
+GetPack updates the shadow manifest automatically during the synchronisation process and it should not be manually edited.
 
 <div class="note warning">
-  <h5>The shadow config should be checked into your SCM</h5>
-  <p>(If you check your dependencies into your SCM)</p>
+  <h5>The shadow config should be versioned alongside your project</h5>
+  <p>(If you version your dependencies in your SCM)</p>
 </div>
 
 ## Creating packages
@@ -183,17 +198,13 @@ This will create a new package configuration to be set up as follows:
 
 If you then run `gradle tasks` you will see new publishing related tasks for your package:
 
-```shell
-gradle publishAcmeExample
-```
-
-Packages can be published individually by name
+GetPack creates a new task for each package called publish[Publisher][Name], so you can publish individually
 
 ```shell
 gradle publishAcmeExample
 ```
 
-Of if a project declares multiple packages they can all be published in a single command:
+Of if all packages can all be published in a single command:
 
 ```shell
 gradle publish

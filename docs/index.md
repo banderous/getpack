@@ -19,7 +19,7 @@ State **what** packages your project needs in the **project manifest:**
 }
 ```
 
-GetPack takes care of **installing**, **removing** and **upgrading** packages automatically; simply edit your project manifest and state what you want.
+GetPack takes care of **installing**, **removing** and **upgrading** packages for you; simply state what you want in your project manifest and run GetPack's `gpSync` task.
 
 What's more, GetPack's upgrade process can help you preserve local changes, and lets package authors move and rename files when publishing new versions.
 

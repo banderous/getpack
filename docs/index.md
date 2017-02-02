@@ -14,7 +14,7 @@ State **what** packages your project needs in the **project manifest:**
     "dependencies" : [
         "darktable:minijson:1.0.0",
         "com.google:android-support:23.0.0",
-        "com.facebook:unity-sdk:4.2.0",
+        "com.facebook:unity-sdk:4.2.0"
     ]
 }
 ```

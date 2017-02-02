@@ -37,6 +37,8 @@ GetPack uses [Gradle's dependency management](https://docs.gradle.org/current/us
 
 GetPack supports any existing plugin directory structure including multiple root folders, and uses the `.unitypackage` format for packaging Assets, so Asset GUIDs and metadata are preserved.
 
+___
+
 # Requirements
 
 * Windows/OSX
@@ -78,7 +80,7 @@ plugins {
 ```shell
 gradle tasks
 ```
-
+___
 
 ## The project manifest
 
@@ -112,6 +114,8 @@ The project manifest is found at `gp/project.json`.
 
 **Package identifiers** are made up of the publisher, the name of the package and a version, colon delimited.
 
+___
+
 ## Synchronisation
 
 Packages are installed, uninstalled and upgraded with a single task; `gpSync`, which **synchronises** the packages installed to match those declared in the project manifest.
@@ -136,9 +140,9 @@ The uninstallation process removes a package's files from the project *except fi
 
 ### Upgrades
 
-GetPack upgrades a package when its version number in the project manifest has changes since the last `gpSync`.
+GetPack upgrades a package when its version number in the project manifest has changed since the last `gpSync`.
 
-The upgrade process allows users to keep local changes if desired, and package authors to rename and move files when publishing new versions.
+The upgrade process allows users to keep local changes if desired and allows package authors to rename and move files when publishing new versions.
 
 GetPack performs a three-way comparison between the **current** version installed in the project,
 the **incoming** version to be installed, and the **local** files as they currently exist in the project.
@@ -211,10 +215,9 @@ gradle publish
 
 GetPack publishes packages in the [Apache Ivy](http://ant.apache.org/ivy/history/latest-milestone/terminology.html) format, and a package consists of two main files.
 
-### A .unitypackage
-
-This contains all Assets and metadata in the normal Unity format.
-
-### A .manifest
-
-This is a JSON file describing the Assets in the package; their GUIDs, paths and file hashes, used by GetPack when uninstalling and upgrading packages.
+<dl>
+  <dt>A .unitypackage file</dt>
+  <dd>This contains all Assets and metadata in the normal Unity format.</dd>
+  <dt>A .manifest file</dt>
+  <dd>This is a JSON file describing the Assets in the package; their GUIDs, paths and file hashes, used by GetPack when uninstalling and upgrading packages.</dd>
+</dl>

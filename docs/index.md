@@ -43,7 +43,7 @@ ___
 
 * Windows/OSX
 * [JRE/JDK](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
-* [Gradle](https://gradle.org/gradle-download)
+* [Gradle 3+ **(Gradle < 3 not supported)**](https://gradle.org/gradle-download)
 
 Follow [Gradle's installation instructions](https://docs.gradle.org/current/userguide/installation.html) ensuring that it is added to your path; check that running `gradle` from the command prompt succeeds.
 
@@ -68,7 +68,7 @@ GetPack is implemented as a plugin for the Gradle build system.
 
 ```groovy
 plugins {
-    id 'com.banderous.getpack' version '0.1.1'
+    id 'com.banderous.getpack' version '0.1.2'
 }
 ```
 

@@ -1,9 +1,12 @@
 package com.nxt.config;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.nxt.Log;
+import org.gradle.api.GradleException;
 import org.gradle.internal.os.OperatingSystem;
 
 import java.io.File;
@@ -42,6 +45,18 @@ public class Util {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static void assertGradle3Plus(String gradleVersion) {
+    if (!(isGradle3Plus(gradleVersion))) {
+      Log.L.error("Gradle {} unsupported, minimum is 3", gradleVersion);
+      throw new GradleException("Minimum gradle version is 3. Unsupported: " + gradleVersion);
+    }
+  }
+
+  public static boolean isGradle3Plus(String gradleVersion) {
+    String majorVersion = Splitter.on(".").split(gradleVersion).iterator().next();
+    return Integer.parseInt(majorVersion) >= 3;
   }
 
   public static String serialize(Object o) {

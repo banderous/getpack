@@ -15,7 +15,6 @@ import com.nxt.config.AssetMap
 class PuppetSpec extends BaseE2ESpec {
     def project = UBuilder.Builder()
 
-    @Trouble
     def "installs packages"() {
         when:
         def path = 'Assets/A.txt'

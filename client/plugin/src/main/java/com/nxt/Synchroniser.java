@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.nxt.config.*;
-import org.apache.tools.ant.Task;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -15,7 +14,6 @@ import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.resources.ReadableResource;
 import org.gradle.api.tasks.util.PatternSet;
-import org.gradle.internal.impldep.aQute.libg.generics.Create;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

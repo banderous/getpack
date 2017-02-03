@@ -67,7 +67,6 @@ class E2ESpec extends BaseE2ESpec {
         dependency.@rev == '1.0.0'
     }
 
-    @Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)
@@ -108,9 +107,10 @@ class E2ESpec extends BaseE2ESpec {
         }
     }
 
+    @Trouble
     def "consume package with transitive dependencies"() {
         when:
-        def withTransitive = SynchroniserSpec.buildTransitivePackage(ivyRepo, 3)
+        def withTransitive = SynchroniserSpec.buildTransitivePackage(ivyRepo, 10)
         def result = UBuilder.Builder()
                 .withRepository(ivyRepo.dir.path)
                 .withDependency(withTransitive)
@@ -121,7 +121,7 @@ class E2ESpec extends BaseE2ESpec {
         def tree = result.asProject().fileTree('Assets/Com.foo').exclude('**/*.meta')
         def paths = tree.files.collect { it.name }
         def filenames = ImmutableSet.copyOf(paths)
-        def expectedNames = (0..3).collect { "Level${it}-1.0.0.txt".toString() }
+        def expectedNames = (0..10).collect { "Level${it}-1.0.0.txt".toString() }
         then:
 
         filenames == ImmutableSet.copyOf(expectedNames)

@@ -22,7 +22,6 @@ class ExportSpec extends Specification {
         project.tasks.gpPublishAcmeSuperjson
     }
 
-    @Trouble
     def "gathers files in package roots"() {
         when:
         def builder = UBuilder.Builder()

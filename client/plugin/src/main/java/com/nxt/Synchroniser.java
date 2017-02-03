@@ -9,7 +9,6 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
-import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.resources.ReadableResource;
@@ -32,11 +31,12 @@ class Synchroniser {
   static Logger logger = LoggerFactory.getLogger("gp");
   static int count = 1;
 
-  public static List<FilteredManifest> sync(Project project) {
+  public static List<FilteredManifest> sync(Project project,
+                                            Configuration config, Configuration shadow) {
     Set<PackageManifest> currentManifests =
-        gatherManifests(gatherDependencies(project, ProjectConfig.loadShadow(project)));
+        gatherManifests(config.getResolvedConfiguration().getFirstLevelModuleDependencies());
     Set<PackageManifest> targetManifests =
-        gatherManifests(gatherDependencies(project, ProjectConfig.load(project)));
+        gatherManifests(shadow.getResolvedConfiguration().getFirstLevelModuleDependencies());
 
     Log.L.info("Current packages: {}, target packages: {}", currentManifests.size(),
         targetManifests.size());
@@ -305,29 +305,6 @@ class Synchroniser {
     }
 
     return result;
-  }
-
-  static Set<ResolvedDependency> gatherDependencies(Project project, ProjectConfig config) {
-    return gatherDependencies(project, config.getRepositories(), config.getDependencies());
-  }
-
-  static Set<ResolvedDependency> gatherDependencies(Project project, Set<String> repositories,
-                                                    Set<String> dependencies) {
-    for (final String r : repositories) {
-      project.getRepositories().ivy(new Action<IvyArtifactRepository>() {
-        @Override
-        public void execute(IvyArtifactRepository ivyArtifactRepository) {
-          ivyArtifactRepository.setUrl(r);
-        }
-      });
-    }
-
-    Configuration conf = project.getConfigurations().create("gpTmp" + count++);
-    for (String id : dependencies) {
-      conf.getDependencies().add(project.getDependencies().create(id));
-    }
-
-    return gatherDependencies(conf.getResolvedConfiguration().getFirstLevelModuleDependencies());
   }
 
   private static Set<ResolvedDependency> gatherDependencies(Set<ResolvedDependency> deps) {

@@ -25,7 +25,7 @@ What's more, GetPack's upgrade process can help you preserve local changes, and 
 
 ### Dependency management
 
-Unity developers use plugins to avoid reinventing the wheel and reuse great work,
+Unity developers use plugins to reuse great work and avoid reinventing the wheel,
 but it's much harder for plugin makers to do the same.
 
 Unity plugins are forced to bundle dependencies, causing plugins to conflict with each other

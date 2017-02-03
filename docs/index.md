@@ -36,7 +36,7 @@ GetPack uses [Gradle's dependency management](https://docs.gradle.org/current/us
 ### Unobtrusive
 
 GetPack supports any existing plugin directory structure including multiple root folders, and uses the `.unitypackage` format for packaging Assets, so Asset GUIDs and metadata are preserved.
- 
+
 ___
 
 # Requirements
@@ -97,7 +97,7 @@ The project manifest is found at `gp/project.json`.
 
 ```json-doc
 {
-    "repositories" : ["https://github.com/banderous/getpack-sandbox/tree/master/build/repo"],
+    "repositories" : ["https://raw.githubusercontent.com/banderous/getpack-sandbox/master/build/repo"],
     "dependencies" : [
         "darktable:minijson:1.0.0",
         "com.google:android-support:23.0.0"

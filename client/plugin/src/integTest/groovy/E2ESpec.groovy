@@ -27,13 +27,13 @@ class E2ESpec extends BaseE2ESpec {
         project.build()
 
         def p = project.asProject()
-        def pack = p.file("gp/export/acme.superjson.unitypackage")
+        def pack = p.file("gp/build/export/acme.superjson.unitypackage")
         def tar = p.tarTree(p.resources.gzip(pack))
         def paths = tar.findAll { x-> x.name.equals('pathname') }.collect { f -> f.text }
         then:
         pack.exists()
         paths == [IvyBuilder.assetPathForPackage(packageId)]
-        project.asProject().fileTree('gp/export') {
+        project.asProject().fileTree('gp/build/export') {
             include '*.task'
         }.isEmpty()
     }

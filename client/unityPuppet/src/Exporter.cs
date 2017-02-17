@@ -5,7 +5,7 @@ using UnityEditor;
 internal static class Exporter
 {
     public const string TaskExtension = "*.task";
-    public const string ExportFolder = "gp/export";
+    public const string ExportFolder = "gp/build/export";
 
     internal static void DoExport ()
     {

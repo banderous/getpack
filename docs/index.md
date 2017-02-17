@@ -68,7 +68,7 @@ GetPack is implemented as a plugin for the Gradle build system.
 
 ```groovy
 plugins {
-    id 'com.banderous.getpack' version '0.1.2'
+    id 'com.banderous.getpack' version '0.1.3'
 }
 ```
 

@@ -142,7 +142,7 @@ public class ExportPackage extends DefaultTask {
   }
 
   static File getPath(Project project, PathType type, Package pack) {
-    String path = String.format("gp/%s/%s.%s.%s", type.path, pack.getGroup(), pack.getName(),
+    String path = String.format("gp/build/%s/%s.%s.%s", type.path, pack.getGroup(), pack.getName(),
         type.extension);
     return project.file(path);
   }

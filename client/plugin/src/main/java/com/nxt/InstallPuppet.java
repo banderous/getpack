@@ -37,8 +37,9 @@ class InstallPuppet extends DefaultTask {
         }
       }
       Files.createParentDirs(f);
-      ByteStreams.copy(InstallPuppet.class.getResourceAsStream("/unityPuppet.dll"),
-              new FileOutputStream(f));
+      try (FileOutputStream o = new FileOutputStream(f)) {
+        ByteStreams.copy(in, o);
+      }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

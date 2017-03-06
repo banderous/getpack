@@ -43,12 +43,6 @@ import java.util.Set;
  */
 public class ExportPackage {
 
-  @OutputFile
-  File zip;
-  @OutputFile
-  File manifest;
-  Package pack;
-
   public static void configure(final Project project, final PublishConfig config) {
     project.getConfigurations().create("archives");
     project.getPluginManager().apply("ivy-publish");
@@ -88,9 +82,11 @@ public class ExportPackage {
         }
     });
 
-    final CreateManifest createManifest = project.getTasks().create("gpManifest" + packageId, CreateManifest.class);
+    final CreateManifest createManifest = project.getTasks().create("gpManifest" + packageId,
+        CreateManifest.class);
     createManifest.pack = pkg;
     createManifest.packageFiles = files;
+    createManifest.manifest = project.file(getPath(project, PathType.manifest, pkg));
 
     project.getExtensions().configure(PublishingExtension.class, new Action<PublishingExtension>() {
       @Override

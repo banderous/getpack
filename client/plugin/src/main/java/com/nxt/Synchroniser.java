@@ -72,6 +72,7 @@ class Synchroniser {
       @Override
       public void execute(CopySpec copySpec) {
         PatternSet pattern = new PatternSet();
+
         for (String s : manifest.getGuidsToInclude()) {
           pattern.include(String.format("**/%s/**", s));
         }
@@ -272,21 +273,21 @@ class Synchroniser {
 
     for (ResolvedDependency dep : deps) {
       File manifest = null;
-      File unitypackage = null;
+      File unityZip = null;
       for (ResolvedArtifact art : dep.getModuleArtifacts()) {
         if (art.getExtension().equals("manifest")) {
           manifest = art.getFile();
-        } else if (art.getExtension().equals("unitypackage")) {
-          unitypackage = art.getFile();
+        } else if (art.getExtension().equals("zip")) {
+          unityZip = art.getFile();
         }
       }
 
-      if (null != manifest && null != unitypackage) {
+      if (null != manifest && null != unityZip) {
         PackageManifest p = PackageManifest.load(manifest);
-        p.setUnityPackage(unitypackage);
+        p.setUnityPackage(unityZip);
         manifests.add(p);
       } else {
-        logger.error("Malformed package", manifest, unitypackage);
+        logger.error("Malformed package", manifest, unityZip);
       }
 
     }

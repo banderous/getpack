@@ -1,10 +1,15 @@
 package com.nxt;
 
 import com.google.common.io.Files;
+import java.util.Arrays;
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 
 import java.io.File;
 import java.io.IOException;
+import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.FileCopyDetails;
+import org.gradle.api.file.RelativePath;
 
 /**
  * Created by alex on 04/01/2017.
@@ -15,27 +20,26 @@ public class UnityPuppet {
   public static void installPackage(Project project, File unitypackage) {
     InstallPuppet.install(project);
     LaunchUnity.launch(project, true);
-    File dest = project.file(IMPORT_PACKAGE_PATH + "/" + unitypackage.getName());
-    File completed = project.file(dest.getPath() + ".completed");
 
-    try {
-      Files.createParentDirs(dest);
-      Files.copy(unitypackage, dest);
-
-      TimeoutTimer timer = new TimeoutTimer(Constants.DEFAULT_TIMEOUT_SECONDS,
-          "Timed out waiting for import of " + completed);
-      while (!completed.exists()) {
-        try {
-          Thread.sleep(100);
-          Log.L.debug("Waiting for {}", completed);
-          timer.throwIfExceeded();
-        } catch (InterruptedException e) {
-          // Nothing to do here.
-        }
+    project.copy(new Action<CopySpec>() {
+      @Override
+      public void execute(CopySpec copySpec) {
+        copySpec.from(project.zipTree(unitypackage));
+        copySpec.into(project.file("Assets"));
+        copySpec.eachFile(new Action<FileCopyDetails>() {
+          @Override
+          public void execute(FileCopyDetails details) {
+            String[] segments = details.getRelativePath().getSegments();
+            // Chop off the 'Assets' folder.
+            if (segments[0].equals("Assets")) {
+              String[] tail = Arrays.copyOfRange(segments, 1, segments.length);
+              boolean isFile = details.getFile().isFile();
+              RelativePath path = new RelativePath(isFile, tail);
+              details.setRelativePath(path);
+            }
+          }
+        });
       }
-      completed.delete();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    });
   }
 }

@@ -18,24 +18,23 @@ class E2ESpec extends BaseE2ESpec {
 
     @Shared UBuilder packageRunner = publishPackage(packageId)
     def ivyRepo = IvyBuilder.Create()
+    @com.nxt.Trouble
     def "export a package"() {
         when:
         def project = UBuilder.Builder()
                 .withPackage(packageId)
-                .withArg("gpPublishAcmeSuperjson")
+                .withArg("gpZipAcmeSuperjson")
         project.withFile('Assets/Irrelevant/File.txt')
         project.build()
 
         def p = project.asProject()
-        def pack = p.file("gp/build/export/acme.superjson.unitypackage")
-        def tar = p.tarTree(p.resources.gzip(pack))
-        def paths = tar.findAll { x-> x.name.equals('pathname') }.collect { f -> f.text }
+        def pack = p.file("gp/build/superjson-1.0.0.zip")
+        def paths = p.zipTree(pack).collect { f -> f.name }
+
         then:
         pack.exists()
-        paths == [IvyBuilder.assetPathForPackage(packageId)]
-        project.asProject().fileTree('gp/build/export') {
-            include '*.task'
-        }.isEmpty()
+
+        paths == ['Superjson-1.0.0.txt', 'Superjson-1.0.0.txt.meta']
     }
 
     def "publish a package"() {
@@ -44,7 +43,7 @@ class E2ESpec extends BaseE2ESpec {
         def modulePath = new File(packageRunner.projectDir, "gp/repo/${group}/${name}/${version}")
 
         then:
-        new File(modulePath, "${name}-${version}.unitypackage").exists()
+        new File(modulePath, "${name}-${version}.zip").exists()
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
@@ -107,7 +106,6 @@ class E2ESpec extends BaseE2ESpec {
         }
     }
 
-    @Trouble
     def "consume package with transitive dependencies"() {
         when:
         def withTransitive = SynchroniserSpec.buildTransitivePackage(ivyRepo, 10)

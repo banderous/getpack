@@ -11,6 +11,7 @@ import org.gradle.api.Project;
 public class PublishPlugin implements Plugin<Project> {
   @Override
   public void apply(Project project) {
+    project.setBuildDir("gp/build");
     Util.assertGradle3Plus(project.getGradle().getGradleVersion());
     project.getTasks().create("installPuppet", InstallPuppet.class);
     project.getTasks().create("launchUnity", LaunchUnity.class).dependsOn("installPuppet");

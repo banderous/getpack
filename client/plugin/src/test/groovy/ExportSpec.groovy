@@ -33,12 +33,11 @@ class ExportSpec extends Specification {
 
         builder.withFile("Assets/Irrelevant.txt")
         builder.withFile("Assets/More/IrrelevantStuff.txt")
-        builder.withFile("Assets/Acme/file.meta")
 
         def tree = ExportPackage.gatherForExport(proj, builder.publishConfig.findPackage('acme:superjson'))
         def names = ImmutableSet.copyOf(tree.files.collect { f-> f.name })
         then:
-        names == ImmutableSet.of('Superjson-1.0.1.txt')
+        names == ImmutableSet.of('Superjson-1.0.1.txt', 'Superjson-1.0.1.txt.meta')
     }
 
     def "manifest generation"() {

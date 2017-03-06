@@ -130,7 +130,6 @@ public class ExportPackage extends DefaultTask {
   static FileTree gatherForExport(Project project, Package pack) {
     ConfigurableFileTree tree = project.fileTree("Assets");
     tree.exclude("Plugins/gp");
-    tree.exclude("**/*.meta");
 
     for (String s : pack.getRoots()) {
       Log.L.info("Including '{}'", s);
@@ -160,6 +159,9 @@ public class ExportPackage extends DefaultTask {
 
     PackageManifest manifest = new PackageManifest(pack);
     for (File file : tree.getFiles()) {
+      if (Files.getFileExtension(file.getName()).equals("meta")) {
+        continue;
+      }
       String guid = getGUIDForAsset(file);
       String md5 = generateMD5(file);
       Path path = baseURL.relativize(file.toPath());

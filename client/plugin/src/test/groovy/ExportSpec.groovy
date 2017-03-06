@@ -1,6 +1,7 @@
 package com.nxt
 
 import com.google.common.collect.ImmutableSet
+import com.nxt.publish.CreateManifest
 import com.nxt.publish.ExportPackage
 import com.nxt.publish.PublishConfig
 import org.gradle.testfixtures.ProjectBuilder;
@@ -10,17 +11,6 @@ class ExportSpec extends Specification {
 
 
     def id = 'acme:superjson:1.0.1'
-
-    def "creates export task"() {
-        when:
-        def project = ProjectBuilder.builder().build()
-        def config = new PublishConfig()
-        config.addPackage(id)
-        ExportPackage.configure(project, config)
-
-        then:
-        project.tasks.gpPublishAcmeSuperjson
-    }
 
     def "gathers files in package roots"() {
         when:
@@ -48,7 +38,9 @@ class ExportSpec extends Specification {
                       .withPackage(id)
                       .asProject()
 
-        def manifest = ExportPackage.generateManifest(project, builder.publishConfig.packages.first())
+        def pack = builder.publishConfig.packages.first()
+        def tree = ExportPackage.gatherForExport(project, pack)
+        def manifest = CreateManifest.generateManifest(project, tree, pack)
 
         then:
         manifest.files instanceof Map
@@ -59,7 +51,7 @@ class ExportSpec extends Specification {
     def "meta parsing"() {
         when:
         def path = new File('src/test/resources/meta/prefab.meta')
-        def meta = ExportPackage.getGUID(path)
+        def meta = CreateManifest.getGUID(path)
 
         then:
         meta == "4f04e8e06b86e4610af0205cbb62425c"

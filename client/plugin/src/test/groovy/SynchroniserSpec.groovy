@@ -257,6 +257,15 @@ class SynchroniserSpec extends Specification {
         !project.file(UnityPuppet.IMPORT_PACKAGE_PATH).exists()
     }
 
+    def "does not duplicate packages to install"() {
+        when:
+        builder.withDependency(superJSON)
+        def manifests = Synchroniser.sync(getProject());
+        manifests.each { println it.manifest.unitypackage }
+        then:
+        manifests.size() == 1
+    }
+
     Set<ResolvedDependency> resolve(String forPackage) {
         Synchroniser.gatherDependencies(project, repositories, Sets.newHashSet(forPackage))
     }

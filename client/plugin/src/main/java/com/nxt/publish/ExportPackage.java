@@ -76,6 +76,7 @@ public class ExportPackage {
         public void execute(Zip zip) {
           zip.dependsOn("launchUnity");
           zip.from(files);
+          zip.setIncludeEmptyDirs(false);
           zip.into("Assets");
           zip.setBaseName(pkg.getName());
           zip.setVersion(pkg.getVersion());

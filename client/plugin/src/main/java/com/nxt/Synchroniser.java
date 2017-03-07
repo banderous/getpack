@@ -71,20 +71,21 @@ class Synchroniser {
   public static List<FilteredManifest> filterManifest(ImmutableMap<String, Asset> add,
                                  Set<PackageManifest> targetManifests) {
     Map<String, File> filesByGUID = buildGUIDToUnitypackageMap(targetManifests);
-    HashMultimap<File, String> pathsByFile = HashMultimap.create();
+    HashMultimap<String, String> pathsByFile = HashMultimap.create();
     for (Map.Entry<String, Asset> entry : add.entrySet()) {
       Log.L.info("add " + entry.getKey() + " " + entry.getValue().getPath());
       File f = filesByGUID.get(entry.getKey());
       Log.L.info("Putting " + f.getPath() + " " + entry.getKey());
 
-      pathsByFile.put(f, entry.getValue().getPath());
-      pathsByFile.put(f, entry.getValue().getPath() + ".meta");
+      pathsByFile.put(f.getAbsolutePath(), entry.getValue().getPath());
+      pathsByFile.put(f.getAbsolutePath(), entry.getValue().getPath() + ".meta");
     }
 
     List<FilteredManifest> filtered = Lists.newArrayList();
-    for (File file : pathsByFile.keys()) {
+    for (String filePath : pathsByFile.keySet()) {
+      File file = new File(filePath);
       PackageManifest manifest = findManifest(file, targetManifests);
-      filtered.add(new FilteredManifest(manifest, ImmutableSet.copyOf(pathsByFile.get(file))));
+      filtered.add(new FilteredManifest(manifest, ImmutableSet.copyOf(pathsByFile.get(filePath))));
     }
 
     return filtered;

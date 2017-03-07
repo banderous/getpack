@@ -106,6 +106,11 @@ class Synchroniser {
       File from = project.file(entry.getKey());
       File to = project.file(entry.getValue());
       from.renameTo(to);
+      File fromMeta = new File(from.getPath() + ".meta");
+      if (fromMeta.exists()) {
+        File toMeta = new File(to.getPath() + ".meta");
+        fromMeta.renameTo(toMeta);
+      }
     }
   }
 

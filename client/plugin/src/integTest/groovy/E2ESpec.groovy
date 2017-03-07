@@ -3,6 +3,9 @@ package com.nxt
 import com.google.common.collect.ImmutableSet
 import com.nxt.config.Asset
 import com.nxt.config.AssetMap
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.IOFileFilter
+import org.apache.commons.io.filefilter.TrueFileFilter
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.PendingFeature
 import spock.lang.Shared
@@ -39,6 +42,7 @@ class E2ESpec extends BaseE2ESpec {
         paths == ['Superjson-1.0.0.txt', 'Superjson-1.0.0.txt.meta']
     }
 
+
     def "publish a package"() {
         when:
         // Ivy repo is org/name/version.
@@ -73,9 +77,11 @@ class E2ESpec extends BaseE2ESpec {
         when:
         def consumer = projectConsumingPackage(packageId)
         consumer.build()
-        // create a runner that references it
+        def assets = new File(consumer.projectDir, 'Assets')
+
         then:
         IvyBuilder.isInstalled(consumer.asProject(), packageId)
+        !new File(consumer.projectDir, 'Assets/Assets').exists()
     }
 
     def "remove a dependency"() {
@@ -125,7 +131,6 @@ class E2ESpec extends BaseE2ESpec {
         filenames == ImmutableSet.copyOf(expectedNames)
     }
 
-    @Trouble
     def "preserves local changes during upgrade"() {
         when:
         AssetMap universal = new AssetMap()

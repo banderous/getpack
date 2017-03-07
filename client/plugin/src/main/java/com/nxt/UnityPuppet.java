@@ -24,21 +24,16 @@ public class UnityPuppet {
       @Override
       public void execute(CopySpec copySpec) {
         copySpec.from(project.zipTree(zip));
+        copySpec.include(includes);
+        copySpec.setIncludeEmptyDirs(false);
         copySpec.into(project.file("Assets"));
         copySpec.eachFile(new Action<FileCopyDetails>() {
           @Override
           public void execute(FileCopyDetails details) {
-            if (!details.isDirectory()) {
-              if (!includes.contains(details.getPath())) {
-                Log.L.info("Excluding {}", details.getPath());
-                details.exclude();
-                return;
-              }
-            }
+            Log.L.info("Including {}", details.getRelativePath());
             String[] segments = details.getRelativePath().getSegments();
             // Chop off the 'Assets' folder.
             if (segments[0].equals("Assets")) {
-
               String[] tail = Arrays.copyOfRange(segments, 1, segments.length);
               boolean isFile = details.getFile().isFile();
               RelativePath path = new RelativePath(isFile, tail);

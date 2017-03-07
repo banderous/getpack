@@ -1,4 +1,5 @@
 import com.google.common.base.Charsets
+import com.google.common.collect.ImmutableSet
 import com.google.common.hash.Hashing
 import com.nxt.BaseE2ESpec
 import com.nxt.IvyBuilder
@@ -18,15 +19,16 @@ class PuppetSpec extends BaseE2ESpec {
         when:
         def path = 'Assets/A.txt'
         def pack = writeUnityZip([path])
-        UnityPuppet.installPackage(project.asProject(), pack)
+        UnityPuppet.installPackage(project.asProject(), pack, ImmutableSet.of(path))
 
         def path2 = 'Assets/B.txt'
         pack = writeUnityZip([path2])
-        UnityPuppet.installPackage(project.asProject(), pack)
+        UnityPuppet.installPackage(project.asProject(), pack, ImmutableSet.of(path))
 
         then:
         project.asProject().file(path).exists()
-        project.asProject().file(path2).exists()
+        // Path2 is not in the include filter.
+        !project.asProject().file(path2).exists()
     }
 
     File writeUnityZip(List<String> paths) {

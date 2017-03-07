@@ -1,5 +1,6 @@
 package com.nxt;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import java.util.Arrays;
 import org.gradle.api.Action;
@@ -17,21 +18,27 @@ import org.gradle.api.file.RelativePath;
 public class UnityPuppet {
   public static final String IMPORT_PACKAGE_PATH = "gp/build/import";
 
-  public static void installPackage(Project project, File unitypackage) {
-    InstallPuppet.install(project);
-    LaunchUnity.launch(project, true);
-
+  public static void installPackage(Project project, File zip, ImmutableSet<String> includes) {
+    Log.L.info("Installing {}", zip);
     project.copy(new Action<CopySpec>() {
       @Override
       public void execute(CopySpec copySpec) {
-        copySpec.from(project.zipTree(unitypackage));
+        copySpec.from(project.zipTree(zip));
         copySpec.into(project.file("Assets"));
         copySpec.eachFile(new Action<FileCopyDetails>() {
           @Override
           public void execute(FileCopyDetails details) {
+            if (!details.isDirectory()) {
+              if (!includes.contains(details.getPath())) {
+                Log.L.info("Excluding {}", details.getPath());
+                details.exclude();
+                return;
+              }
+            }
             String[] segments = details.getRelativePath().getSegments();
             // Chop off the 'Assets' folder.
             if (segments[0].equals("Assets")) {
+
               String[] tail = Arrays.copyOfRange(segments, 1, segments.length);
               boolean isFile = details.getFile().isFile();
               RelativePath path = new RelativePath(isFile, tail);

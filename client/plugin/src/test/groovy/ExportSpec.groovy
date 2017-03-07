@@ -18,7 +18,6 @@ class ExportSpec extends Specification {
         builder.withPackage(id)
         builder.saveConfig()
 
-
         def proj = builder.asProject()
 
         builder.withFile("Assets/Irrelevant.txt")

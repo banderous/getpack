@@ -38,7 +38,9 @@ class IvyBuilder {
     }
 
     public static boolean isInstalled(Project project, String packageId) {
-        return new File(project.projectDir, assetPathForPackage(packageId)).exists()
+        File asset = new File(project.projectDir, assetPathForPackage(packageId))
+        File meta = new File(asset.getPath() + ".meta");
+        return asset.exists() && meta.exists()
     }
 
     public static String assetPathForPackage(String id) {
@@ -52,11 +54,12 @@ class IvyBuilder {
 
     File dir = Files.createTempDir()
 
-    IvyBuilder withPackage(String id, String[] deps) {
+    IvyBuilder withPackage(String id, String[] deps, AssetMap extraFiles = new AssetMap()) {
         def parsed = parseId(id)
         def builder = new FileTreeBuilder(dir)
         println "building to " + dir
         def manifest = createManifest(id)
+        manifest.files.putAll(extraFiles)
         builder.dir("${parsed.group}/${parsed.name}/${parsed.version}") {
             file("ivy-${parsed.version}.xml", writeIvyModule(deps, parsed))
             file("${parsed.group}.${parsed.name}-${parsed.version}.manifest", manifest.toString())
@@ -69,7 +72,6 @@ class IvyBuilder {
 
     public static File writeUnityZip(AssetMap map) {
         File zip = Files.createTempDir()
-
         map.entrySet().each {
             File asset = new File(zip, it.value.path)
             Files.createParentDirs(asset)

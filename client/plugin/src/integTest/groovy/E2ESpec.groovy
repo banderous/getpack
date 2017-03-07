@@ -1,6 +1,8 @@
 package com.nxt
 
 import com.google.common.collect.ImmutableSet
+import com.nxt.config.Asset
+import com.nxt.config.AssetMap
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.PendingFeature
 import spock.lang.Shared
@@ -66,6 +68,7 @@ class E2ESpec extends BaseE2ESpec {
         dependency.@rev == '1.0.0'
     }
 
+    @com.nxt.Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)
@@ -99,11 +102,8 @@ class E2ESpec extends BaseE2ESpec {
         consumer.build()
 
         then:
-        conditions.within(5) {
-            assert !IvyBuilder.isInstalled(consumer.asProject(), packageId)
-
-            assert IvyBuilder.isInstalled(consumer.asProject(), newVersion)
-        }
+        assert !IvyBuilder.isInstalled(consumer.asProject(), packageId)
+        assert IvyBuilder.isInstalled(consumer.asProject(), newVersion)
     }
 
     def "consume package with transitive dependencies"() {
@@ -125,6 +125,38 @@ class E2ESpec extends BaseE2ESpec {
         filenames == ImmutableSet.copyOf(expectedNames)
     }
 
+    @Trouble
+    def "preserves local changes during upgrade"() {
+        when:
+        AssetMap universal = new AssetMap()
+        def filePath = 'Assets/Universal.txt'
+        universal['guid'] = new Asset(filePath, 'md5')
+        def pid = 'com:upgrade:1.0.0'
+        ivyRepo.withPackage(pid, new String[0], universal)
+        def result = UBuilder.Builder()
+                .withRepository(ivyRepo.dir.path)
+                .withDependency(pid)
+                .withArg("gpSync")
+        result.build()
+
+        // Define a new package version.
+        def newVersion = 'com:upgrade:1.1.0'
+        def newPath = 'Assets/Another.txt'
+        universal['newguid'] = new Asset(newPath, 'differentmd5')
+        ivyRepo.withPackage(newVersion, new String[0], universal)
+
+        // Modify the existing file locally.
+        File localFile = result.asProject().file(filePath)
+        localFile.text = "Modified"
+
+        result.clearDependencies()
+        result.withDependency(newVersion)
+        result.build()
+
+        then:
+        "Modified" == localFile.text
+        result.asProject().file(newPath).exists()
+    }
 
     def projectConsumingPackage(String packageId) {
         def result = UBuilder.Builder()

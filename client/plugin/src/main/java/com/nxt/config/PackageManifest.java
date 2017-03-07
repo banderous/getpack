@@ -55,6 +55,10 @@ public class PackageManifest {
     files.put(guid, new Asset(FilenameUtils.separatorsToUnix(path.toString()), md5));
   }
 
+  public String getKey() {
+    return pack.key();
+  }
+
   @Override
   public boolean equals(Object obj) {
     final PackageManifest other = (PackageManifest) obj;

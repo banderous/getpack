@@ -25,7 +25,6 @@ public class SyncDeps extends DefaultTask {
 
   static void configure(Project project) {
     SyncDeps build = project.getTasks().create("gpDo", SyncDeps.class);
-    build.dependsOn("launchUnity");
 
     Task install = project.getTasks().create("gpInstall");
     install.dependsOn(build);

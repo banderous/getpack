@@ -44,9 +44,6 @@
   <ItemGroup>
     <Compile Include="src\Packager.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />
-    <Compile Include="src\MiniJSON.cs" />
-    <Compile Include="src\Exporter.cs" />
-    <Compile Include="src\Importer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

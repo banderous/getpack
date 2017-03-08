@@ -10,7 +10,6 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.nxt.Constants;
 import com.nxt.Log;
-import com.nxt.TimeoutTimer;
 import com.nxt.config.Package;
 import com.nxt.config.PackageManifest;
 import groovy.util.Node;

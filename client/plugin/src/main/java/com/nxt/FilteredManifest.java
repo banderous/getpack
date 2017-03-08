@@ -1,5 +1,6 @@
 package com.nxt;
 
+import com.google.common.collect.ImmutableSet;
 import com.nxt.config.PackageManifest;
 
 import java.util.Set;
@@ -9,18 +10,18 @@ import java.util.Set;
  */
 public class FilteredManifest {
   private PackageManifest manifest;
-  private Set<String> guidsToInclude;
+  private ImmutableSet<String> pathsToInclude;
 
-  public FilteredManifest(PackageManifest manifest, Set<String> guidsToInclude) {
+  public FilteredManifest(PackageManifest manifest, ImmutableSet<String> pathsToInclude) {
     this.manifest = manifest;
-    this.guidsToInclude = guidsToInclude;
+    this.pathsToInclude = pathsToInclude;
   }
 
   public PackageManifest getManifest() {
     return manifest;
   }
 
-  public Set<String> getGuidsToInclude() {
-    return guidsToInclude;
+  public ImmutableSet<String> getPathsToInclude() {
+    return pathsToInclude;
   }
 }

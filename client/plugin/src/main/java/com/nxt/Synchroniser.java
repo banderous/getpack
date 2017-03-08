@@ -1,28 +1,32 @@
 package com.nxt;
 
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
-import com.nxt.config.*;
+import com.nxt.config.Asset;
+import com.nxt.config.AssetDifference;
+import com.nxt.config.AssetMap;
+import com.nxt.config.PackageManifest;
+import com.nxt.config.ProjectConfig;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
-import org.gradle.api.file.CopySpec;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.resources.ReadableResource;
-import org.gradle.api.tasks.util.PatternSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by alex on 09/12/2016.
@@ -45,68 +49,43 @@ class Synchroniser {
 
     AssetDifference difference = Synchroniser.difference(current, target,
         Synchroniser.filter(project));
-    Log.L.info("Files added: {}", difference.getAdd().size());
-    Log.L.info("Files removed: {}", difference.getRemove().size());
-    Log.L.info("Files moved: {}", difference.getMoved().size());
+
+    Log.L.info("Files added: {}, {}", difference.getAdd().size(), difference.getAdd().values());
+    Log.L.info("Files removed: {}, {}", difference.getRemove().size(), difference.getRemove());
+    Log.L.info("Files moved: {}, {}", difference.getMoved().size(), difference.getMoved());
 
     remove(project, difference.getRemove());
     cleanOldPackageDirs(project.getProjectDir(), difference.getRemove());
     move(project, difference.getMoved());
 
-    return install(project, difference.getAdd(), targetManifests);
+    return filterManifest(difference.getAdd(), targetManifests);
   }
 
   public static void installPackages(Project project, List<FilteredManifest> manifests) {
     for (FilteredManifest manifest : manifests) {
-      if (manifest.getManifest().getFiles().size() != manifest.getGuidsToInclude().size()) {
-        UnityPuppet.installPackage(project, repackage(project, manifest));
-      } else {
-        UnityPuppet.installPackage(project, manifest.getManifest().getUnitypackage());
-      }
+      UnityPuppet.installPackage(project,manifest.getManifest().getUnitypackage(),
+          manifest.getPathsToInclude());
     }
   }
 
-  public static File repackage(Project project, FilteredManifest manifest) {
-    File tempDir = Files.createTempDir();
-    project.copy(new Action<CopySpec>() {
-      @Override
-      public void execute(CopySpec copySpec) {
-        PatternSet pattern = new PatternSet();
-        for (String s : manifest.getGuidsToInclude()) {
-          pattern.include(String.format("**/%s/**", s));
-        }
-
-        ReadableResource r = project.getResources().gzip(manifest.getManifest().getUnitypackage());
-        FileTree tar = project.tarTree(r);
-        copySpec.from(tar.matching(pattern));
-        copySpec.into(tempDir);
-      }
-    });
-
-    try {
-      File temp = File.createTempFile("getpack", ".unitypackage");
-      CreateTarGZ.create(tempDir, temp);
-      return temp;
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  public static List<FilteredManifest> install(Project project, ImmutableMap<String, Asset> add,
+  public static List<FilteredManifest> filterManifest(ImmutableMap<String, Asset> add,
                                  Set<PackageManifest> targetManifests) {
     Map<String, File> filesByGUID = buildGUIDToUnitypackageMap(targetManifests);
-    HashMultimap<File, String> guidsByFile = HashMultimap.create();
+    HashMultimap<String, String> pathsByFile = HashMultimap.create();
     for (Map.Entry<String, Asset> entry : add.entrySet()) {
       Log.L.info("add " + entry.getKey() + " " + entry.getValue().getPath());
       File f = filesByGUID.get(entry.getKey());
       Log.L.info("Putting " + f.getPath() + " " + entry.getKey());
-      guidsByFile.put(f, entry.getKey());
+
+      pathsByFile.put(f.getAbsolutePath(), entry.getValue().getPath());
+      pathsByFile.put(f.getAbsolutePath(), entry.getValue().getPath() + ".meta");
     }
 
     List<FilteredManifest> filtered = Lists.newArrayList();
-    for (File file : guidsByFile.keys()) {
+    for (String filePath : pathsByFile.keySet()) {
+      File file = new File(filePath);
       PackageManifest manifest = findManifest(file, targetManifests);
-      filtered.add(new FilteredManifest(manifest, guidsByFile.get(file)));
+      filtered.add(new FilteredManifest(manifest, ImmutableSet.copyOf(pathsByFile.get(filePath))));
     }
 
     return filtered;
@@ -122,32 +101,16 @@ class Synchroniser {
     throw new IllegalArgumentException("Cannot find manifest for " + by);
   }
 
-  public static FileTree mergeArchives(Project project, HashMultimap<File, String> filesAndPaths) {
-    FileTree result = null;
-    for (File file : filesAndPaths.keys()) {
-      ReadableResource resource = project.getResources().gzip(file);
-
-      PatternSet pattern = new PatternSet();
-
-      for (String s : filesAndPaths.get(file)) {
-        pattern.include(String.format("**/%s/**", s));
-      }
-      FileTree tree = project.tarTree(resource).matching(pattern);
-      if (null == result) {
-        result = tree;
-      } else {
-        result = result.plus(tree);
-      }
-    }
-
-    return result;
-  }
-
   public static void move(Project project, ImmutableMap<String, String> moved) {
     for (Map.Entry<String, String> entry : moved.entrySet()) {
       File from = project.file(entry.getKey());
       File to = project.file(entry.getValue());
       from.renameTo(to);
+      File fromMeta = new File(from.getPath() + ".meta");
+      if (fromMeta.exists()) {
+        File toMeta = new File(to.getPath() + ".meta");
+        fromMeta.renameTo(toMeta);
+      }
     }
   }
 
@@ -272,21 +235,21 @@ class Synchroniser {
 
     for (ResolvedDependency dep : deps) {
       File manifest = null;
-      File unitypackage = null;
+      File unityZip = null;
       for (ResolvedArtifact art : dep.getModuleArtifacts()) {
         if (art.getExtension().equals("manifest")) {
           manifest = art.getFile();
-        } else if (art.getExtension().equals("unitypackage")) {
-          unitypackage = art.getFile();
+        } else if (art.getExtension().equals("zip")) {
+          unityZip = art.getFile();
         }
       }
 
-      if (null != manifest && null != unitypackage) {
+      if (null != manifest && null != unityZip) {
         PackageManifest p = PackageManifest.load(manifest);
-        p.setUnityPackage(unitypackage);
+        p.setUnityPackage(unityZip);
         manifests.add(p);
       } else {
-        logger.error("Malformed package", manifest, unitypackage);
+        logger.error("Malformed package", manifest, unityZip);
       }
 
     }

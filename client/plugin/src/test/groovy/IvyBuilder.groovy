@@ -3,10 +3,13 @@ package com.nxt
 import com.google.common.base.Charsets
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
+import com.nxt.config.Asset
 import com.nxt.config.AssetMap
 import com.nxt.config.Package
 import com.nxt.config.PackageManifest
 import groovy.xml.MarkupBuilder
+import org.zeroturnaround.zip.ZipUtil;
+
 import org.gradle.api.Project
 
 import java.nio.file.Paths
@@ -35,7 +38,9 @@ class IvyBuilder {
     }
 
     public static boolean isInstalled(Project project, String packageId) {
-        return new File(project.projectDir, assetPathForPackage(packageId)).exists()
+        File asset = new File(project.projectDir, assetPathForPackage(packageId))
+        File meta = new File(asset.getPath() + ".meta");
+        return asset.exists() && meta.exists()
     }
 
     public static String assetPathForPackage(String id) {
@@ -49,35 +54,41 @@ class IvyBuilder {
 
     File dir = Files.createTempDir()
 
-    IvyBuilder withPackage(String id, String[] deps) {
+    IvyBuilder withPackage(String id, String[] deps, AssetMap extraFiles = new AssetMap()) {
         def parsed = parseId(id)
         def builder = new FileTreeBuilder(dir)
+        println "building to " + dir
         def manifest = createManifest(id)
+        manifest.files.putAll(extraFiles)
         builder.dir("${parsed.group}/${parsed.name}/${parsed.version}") {
             file("ivy-${parsed.version}.xml", writeIvyModule(deps, parsed))
             file("${parsed.group}.${parsed.name}-${parsed.version}.manifest", manifest.toString())
-            file("${parsed.name}-${parsed.version}.unitypackage", writeUnityPackage(manifest.files))
+            file("${parsed.name}-${parsed.version}.zip", writeUnityZip(manifest.files))
         }
 
 
         this
     }
 
-    public static File writeUnityPackage(AssetMap map) {
-        File tarDir = Files.createTempDir()
+    public static File writeUnityZip(AssetMap map) {
+        File zip = Files.createTempDir()
+        map.entrySet().each {
+            File asset = new File(zip, it.value.path)
+            Files.createParentDirs(asset)
+            Files.touch(asset)
+            asset << "Fake asset"
 
-        def builder = new FileTreeBuilder(tarDir)
-        map.each { a ->
-            builder.dir(a.key) {
-                file("asset", "Fake asset")
-                file("pathname", a.value.path)
-            }
+            new File(zip, it.value.path + ".meta") <<
+"""
+fileFormatVersion: 2
+guid: ${it.key}
+timeCreated: 1488792321
+"""
         }
 
-        // Write the unitypackage.
-        File unityPackage = File.createTempFile("fake", ".unitypackage")
-        CreateTarGZ.create(tarDir, unityPackage);
-        return unityPackage
+        File unityZip = File.createTempFile("fake", ".zip")
+        ZipUtil.pack(zip, unityZip)
+        return unityZip
     }
 
     def createManifest(String id) {
@@ -100,7 +111,7 @@ class IvyBuilder {
             info(organisation: id.group, module: id.name, revision: id.version, status: 'integration', publication:"20161209071257")
             configurations()
             publications() {
-                artifact(name: id.name, type: 'unitypackage', ext: 'unitypackage')
+                artifact(name: id.name, type: 'zip', ext: 'zip')
                 artifact(name: manifestName, type: 'manifest', ext: 'manifest')
             }
             dependencies() {

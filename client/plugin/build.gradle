@@ -17,7 +17,7 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'ivy-publish'
 apply plugin: 'checkstyle'
 
-version = "0.1.4"
+version = "0.2.0"
 group = "com.banderous.getpack"
 
 pluginBundle {
@@ -70,7 +70,9 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'commons-io:commons-io:2.5'
     compile 'org.apache.commons:commons-compress:1.12'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
 
+    testCompile 'org.zeroturnaround:zt-zip:1.11'
     testCompile gradleTestKit()
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {
         exclude module: 'groovy-all'

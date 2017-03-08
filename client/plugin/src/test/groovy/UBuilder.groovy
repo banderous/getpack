@@ -32,7 +32,7 @@ class UBuilder {
     ProjectConfig config = new ProjectConfig()
     PublishConfig publishConfig = new PublishConfig()
     ProjectConfig projectState = new ProjectConfig()
-    List<String> args = ["-d"]
+    List<String> args = ["-s", "-i"]
 
     UBuilder(){
         this(Files.createTempDir())
@@ -54,11 +54,11 @@ class UBuilder {
             }
         """
 
-        withRepository('gp/repo')
+        withRepository('getpack/repo')
     }
 
     UBuilder saveConfig() {
-        def f = new File(projectDir, "gp/project.json")
+        def f = new File(projectDir, "getpack/project.json")
         f.getParentFile().mkdirs()
         ProjectConfig.save(config, f)
 
@@ -147,7 +147,7 @@ class UBuilder {
     UBuilder withInstalledDependency(String id) {
         withFile(IvyBuilder.assetPathForPackage(id))
         projectState.addDependency(id)
-        File f = new File(projectDir, "gp/project.json.state")
+        File f = new File(projectDir, "getpack/project.json.state")
         ProjectConfig.save(projectState, f)
         this
     }

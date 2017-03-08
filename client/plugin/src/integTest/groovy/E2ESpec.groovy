@@ -1,6 +1,11 @@
 package com.nxt
 
 import com.google.common.collect.ImmutableSet
+import com.nxt.config.Asset
+import com.nxt.config.AssetMap
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.IOFileFilter
+import org.apache.commons.io.filefilter.TrueFileFilter
 import org.gradle.testkit.runner.GradleRunner
 import spock.lang.PendingFeature
 import spock.lang.Shared
@@ -18,33 +23,33 @@ class E2ESpec extends BaseE2ESpec {
 
     @Shared UBuilder packageRunner = publishPackage(packageId)
     def ivyRepo = IvyBuilder.Create()
+    @com.nxt.Trouble
     def "export a package"() {
         when:
         def project = UBuilder.Builder()
                 .withPackage(packageId)
-                .withArg("gpPublishAcmeSuperjson")
+                .withArg("gpZipAcmeSuperjson")
         project.withFile('Assets/Irrelevant/File.txt')
         project.build()
 
         def p = project.asProject()
-        def pack = p.file("gp/build/export/acme.superjson.unitypackage")
-        def tar = p.tarTree(p.resources.gzip(pack))
-        def paths = tar.findAll { x-> x.name.equals('pathname') }.collect { f -> f.text }
+        def pack = p.file("getpack/build/superjson-1.0.0.zip")
+        def paths = p.zipTree(pack).collect { f -> f.name }
+
         then:
         pack.exists()
-        paths == [IvyBuilder.assetPathForPackage(packageId)]
-        project.asProject().fileTree('gp/build/export') {
-            include '*.task'
-        }.isEmpty()
+
+        paths == ['Superjson-1.0.0.txt', 'Superjson-1.0.0.txt.meta']
     }
+
 
     def "publish a package"() {
         when:
         // Ivy repo is org/name/version.
-        def modulePath = new File(packageRunner.projectDir, "gp/repo/${group}/${name}/${version}")
+        def modulePath = new File(packageRunner.projectDir, "getpack/repo/${group}/${name}/${version}")
 
         then:
-        new File(modulePath, "${name}-${version}.unitypackage").exists()
+        new File(modulePath, "${name}-${version}.zip").exists()
         new File(modulePath, "${name}-${version}.manifest").exists()
     }
 
@@ -57,7 +62,7 @@ class E2ESpec extends BaseE2ESpec {
 
         user.withArg('publishAcmeUsesjsonPublicationToIvyRepository').build()
 
-        def modulePath = user.asProject().file("gp/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
+        def modulePath = user.asProject().file("getpack/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
         println modulePath.text
         def ivy = new XmlSlurper().parse(modulePath)
         def dependency = ivy.dependencies.dependency[0]
@@ -67,13 +72,16 @@ class E2ESpec extends BaseE2ESpec {
         dependency.@rev == '1.0.0'
     }
 
+    @com.nxt.Trouble
     def "install a dependency"() {
         when:
         def consumer = projectConsumingPackage(packageId)
         consumer.build()
-        // create a runner that references it
+        def assets = new File(consumer.projectDir, 'Assets')
+
         then:
         IvyBuilder.isInstalled(consumer.asProject(), packageId)
+        !new File(consumer.projectDir, 'Assets/Assets').exists()
     }
 
     def "remove a dependency"() {
@@ -94,20 +102,16 @@ class E2ESpec extends BaseE2ESpec {
 
         def newVersion = [group, name, "1.1.0"].join(":")
         def n = publishPackage(newVersion)
-        consumer.withRepository(n.projectDir.path + "/gp/repo")
+        consumer.withRepository(n.projectDir.path + "/getpack/repo")
 
         consumer.withDependency(newVersion)
         consumer.build()
 
         then:
-        conditions.within(5) {
-            assert !IvyBuilder.isInstalled(consumer.asProject(), packageId)
-
-            assert IvyBuilder.isInstalled(consumer.asProject(), newVersion)
-        }
+        assert !IvyBuilder.isInstalled(consumer.asProject(), packageId)
+        assert IvyBuilder.isInstalled(consumer.asProject(), newVersion)
     }
 
-    @Trouble
     def "consume package with transitive dependencies"() {
         when:
         def withTransitive = SynchroniserSpec.buildTransitivePackage(ivyRepo, 10)
@@ -127,10 +131,41 @@ class E2ESpec extends BaseE2ESpec {
         filenames == ImmutableSet.copyOf(expectedNames)
     }
 
+    def "preserves local changes during upgrade"() {
+        when:
+        AssetMap universal = new AssetMap()
+        def filePath = 'Assets/Universal.txt'
+        universal['guid'] = new Asset(filePath, 'md5')
+        def pid = 'com:upgrade:1.0.0'
+        ivyRepo.withPackage(pid, new String[0], universal)
+        def result = UBuilder.Builder()
+                .withRepository(ivyRepo.dir.path)
+                .withDependency(pid)
+                .withArg("gpSync")
+        result.build()
+
+        // Define a new package version.
+        def newVersion = 'com:upgrade:1.1.0'
+        def newPath = 'Assets/Another.txt'
+        universal['newguid'] = new Asset(newPath, 'differentmd5')
+        ivyRepo.withPackage(newVersion, new String[0], universal)
+
+        // Modify the existing file locally.
+        File localFile = result.asProject().file(filePath)
+        localFile.text = "Modified"
+
+        result.clearDependencies()
+        result.withDependency(newVersion)
+        result.build()
+
+        then:
+        "Modified" == localFile.text
+        result.asProject().file(newPath).exists()
+    }
 
     def projectConsumingPackage(String packageId) {
         def result = UBuilder.Builder()
-                .withRepository("${packageRunner.projectDir.path}/gp/repo")
+                .withRepository("${packageRunner.projectDir.path}/getpack/repo")
                 .withDependency(packageId)
                 .withArg("gpSync")
         result.build()

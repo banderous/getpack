@@ -240,21 +240,33 @@ class SynchroniserSpec extends Specification {
     def "moving files"() {
         when:
         new FileTreeBuilder(project.projectDir).Assets {
-            file('A.txt', "A");
+            file('A.txt', 'A')
+            file('A.txt.meta', 'meta')
+            // Has no meta file
+            file('X.txt', 'X')
         }
 
-        Synchroniser.move(project, ImmutableMap.of('Assets/A.txt', 'Assets/B.txt'))
+        Synchroniser.move(project, ImmutableMap.of(
+                'Assets/A.txt', 'Assets/B.txt',
+                'Assets/X.txt', 'Assets/Y.txt'
+        ))
         then:
         !project.file('Assets/A.txt').exists()
+        !project.file('Assets/A.txt.meta').exists()
         project.file('Assets/B.txt').exists()
+        project.file('Assets/B.txt.meta').exists()
+
+        !project.file('Assets/X.txt').exists()
+        project.file('Assets/Y.txt').exists()
     }
 
-    def "no changes does not create import package"() {
+    def "does not duplicate packages to install"() {
         when:
-        project.tasks.gpDo.execute()
-        project.tasks.gpSync.execute()
+        builder.withDependency(superJSON)
+        def manifests = Synchroniser.sync(getProject());
+        manifests.each { println it.manifest.unitypackage }
         then:
-        !project.file(UnityPuppet.IMPORT_PACKAGE_PATH).exists()
+        manifests.size() == 1
     }
 
     Set<ResolvedDependency> resolve(String forPackage) {

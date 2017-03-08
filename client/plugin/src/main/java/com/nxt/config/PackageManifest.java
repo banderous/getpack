@@ -3,6 +3,7 @@ package com.nxt.config;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -41,7 +42,8 @@ public class PackageManifest {
   public static void save(PackageManifest manifest, File to) {
     try {
       Files.createParentDirs(to);
-      Files.write(new Gson().toJson(manifest), to, Charsets.UTF_8);
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      Files.write(gson.toJson(manifest), to, Charsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -53,6 +55,10 @@ public class PackageManifest {
 
   public void add(String guid, Path path, String md5) {
     files.put(guid, new Asset(FilenameUtils.separatorsToUnix(path.toString()), md5));
+  }
+
+  public String getKey() {
+    return pack.key();
   }
 
   @Override

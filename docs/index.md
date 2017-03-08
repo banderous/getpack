@@ -13,8 +13,8 @@ State **what** packages your project needs in the **project manifest:**
 {
     "dependencies" : [
         "darktable:minijson:1.0.0",
-        "com.google:android-support:23.0.0",
-        "com.facebook:unity-sdk:4.2.0"
+        "google:android-support:23.0.0",
+        "facebook:unity-sdk:4.2.0"
     ]
 }
 ```
@@ -100,7 +100,7 @@ The project manifest is found at `getpack/project.json`.
     "repositories" : ["https://raw.githubusercontent.com/banderous/getpack-sandbox/zip/build/repo"],
     "dependencies" : [
         "darktable:minijson:1.0.0",
-        "com.google:android-support:23.0.0"
+        "google:android-support:23.0.0"
     ]
 }
 ```

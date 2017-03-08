@@ -17,8 +17,8 @@ import java.util.Set;
 
 public class ProjectConfig {
 
-  public static final String CONFIG_PATH = "gp/project.json";
-  public static final String SHADOW_CONFIG_PATH = "gp/project.json.state";
+  public static final String CONFIG_PATH = "getpack/project.json";
+  public static final String SHADOW_CONFIG_PATH = "getpack/project.json.state";
   Set<String> repositories = Sets.newHashSet();
   Set<String> dependencies = Sets.newHashSet();
 

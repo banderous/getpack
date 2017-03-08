@@ -16,7 +16,6 @@ import org.gradle.api.file.RelativePath;
  * Created by alex on 04/01/2017.
  */
 public class UnityPuppet {
-  public static final String IMPORT_PACKAGE_PATH = "gp/build/import";
 
   public static void installPackage(Project project, File zip, ImmutableSet<String> includes) {
     Log.L.info("Installing {}", zip);

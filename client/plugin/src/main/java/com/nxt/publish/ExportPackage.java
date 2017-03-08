@@ -125,7 +125,7 @@ public class ExportPackage {
 
   static FileTree gatherForExport(Project project, Package pack) {
     ConfigurableFileTree tree = project.fileTree("Assets");
-    tree.exclude("Plugins/gp");
+    tree.exclude("Plugins/getpack");
 
     for (String s : pack.getRoots()) {
       Log.L.info("Including '{}'", s);
@@ -137,8 +137,8 @@ public class ExportPackage {
   }
 
   static File getPath(Project project, PathType type, Package pack) {
-    String path = String.format("gp/build/%s/%s.%s.%s", type.path, pack.getGroup(), pack.getName(),
-        type.extension);
+    String path = String.format("getpack/build/%s/%s.%s.%s",
+        type.path, pack.getGroup(), pack.getName(), type.extension);
     return project.file(path);
   }
 

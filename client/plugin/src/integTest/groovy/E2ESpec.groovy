@@ -33,7 +33,7 @@ class E2ESpec extends BaseE2ESpec {
         project.build()
 
         def p = project.asProject()
-        def pack = p.file("gp/build/superjson-1.0.0.zip")
+        def pack = p.file("getpack/build/superjson-1.0.0.zip")
         def paths = p.zipTree(pack).collect { f -> f.name }
 
         then:
@@ -46,7 +46,7 @@ class E2ESpec extends BaseE2ESpec {
     def "publish a package"() {
         when:
         // Ivy repo is org/name/version.
-        def modulePath = new File(packageRunner.projectDir, "gp/repo/${group}/${name}/${version}")
+        def modulePath = new File(packageRunner.projectDir, "getpack/repo/${group}/${name}/${version}")
 
         then:
         new File(modulePath, "${name}-${version}.zip").exists()
@@ -62,7 +62,7 @@ class E2ESpec extends BaseE2ESpec {
 
         user.withArg('publishAcmeUsesjsonPublicationToIvyRepository').build()
 
-        def modulePath = user.asProject().file("gp/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
+        def modulePath = user.asProject().file("getpack/repo/acme/usesjson/1.0.0/ivy-1.0.0.xml")
         println modulePath.text
         def ivy = new XmlSlurper().parse(modulePath)
         def dependency = ivy.dependencies.dependency[0]
@@ -102,7 +102,7 @@ class E2ESpec extends BaseE2ESpec {
 
         def newVersion = [group, name, "1.1.0"].join(":")
         def n = publishPackage(newVersion)
-        consumer.withRepository(n.projectDir.path + "/gp/repo")
+        consumer.withRepository(n.projectDir.path + "/getpack/repo")
 
         consumer.withDependency(newVersion)
         consumer.build()
@@ -165,7 +165,7 @@ class E2ESpec extends BaseE2ESpec {
 
     def projectConsumingPackage(String packageId) {
         def result = UBuilder.Builder()
-                .withRepository("${packageRunner.projectDir.path}/gp/repo")
+                .withRepository("${packageRunner.projectDir.path}/getpack/repo")
                 .withDependency(packageId)
                 .withArg("gpSync")
         result.build()

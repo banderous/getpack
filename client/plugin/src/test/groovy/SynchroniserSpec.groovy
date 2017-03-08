@@ -260,14 +260,6 @@ class SynchroniserSpec extends Specification {
         project.file('Assets/Y.txt').exists()
     }
 
-    def "no changes does not create import package"() {
-        when:
-        project.tasks.gpDo.execute()
-        project.tasks.gpSync.execute()
-        then:
-        !project.file(UnityPuppet.IMPORT_PACKAGE_PATH).exists()
-    }
-
     def "does not duplicate packages to install"() {
         when:
         builder.withDependency(superJSON)

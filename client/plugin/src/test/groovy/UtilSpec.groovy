@@ -1,3 +1,4 @@
+import com.nxt.config.Package
 import com.nxt.config.Util
 import org.gradle.api.GradleException
 import spock.lang.Specification
@@ -25,5 +26,19 @@ class UtilSpec extends Specification {
 
         then:
         thrown(GradleException)
+    }
+
+    def "throws an exception deserializing invalid json"() {
+        when:
+        def input = '''
+{
+  "dependencies": [
+    "darktable:minijson:1.0.0",
+  ]
+}
+'''
+        Util.loadJSONClass(input, Package.class)
+        then:
+        thrown RuntimeException
     }
 }

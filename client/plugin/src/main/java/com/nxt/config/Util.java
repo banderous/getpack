@@ -1,11 +1,14 @@
 package com.nxt.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nxt.Log;
+import java.io.Reader;
 import org.gradle.api.GradleException;
 import org.gradle.internal.os.OperatingSystem;
 
@@ -25,15 +28,27 @@ public class Util {
     return OperatingSystem.current().isWindows();
   }
 
+  public static void validateJSON(String s) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      JsonNode jsonNode = objectMapper.readTree(s);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static <T> T loadJSONClass(String s, Class<T> c) {
+    validateJSON(s);
+    return new Gson().fromJson(s, c);
+  }
+
   public static <T> T loadJSONClass(File f, Class<T> c) {
     try {
       if (!f.exists()) {
         Files.createParentDirs(f);
         save(c.newInstance(), f);
       }
-      try (FileReader reader = new FileReader(f)) {
-        return new Gson().fromJson(reader, c);
-      }
+      return loadJSONClass(Files.toString(f, Charsets.UTF_8), c);
     } catch (IOException | IllegalAccessException | InstantiationException e) {
       throw new RuntimeException(e);
     }

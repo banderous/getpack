@@ -68,7 +68,7 @@ GetPack is implemented as a plugin for the Gradle build system.
 
 ```groovy
 plugins {
-    id 'com.banderous.getpack' version '0.1.4'
+    id 'com.banderous.getpack' version '0.2.0'
 }
 ```
 
@@ -88,7 +88,7 @@ You install, remove and up/downgrade packages just by editing your manifest and 
 
 
 
-The project manifest is found at `gp/project.json`.
+The project manifest is found at `getpack/project.json`.
 
 <div class="note info">
   <h5>You can copy this sample</h5>
@@ -97,7 +97,7 @@ The project manifest is found at `gp/project.json`.
 
 ```json-doc
 {
-    "repositories" : ["https://raw.githubusercontent.com/banderous/getpack-sandbox/master/build/repo"],
+    "repositories" : ["https://raw.githubusercontent.com/banderous/getpack-sandbox/zip/build/repo"],
     "dependencies" : [
         "darktable:minijson:1.0.0",
         "com.google:android-support:23.0.0"
@@ -155,7 +155,7 @@ the **incoming** version to be installed, and the **local** files as they curren
 
 ### The shadow manifest
 
-In order to detect changes to the project manifest, GetPack maintains another JSON file called the **shadow manifest**, at `gp/project.json.state`.
+In order to detect changes to the project manifest, GetPack maintains another JSON file called the **shadow manifest**, at `getpack/project.json.state`.
 
 GetPack updates the shadow manifest automatically during the synchronisation process and it should not be manually edited.
 
@@ -166,7 +166,7 @@ GetPack updates the shadow manifest automatically during the synchronisation pro
 
 ## Creating packages
 
-Packages are declared in the **publisher configuration** at `gp/publish.json`.
+Packages are declared in the **publisher configuration** at `getpack/publish.json`.
 
 You can generate a template package configuration with the `gpCreatePackage` task:
 

@@ -1,6 +1,6 @@
 ### What is GetPack?
 
-GetPack makes it easier to share, reuse and update Unity plugins.
+GetPack makes it easier to share, reuse and update [Unity](https://unity3d.com/) plugins.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/gw4GXONRhXI" frameborder="0" allowfullscreen></iframe>
 &nbsp;

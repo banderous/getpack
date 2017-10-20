@@ -7,8 +7,9 @@ For more information about GetPack, please visit [getpack.org](http://getpack.or
 # Build and run all tests
 
 ```shell
-Mac:
+(Mac)
 ./gradlew check
-Windows:
+
+(Windows)
 gradlew.bat check
 ```

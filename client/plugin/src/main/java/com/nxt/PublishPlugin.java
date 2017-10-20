@@ -13,8 +13,7 @@ public class PublishPlugin implements Plugin<Project> {
   public void apply(Project project) {
     project.setBuildDir("getpack/build");
     Util.assertGradle3Plus(project.getGradle().getGradleVersion());
-    project.getTasks().create("installPuppet", InstallPuppet.class);
-    project.getTasks().create("launchUnity", LaunchUnity.class).dependsOn("installPuppet");
+    project.getTasks().create("launchUnity", LaunchUnity.class);
     PublishConfig config = PublishConfig.load(project);
     ExportPackage.configure(project, config);
     CreatePackage.configure(project);

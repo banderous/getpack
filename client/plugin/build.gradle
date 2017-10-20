@@ -77,9 +77,6 @@ dependencies {
     testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') {
         exclude module: 'groovy-all'
     }
-
-
-    archives project(path: ':client:unityPuppet', configuration: 'archives')
 }
 
 task integrationTest(type: Test) {
@@ -89,13 +86,6 @@ task integrationTest(type: Test) {
 
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
-
-task getPuppet(type: Copy, dependsOn: ':client:unityPuppet:build') {
-    from configurations.archives
-    into 'src/main/resources'
-}
-
-classes.dependsOn getPuppet
 
 // Run only tests annotated with @Trouble.
 task testTrouble(type: Test) {
